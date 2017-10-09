@@ -48,7 +48,6 @@ elif mdl_odr == 'FS_stab':
   mom = MomentumNitscheStokes(model, stabilized=True)
 elif mdl_odr == 'FS_th':
   mom = MomentumNitscheStokes(model, stabilized=False)
-mom.solve_params['solve_vert_velocity'] = False
 mom.solve_params['solver']['newton_solver']['relative_tolerance'] = 5e-15
 mom.solve_params['solver']['newton_solver']['maximum_iterations'] = 60
 mom.solve()
@@ -81,6 +80,22 @@ bedmodel.assign_submesh_variable(divU_b, divU)
 srfmodel.assign_submesh_variable(srfmodel.U3, model.U3)
 srfmodel.init_U_mag(srfmodel.U3)  # calculates the velocity magnitude 
 bedmodel.assign_submesh_variable(bedmodel.p,  model.p)
+
+# save the mesh coordinates and data for interpolation with ISSM :
+x     = srfmodel.mesh.coordinates()[:,0]
+y     = srfmodel.mesh.coordinates()[:,1]
+u,v,w = srfmodel.U3.split(True)
+u     = u.compute_vertex_values(srfmodel.mesh)
+v     = v.compute_vertex_values(srfmodel.mesh)
+w     = w.compute_vertex_values(srfmodel.mesh)
+p     = bedmodel.p.compute_vertex_values(bedmodel.mesh)
+np.savetxt(out_dir + 'x.txt',     x)
+np.savetxt(out_dir + 'y.txt',     y)
+np.savetxt(out_dir + 'u_x.txt',   u)
+np.savetxt(out_dir + 'u_y.txt',   v)
+np.savetxt(out_dir + 'u_z.txt',   w)
+np.savetxt(out_dir + 'p.txt',     p)
+np.savetxt(out_dir + 'cells.txt', srfmodel.mesh.cells())
 
 # figure out some nice-looking contour levels :
 U_min  = srfmodel.U_mag.vector().min()
@@ -126,7 +141,7 @@ plot_variable(u                   = srfmodel.U3,
               levels_2            = None,
               umin                = None,
               umax                = None,
-              tp                  = True,
+              plot_tp             = True,
               tp_kwargs           = tp_kwargs,
               show                = False,
               hide_ax_tick_labels = False,
@@ -140,6 +155,7 @@ plot_variable(u                   = srfmodel.U3,
               extend              = 'neither',
               ext                 = '.pdf',
               normalize_vec       = True,
+              plot_quiver         = False,
               quiver_kwargs       = quiver_kwargs,
               res                 = 150,
               cb                  = True,
@@ -150,7 +166,7 @@ plot_variable(u = bedmodel.p, name = 'p', direc = plt_dir,
               title               = r'$p |_B$',
               levels              = p_lvls,
               cmap                = 'viridis',
-              tp                  = True,
+              plot_tp             = True,
               show                = False,
               extend              = 'min',
               cb_format           = '%.1e')
@@ -160,7 +176,7 @@ plot_variable(u = divU_b, name = 'divU', direc = plt_dir,
               title               = r'$\nabla \cdot \underline{u} |_B$',
               cmap                = 'RdGy',
               levels              = None,#d_lvls,
-              tp                  = True,
+              plot_tp             = True,
               show                = False,
               extend              = 'neither',
               cb_format           = '%.1e')

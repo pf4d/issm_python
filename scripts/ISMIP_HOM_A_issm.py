@@ -1,22 +1,34 @@
-from numpy           import *
-from squaremesh      import *
-from model           import *
-from solve           import *
-from setmask         import *
-from setflowequation import *
-from verbose         import *
-#from plotmodel       import *
+from squaremesh      import squaremesh
+from model           import model
+from solve           import solve
+from setmask         import setmask
+from setflowequation import setflowequation
+from verbose         import verbose
 from SetIceSheetBC   import SetIceSheetBC
 from socket          import gethostname
+from generic         import generic
+from fenics_viz      import *
+import numpy             as np
 import matplotlib.pyplot as plt
 import matplotlib.tri    as tri
+import os
+
+# directories for saving data :
+mdl_odr = 'FS'
+plt_dir = './images/issm/' + mdl_odr + '/'
+out_dir = './results/issm/' + mdl_odr + '/'
+
+# create the output directory if it does not exist :
+d       = os.path.dirname(out_dir)
+if not os.path.exists(d):
+  os.makedirs(d)
 
 # ISMIP HOM A experiment :
 md = model()
 md.miscellaneous.name = 'ISMIP_HOM_A'
 
 # Geometry :
-print '   Constructing Geometry'
+print_text('::: issm -- constructing geometry :::', 'red')
 
 # Define the geometry of the simulation :
 #md = triangle(md, './exp/square.exp', 80000)
@@ -26,49 +38,52 @@ md = squaremesh(md, L, L, n, n)
 md = setmask(md, 'all', '')
 
 #surface
-md.geometry.surface = - md.mesh.x * tan(0.5*pi/180.0)
+md.geometry.surface = - md.mesh.x * np.tan(0.5*np.pi/180.0)
 
 # base of ice sheet with 'L' the size of the side of the square :
 md.geometry.base = + md.geometry.surface - 1000.0 \
-                   + 500.0 * sin(md.mesh.x*2*pi/L) * sin(md.mesh.y*2*pi/L)
+                   + 500.0 * np.sin(md.mesh.x*2*np.pi/L) \
+                           * np.sin(md.mesh.y*2*np.pi/L)
 
 #thickness is the difference between surface and base :
 md.geometry.thickness = md.geometry.surface - md.geometry.base
 
-# plot the geometry to check it out :
-#plotmodel(md, 'data', md.geometry.thickness)
-
-print '   Defining friction parameters'
+# ISMIP_HOM experiment :
+md.materials.rho_ice = 910.0
+md.constants.g       = 9.80665
+md.constants.yts     = 31556926.0
 
 # one friciton coefficient per node :
+print_text('::: issm -- defining friction parameters :::', 'red')
+
 md.friction.coefficient = 10 * np.ones(md.mesh.numberofvertices)
 #floating_v = numpy.where(md.mask.groundedice_levelset < 0)[0]
 #md.friction.coefficient[floating_v] = 0
 
 # one friciton exponent (p,q) per element :
-md.friction.p = ones(md.mesh.numberofelements)
-md.friction.q = zeros(md.mesh.numberofelements)
+md.friction.p = np.ones(md.mesh.numberofelements)
+md.friction.q = np.zeros(md.mesh.numberofelements)
 
-print '   Construct ice rheological properties'
+print_text('::: issm -- construct ice rheological properties :::', 'red')
 
 # The rheology parameters sit in the material section :
 
 # B has one value per vertex :
 n   = 3.0
-spy = 31556926.0    # s a^{-1}
-A   = 1e-16         # Pa^{-n} s^{-1}
+spy = md.constants.yts   # s a^{-1}
+A   = 1e-16              # Pa^{-n} s^{-1}
 B   = (A / spy)**(-1/n)
-md.materials.rheology_B = B * ones(md.mesh.numberofvertices)
+md.materials.rheology_B = B * np.ones(md.mesh.numberofvertices)
 
 # n has one value per element :
-md.materials.rheology_n = n * ones(md.mesh.numberofelements)
+md.materials.rheology_n = n * np.ones(md.mesh.numberofelements)
 
-print '   Set boundary conditions'
+print_text('::: issm -- set boundary conditions :::', 'red')
 
 # Set the default boundary conditions for an ice-sheet :
 md = SetIceSheetBC(md)  # create placeholder arrays for indicies 
 md.extrude(6, 1.0)
-md = setflowequation(md,'HO','all')
+md = setflowequation(md, mdl_odr, 'all')
 	
 md.stressbalance.spcvx = np.nan * np.ones(md.mesh.numberofvertices)
 md.stressbalance.spcvy = np.nan * np.ones(md.mesh.numberofvertices)
@@ -97,21 +112,31 @@ md.stressbalance.vertex_pairing = np.array([np.append(minX, minY),
                                             np.append(maxX, maxY)]).T
 
 # solve :
+print_text('::: issm -- solving :::', 'red')
+
 md.cluster = generic('name', gethostname(), 'np', 1)
 md.verbose = verbose('convergence', True)
 md         = solve(md, 'Stressbalance')
 
 # plot the results :
+print_text('::: issm -- plotting :::', 'red')
+
 p   = md.results.StressbalanceSolution.Pressure[md.mesh.vertexonbase]
 u_x = md.results.StressbalanceSolution.Vx[md.mesh.vertexonsurface] 
 u_y = md.results.StressbalanceSolution.Vy[md.mesh.vertexonsurface] 
-u   = np.array([u_x.flatten(), u_y.flatten()]) 
+u_z = md.results.StressbalanceSolution.Vz[md.mesh.vertexonsurface] 
+u   = np.array([u_x.flatten(), u_y.flatten(), u_z.flatten()]) 
 
-from fenics_viz      import *
+# save the mesh coordinates and data for interpolation with CSLVR :
+np.savetxt(out_dir + 'x.txt',   md.mesh.x2d)
+np.savetxt(out_dir + 'y.txt',   md.mesh.y2d)
+np.savetxt(out_dir + 'u_x.txt', u[0])
+np.savetxt(out_dir + 'u_y.txt', u[1])
+np.savetxt(out_dir + 'u_z.txt', u[2])
+np.savetxt(out_dir + 'p.txt',   p)
 
-U_lvls = array([u.min(), 10, 20, 30, 40, 50, 60, 70, 80, u.max()])
-
-mdl_odr = 'BP'
+U_mag  = np.sqrt(u[0]**2 + u[1]**2 + u[2]**2 + 1e-16)
+U_lvls = np.array([U_mag.min(), 10, 20, 30, 40, 50, 60, 70, 80, U_mag.max()])
 
 tp_kwargs     = {'linestyle'      : '-',
                  'lw'             : 1.0,
@@ -129,7 +154,7 @@ quiver_kwargs = {'pivot'          : 'middle',
 
 plot_variable(u                   = u,
               name                = 'U',
-              direc               = './images/issm/' + mdl_odr + '/', 
+              direc               = plt_dir, 
               coords              = (md.mesh.x2d, md.mesh.y2d),
               cells               = md.mesh.elements2d - 1,
               figsize             = (8,7),
@@ -140,7 +165,7 @@ plot_variable(u                   = u,
               levels_2            = None,
               umin                = None,
               umax                = None,
-              tp                  = True,
+              plot_tp             = True,
               tp_kwargs           = tp_kwargs,
               show                = False,
               hide_ax_tick_labels = False,
@@ -152,8 +177,9 @@ plot_variable(u                   = u,
               colorbar_loc        = 'right',
               contour_type        = 'filled',
               extend              = 'neither',
-              ext                 = '.pdf',
+              ext                 = '.png',
               normalize_vec       = True,
+              plot_quiver         = False,
               quiver_kwargs       = quiver_kwargs,
               res                 = 150,
               cb                  = True,
