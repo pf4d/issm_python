@@ -14,9 +14,12 @@ import matplotlib.tri    as tri
 import os
 
 # directories for saving data :
-mdl_odr = 'FS'
-plt_dir = './images/issm/' + mdl_odr + '/'
-out_dir = './results/issm/' + mdl_odr + '/'
+mdl_odr = 'HO'
+
+if mdl_odr == 'HO': mdl_pfx = 'BP'
+else:               mdl_pfx = mdl_odr
+plt_dir = './images/issm/' + mdl_pfx + '/'
+out_dir = './results/issm/' + mdl_pfx + '/'
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(out_dir)
