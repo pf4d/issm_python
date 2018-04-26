@@ -1,13 +1,5 @@
-from squaremesh      import squaremesh
-from model           import model
-from solve           import solve
-from setmask         import setmask
-from setflowequation import setflowequation
-from verbose         import verbose
-from SetIceSheetBC   import SetIceSheetBC
-from socket          import gethostname
-from generic         import generic
 from fenics_viz      import *
+import issm              as im
 import numpy             as np
 import matplotlib.pyplot as plt
 import matplotlib.tri    as tri
@@ -27,7 +19,7 @@ if not os.path.exists(d):
   os.makedirs(d)
 
 # ISMIP HOM A experiment :
-md = model()
+md = im.model()
 md.miscellaneous.name = 'ISMIP_HOM_A'
 
 # Geometry :
@@ -36,9 +28,9 @@ print_text('::: issm -- constructing geometry :::', 'red')
 # Define the geometry of the simulation :
 #md = triangle(md, './exp/square.exp', 80000)
 L  = 80000.0
-n  = 50
-md = squaremesh(md, L, L, n, n)
-md = setmask(md, 'all', '')
+n  = 15
+md = im.squaremesh(md, L, L, n, n)
+md = im.setmask(md, 'all', '')
 
 #surface
 md.geometry.surface = - md.mesh.x * np.tan(0.5*np.pi/180.0)
@@ -84,9 +76,9 @@ md.materials.rheology_n = n * np.ones(md.mesh.numberofelements)
 print_text('::: issm -- set boundary conditions :::', 'red')
 
 # Set the default boundary conditions for an ice-sheet :
-md = SetIceSheetBC(md)  # create placeholder arrays for indicies 
+md = im.SetIceSheetBC(md)  # create placeholder arrays for indicies 
 md.extrude(6, 1.0)
-md = setflowequation(md, mdl_odr, 'all')
+md = im.setflowequation(md, mdl_odr, 'all')
 	
 md.stressbalance.spcvx = np.nan * np.ones(md.mesh.numberofvertices)
 md.stressbalance.spcvy = np.nan * np.ones(md.mesh.numberofvertices)
@@ -117,9 +109,9 @@ md.stressbalance.vertex_pairing = np.array([np.append(minX, minY),
 # solve :
 print_text('::: issm -- solving :::', 'red')
 
-md.cluster = generic('name', gethostname(), 'np', 1)
-md.verbose = verbose('convergence', True)
-md         = solve(md, 'Stressbalance')
+md.cluster = im.generic('name', im.gethostname(), 'np', 1)
+md.verbose = im.verbose('convergence', True)
+md         = im.solve(md, 'Stressbalance')
 
 # plot the results :
 print_text('::: issm -- plotting :::', 'red')
