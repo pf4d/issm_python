@@ -11,7 +11,7 @@ p2    = Point(L,   L,   1)            # x, y, z corner
 mesh  = BoxMesh(p1, p2, 49, 49, 5)    # a box to fill the void 
 
 # output directiories :
-mdl_odr = 'FS_stab'
+mdl_odr = 'BP'
 out_dir = './results/cslvr/' + mdl_odr + '/'
 plt_dir = './images/cslvr/' + mdl_odr + '/'
 
@@ -133,7 +133,7 @@ plot_variable(u                   = srfmodel.U3,
               coords              = None,
               cells               = None,
               direc               = plt_dir, 
-              figsize             = (8,7),
+              figsize             = (8,8),
               cmap                = 'viridis',
               scale               = 'lin',
               numLvls             = 10,
