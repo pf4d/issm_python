@@ -1,9 +1,7 @@
-from fenics_viz      import *
-from netCDF4         import Dataset
-import issm              as im
-import numpy             as np
-import matplotlib.pyplot as plt
-import matplotlib.tri    as tri
+from netCDF4    import Dataset
+from fenics_viz import *
+import issm         as im
+import numpy        as np
 import os
 
 # directories for saving data :
@@ -43,7 +41,7 @@ rhow   =  1028.0      # [kg m^-3] density of seawater
 rhoi   =  910.0       # [kg m^-3] density of glacier ice
 g      =  9.81        # [m s^2] gravitational acceleration
 spy    =  31556926.0  # [s a^-1] seconds per year
-Hini   =  1000.0      # [m] initial ice thickness
+Hini   =  0.1         # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
 A      =  2e-17       # [Pa^{-n} s^{-1}] flow 
@@ -51,23 +49,28 @@ beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  3.0         # [--] Paterson flow exponent one
 q      =  0.0         # [--] Paterson flow exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
+tf     =  40000.0     # [a] final time
+dt     =  10.0        # [a] time step
+cfl    =  0.5         # [--] CFL coefficient
 
 # create an empty rectangular mesh :
 #md     = triangle(md, './exp/MismipDomain.exp', 10000)
 md     = im.squaremesh(md, Lx, Ly, nx=64, ny=20)
 md     = im.setmask(md, 'all', '')
 
-# interpolate the thickness data onto the mesh :
-data   = Dataset('data/weertman-A2.2e-17-ssa.nc', mode = 'r')
-xd     = np.array(data.variables['x'][:])
-yd     = np.array(data.variables['y'][:])
-Hd     = np.array(data.variables['thickness'][:])
-
 # the vertex ones vector (element-wise multiplicative identity) :
 v_ones = np.ones(md.mesh.numberofvertices)
 
 # the element ones vector (element-wise multiplicative identity) :
 e_ones = np.ones(md.mesh.numberofelements)
+
+# interpolate the thickness data onto the mesh :
+#data   = Dataset('data/weertman-A2.2e-17-ssa.nc', mode = 'r')
+#xd     = np.array(data.variables['x'][:])
+#yd     = np.array(data.variables['y'][:])
+#Hd     = np.array(data.variables['thickness'][:])
+#H      = im.InterpFromGridToMesh(xd, yd, Hd, md.mesh.x, md.mesh.y, thklim)[0]
+H      = Hini * v_ones
 
 # eq'n (3)
 xt     = md.mesh.x / xbar
@@ -81,10 +84,6 @@ By     = + dc / (1 + np.exp(-2*(md.mesh.y - Ly/2 - wc) / fc)) \
 
 # lower topography (eq'n 1) :
 zb = np.maximum(Bx + By, zd*v_ones)
-
-# interpolate thickness from data :
-H  = Hini * v_ones
-#H  = im.InterpFromGridToMesh(xd, yd, Hd, md.mesh.x, md.mesh.y, thklim)[0]
 
 # upper surface which does not take into account floatation :
 S  = zb + H
@@ -125,10 +124,10 @@ md.mask.ice_levelset         = -1 * v_ones       # ice is present when negative
 md.friction.coefficient      = beta * v_ones
 #floating_v = numpy.where(md.mask.groundedice_levelset < 0)[0]
 #md.friction.coefficient[floating_v] = 0
-md.friction.p                = p * e_ones
-md.friction.q                = q * e_ones
+md.friction.p                =  p * e_ones
+md.friction.q                =  q * e_ones
 md.materials.rheology_B      = Bf * v_ones
-md.materials.rheology_n      = n * e_ones
+md.materials.rheology_n      =  n * e_ones
 #md.materials.rheology_B      = im.paterson((Tm - 20.0) * v_ones)
 md.materials.rheology_law    = "None"
 
@@ -162,8 +161,8 @@ md.stressbalance.spcvz       = np.nan * v_ones
 md.smb.mass_balance          = adot * v_ones
 md.thermal.spctemperature    = np.nan * v_ones
 
-#md.groundingline.migration              = 'AggressiveMigration'
 md.groundingline.migration              = 'SoftMigration'
+#md.groundingline.migration              = 'AggressiveMigration'
 #md.groundingline.migration              = 'SubelementMigration2'
 #md.groundingline.migration              = 'None'
 md.masstransport.hydrostatic_adjustment = 'Incremental'
@@ -181,9 +180,9 @@ md.transient.isgroundingline      = 1
 md.transient.ismasstransport      = 1
 md.transient.issmb                = 1
 md.timestepping.time_adapt        = 0
-md.timestepping.cfl_coefficient   = 0.5
-md.timestepping.time_step         = 0.5 / 1000.0 * 4000.0
-md.timestepping.final_time        = 5000
+md.timestepping.cfl_coefficient   = cfl
+md.timestepping.time_step         = dt
+md.timestepping.final_time        = tf
 md.settings.output_frequency      = 1
 md.balancethickness.stabilization = 0 # 2
 md.masstransport.stabilization    = 0 # 1
@@ -212,242 +211,8 @@ md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Transient')
 
 #===============================================================================
-# plot the results :
-print_text('::: issm -- plotting :::', 'red')
+# save the state of the model :
+im.savevars(out_dir + 'mismip_%i_years.md' % int(tf), 'md', md)
 
-p   = md.results.StressbalanceSolution.Pressure[md.mesh.vertexonbase]
-u_x = md.results.StressbalanceSolution.Vx[md.mesh.vertexonsurface] 
-u_y = md.results.StressbalanceSolution.Vy[md.mesh.vertexonsurface] 
-u_z = md.results.StressbalanceSolution.Vz[md.mesh.vertexonsurface] 
-u   = np.array([u_x.flatten(), u_y.flatten(), u_z.flatten()]) 
-
-# save the mesh coordinates and data for interpolation with CSLVR :
-np.savetxt(out_dir + 'x.txt',   md.mesh.x2d)
-np.savetxt(out_dir + 'y.txt',   md.mesh.y2d)
-np.savetxt(out_dir + 'u_x.txt', u[0])
-np.savetxt(out_dir + 'u_y.txt', u[1])
-np.savetxt(out_dir + 'u_z.txt', u[2])
-np.savetxt(out_dir + 'p.txt',   p)
-
-U_mag  = np.sqrt(u[0]**2 + u[1]**2 + u[2]**2 + 1e-16)
-U_lvls = np.array([U_mag.min(), 10, 20, 30, 40, 50, 60, 70, 80, U_mag.max()])
-
-tp_kwargs     = {'linestyle'      : '-',
-                 'lw'             : 0.5,
-                 'color'          : 'k',
-                 'alpha'          : 0.5}
-
-quiver_kwargs = {'pivot'          : 'middle',
-                 'color'          : 'k',
-                 'scale'          : 100,
-                 'alpha'          : 0.8,
-                 'width'          : 0.001,
-                 'headwidth'      : 3.0, 
-                 'headlength'     : 3.0, 
-                 'headaxislength' : 3.0}
-
-plot_variable(u                   = u,
-              name                = 'U',
-              direc               = plt_dir, 
-              coords              = (md.mesh.x2d, md.mesh.y2d),
-              cells               = md.mesh.elements2d - 1,
-              figsize             = (8,2),
-              cmap                = 'viridis',
-              scale               = 'lin',
-              numLvls             = 10,
-              levels              = None,#U_lvls,
-              levels_2            = None,
-              umin                = None,
-              umax                = None,
-              plot_tp             = False,
-              tp_kwargs           = tp_kwargs,
-              show                = False,
-              hide_x_tick_labels  = False,
-              hide_y_tick_labels  = True,
-              xlabel              = '',
-              ylabel              = '',
-              equal_axes          = True,
-              title               = r'$\underline{u} |_S^{\mathrm{ISSM}}$',
-              hide_axis           = False,
-              colorbar_loc        = 'right',
-              contour_type        = 'filled',
-              extend              = 'neither',
-              ext                 = '.pdf',
-              normalize_vec       = True,
-              plot_quiver         = True,
-              quiver_kwargs       = quiver_kwargs,
-              res                 = 150,
-              cb                  = True,
-              cb_format           = '%g')
-
-plot_variable(u                   = mask,
-              name                = 'mask',
-              direc               = plt_dir, 
-              coords              = (md.mesh.x2d, md.mesh.y2d),
-              cells               = md.mesh.elements2d - 1,
-              figsize             = (8,2),
-              cmap                = 'gist_yarg',
-              scale               = 'bool',
-              numLvls             = None,
-              levels              = None,
-              levels_2            = None,
-              umin                = None,
-              umax                = None,
-              plot_tp             = True,
-              tp_kwargs           = tp_kwargs,
-              show                = False,
-              hide_x_tick_labels  = False,
-              hide_y_tick_labels  = True,
-              xlabel              = '',
-              ylabel              = '',
-              equal_axes          = True,
-              title               = r'mask',
-              hide_axis           = False,
-              colorbar_loc        = 'right',
-              contour_type        = 'filled',
-              extend              = 'neither',
-              ext                 = '.pdf',
-              normalize_vec       = True,
-              plot_quiver         = False,
-              quiver_kwargs       = quiver_kwargs,
-              res                 = 150,
-              cb                  = True,
-              cb_format           = '%g')
-
-plot_variable(u                   = S,
-              name                = 'S',
-              direc               = plt_dir, 
-              coords              = (md.mesh.x2d, md.mesh.y2d),
-              cells               = md.mesh.elements2d - 1,
-              figsize             = (8,2),
-              cmap                = 'viridis',
-              scale               = 'lin',
-              numLvls             = 10,
-              levels              = None,
-              levels_2            = None,
-              umin                = None,
-              umax                = None,
-              plot_tp             = False,
-              tp_kwargs           = tp_kwargs,
-              show                = False,
-              hide_x_tick_labels  = False,
-              hide_y_tick_labels  = True,
-              xlabel              = '',
-              ylabel              = '',
-              equal_axes          = True,
-              title               = r'$S$',
-              hide_axis           = False,
-              colorbar_loc        = 'right',
-              contour_type        = 'filled',
-              extend              = 'neither',
-              ext                 = '.pdf',
-              normalize_vec       = True,
-              plot_quiver         = False,
-              quiver_kwargs       = quiver_kwargs,
-              res                 = 150,
-              cb                  = True,
-              cb_format           = '%g')
-
-plot_variable(u                   = B,
-              name                = 'B',
-              direc               = plt_dir, 
-              coords              = (md.mesh.x2d, md.mesh.y2d),
-              cells               = md.mesh.elements2d - 1,
-              figsize             = (8,2),
-              cmap                = 'viridis',
-              scale               = 'lin',
-              numLvls             = 10,
-              levels              = None,
-              levels_2            = None,
-              umin                = None,
-              umax                = None,
-              plot_tp             = False,
-              tp_kwargs           = tp_kwargs,
-              show                = False,
-              hide_x_tick_labels  = False,
-              hide_y_tick_labels  = True,
-              xlabel              = '',
-              ylabel              = '',
-              equal_axes          = True,
-              title               = r'$B$',
-              hide_axis           = False,
-              colorbar_loc        = 'right',
-              contour_type        = 'filled',
-              extend              = 'neither',
-              ext                 = '.pdf',
-              normalize_vec       = True,
-              plot_quiver         = False,
-              quiver_kwargs       = quiver_kwargs,
-              res                 = 150,
-              cb                  = True,
-              cb_format           = '%g')
-
-plot_variable(u                   = zb,
-              name                = 'zb',
-              direc               = plt_dir, 
-              coords              = (md.mesh.x2d, md.mesh.y2d),
-              cells               = md.mesh.elements2d - 1,
-              figsize             = (8,2),
-              cmap                = 'viridis',
-              scale               = 'lin',
-              numLvls             = 10,
-              levels              = None,
-              levels_2            = None,
-              umin                = None,
-              umax                = None,
-              plot_tp             = False,
-              tp_kwargs           = tp_kwargs,
-              show                = False,
-              hide_x_tick_labels  = False,
-              hide_y_tick_labels  = True,
-              xlabel              = '',
-              ylabel              = '',
-              equal_axes          = True,
-              title               = r'$z_b$',
-              hide_axis           = False,
-              colorbar_loc        = 'right',
-              contour_type        = 'filled',
-              extend              = 'neither',
-              ext                 = '.pdf',
-              normalize_vec       = True,
-              plot_quiver         = False,
-              quiver_kwargs       = quiver_kwargs,
-              res                 = 150,
-              cb                  = True,
-              cb_format           = '%g')
-
-plot_variable(u                   = H,
-              name                = 'H',
-              direc               = plt_dir, 
-              coords              = (md.mesh.x2d, md.mesh.y2d),
-              cells               = md.mesh.elements2d - 1,
-              figsize             = (8,2),
-              cmap                = 'viridis',
-              scale               = 'lin',
-              numLvls             = 10,
-              levels              = None,
-              levels_2            = None,
-              umin                = None,
-              umax                = None,
-              plot_tp             = False,
-              tp_kwargs           = tp_kwargs,
-              show                = False,
-              hide_x_tick_labels  = False,
-              hide_y_tick_labels  = True,
-              xlabel              = '',
-              ylabel              = '',
-              equal_axes          = True,
-              title               = r'$H$',
-              hide_axis           = False,
-              colorbar_loc        = 'right',
-              contour_type        = 'filled',
-              extend              = 'neither',
-              ext                 = '.pdf',
-              normalize_vec       = True,
-              plot_quiver         = False,
-              quiver_kwargs       = quiver_kwargs,
-              res                 = 150,
-              cb                  = True,
-              cb_format           = '%g')
 
 
