@@ -41,7 +41,7 @@ rhow   =  1028.0      # [kg m^-3] density of seawater
 rhoi   =  910.0       # [kg m^-3] density of glacier ice
 g      =  9.81        # [m s^2] gravitational acceleration
 spy    =  31556926.0  # [s a^-1] seconds per year
-Hini   =  0.1         # [m] initial ice thickness
+Hini   =  thklim      # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
 A      =  2e-17       # [Pa^{-n} s^{-1}] flow 
@@ -49,7 +49,7 @@ beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  3.0         # [--] Paterson flow exponent one
 q      =  0.0         # [--] Paterson flow exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
-tf     =  40000.0     # [a] final time
+tf     =  35000.0     # [a] final time
 dt     =  10.0        # [a] time step
 cfl    =  0.5         # [--] CFL coefficient
 
@@ -185,7 +185,7 @@ md.timestepping.time_step         = dt
 md.timestepping.final_time        = tf
 md.settings.output_frequency      = 1
 md.balancethickness.stabilization = 0 # 2
-md.masstransport.stabilization    = 0 # 1
+md.masstransport.stabilization    = 1
 
 md.transient.requested_outputs    = ['default',
                                      'GroundedArea',
@@ -212,7 +212,7 @@ md         = im.solve(md, 'Transient')
 
 #===============================================================================
 # save the state of the model :
-im.savevars(out_dir + 'mismip_%i_years.md' % int(tf), 'md', md)
+im.savevars(out_dir + 'mismip.md', 'md', md)
 
 
 

@@ -6,7 +6,6 @@ import os
 
 # directories for saving data :
 mdl_odr = 'HO'
-tf      = 100
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
@@ -14,7 +13,7 @@ plt_dir = './images/' + mdl_pfx + '/'
 out_dir = './results/' + mdl_pfx + '/'
 
 # load the model mesh created by gen_nio_mesh.py :
-md = im.loadmodel(out_dir + 'mismip_%i_years.md' % int(tf))
+md = im.loadmodel(out_dir + 'mismip.md')
 
 #===============================================================================
 # plot the results :
