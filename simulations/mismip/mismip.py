@@ -41,7 +41,7 @@ rhow   =  1028.0      # [kg m^-3] density of seawater
 rhoi   =  910.0       # [kg m^-3] density of glacier ice
 g      =  9.81        # [m s^2] gravitational acceleration
 spy    =  31556926.0  # [s a^-1] seconds per year
-Hini   =  thklim      # [m] initial ice thickness
+Hini   =  100.0       # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
 A      =  2e-17       # [Pa^{-n} s^{-1}] flow 
@@ -49,20 +49,29 @@ beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  3.0         # [--] Paterson flow exponent one
 q      =  0.0         # [--] Paterson flow exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
-tf     =  35000.0     # [a] final time
+tf     =  20000.0     # [a] final time
 dt     =  10.0        # [a] time step
 cfl    =  0.5         # [--] CFL coefficient
+inter  =  10          # [--] interval to save data
 
 # create an empty rectangular mesh :
 #md     = triangle(md, './exp/MismipDomain.exp', 10000)
 md     = im.squaremesh(md, Lx, Ly, nx=64, ny=20)
 md     = im.setmask(md, 'all', '')
 
-# the vertex ones vector (element-wise multiplicative identity) :
+# set up element-wise multiplicative identities :
+
+# rank-zero tensor vertex ones vector :
 v_ones = np.ones(md.mesh.numberofvertices)
 
-# the element ones vector (element-wise multiplicative identity) :
+# rank-zero tensor element ones vector :
 e_ones = np.ones(md.mesh.numberofelements)
+
+# rank-two tensor ones vector :
+A_ones = np.ones((md.mesh.numberofvertices, 6))
+
+# rank-one tensor ones vector :
+b_ones = np.ones((md.mesh.numberofvertices, 3))
 
 # interpolate the thickness data onto the mesh :
 #data   = Dataset('data/weertman-A2.2e-17-ssa.nc', mode = 'r')
@@ -136,6 +145,12 @@ md.stressbalance.spcvx       = np.nan * v_ones
 md.stressbalance.spcvy       = np.nan * v_ones
 md.stressbalance.spcvz       = np.nan * v_ones
 
+md.basalforcings.groundedice_melting_rate = 0.0 * v_ones
+md.basalforcings.floatingice_melting_rate = 0.0 * v_ones
+md.stressbalance.referential              = np.nan * A_ones
+md.stressbalance.loadingforce             = np.nan * b_ones
+
+
 ## upper side wall :
 #pos_u  = np.where(md.mesh.y > np.max(md.mesh.y) - 0.1)[0]
 #md.stressbalance.spcvy[pos_u] = 0.0
@@ -166,6 +181,7 @@ md.groundingline.migration              = 'SoftMigration'
 #md.groundingline.migration              = 'SubelementMigration2'
 #md.groundingline.migration              = 'None'
 md.masstransport.hydrostatic_adjustment = 'Incremental'
+md.masstransport.spcthickness           = np.nan * v_ones
 
 # initialization :
 md.initialization.vx          = 0.0 * v_ones
@@ -183,7 +199,7 @@ md.timestepping.time_adapt        = 0
 md.timestepping.cfl_coefficient   = cfl
 md.timestepping.time_step         = dt
 md.timestepping.final_time        = tf
-md.settings.output_frequency      = 1
+md.settings.output_frequency      = inter
 md.balancethickness.stabilization = 0 # 2
 md.masstransport.stabilization    = 1
 
@@ -197,10 +213,15 @@ md.transient.requested_outputs    = ['default',
 print_text('::: issm -- set boundary conditions :::', 'red')
 
 # Set the default boundary conditions for an ice-sheet :
-md = im.SetMarineIceSheetBC(md)  # create placeholder arrays for indicies 
+#md = im.SetMarineIceSheetBC(md)  # create placeholder arrays for indicies 
 md.extrude(6, 1.0)
 md = im.setflowequation(md, mdl_odr, 'all')
-md.flowequation.fe_HO = 'P1bubble'
+md.flowequation.fe_HO = 'P1'
+
+#===============================================================================
+# save the state of the model :
+#im.savevars(out_dir + 'mismip_init.md', 'md', md)
+
 
 #===============================================================================
 # solve :
@@ -212,7 +233,7 @@ md         = im.solve(md, 'Transient')
 
 #===============================================================================
 # save the state of the model :
-im.savevars(out_dir + 'mismip.md', 'md', md)
+im.savevars(out_dir + 'mismip_zero_stress.md', 'md', md)
 
 
 
