@@ -1,5 +1,8 @@
 from cslvr       import *
 from fenics_viz  import *
+from time        import time
+
+t0    = time()             # start the timer
 
 a     = 0.5 * pi / 180     # surface slope in radians
 L     = 80000.0            # width of domain (also 8000, 10000, 14000)
@@ -51,6 +54,8 @@ elif mdl_odr == 'FS_th':
 mom.solve_params['solver']['newton_solver']['relative_tolerance'] = 5e-15
 mom.solve_params['solver']['newton_solver']['maximum_iterations'] = 60
 mom.solve()
+
+print_text("total time to compute: %g seconds" % (time() - t0), 'red', 1)
 
 # let's investigate the velocity divergence :
 divU = project(div(model.U3))
@@ -104,7 +109,8 @@ U_lvls = array([U_min, 10, 20, 30, 40, 50, 60, 70, 80, U_max])
 
 p_min  = bedmodel.p.vector().min()
 p_max  = bedmodel.p.vector().max()
-p_lvls = array([4e6, 5e6, 6e6, 7e6, 8e6, 9e6, 1e7, 1.1e7, 1.2e7, p_max])
+#p_lvls = array([4e6, 5e6, 6e6, 7e6, 8e6, 9e6, 1e7, 1.1e7, 1.2e7, p_max])
+p_lvls = array([4e6, 5e6, 6e6, 7e6, 8e6, p_max])
 
 d_min  = divU_b.vector().min()
 d_max  = divU_b.vector().max()
