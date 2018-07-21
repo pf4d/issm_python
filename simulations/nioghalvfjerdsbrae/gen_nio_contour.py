@@ -16,8 +16,8 @@ dbm        = cs.DataInput(bedmachine)
 m = cs.MeshGenerator(dbm, mesh_name, out_dir)
 
 #m.create_contour('mask', zero_cntr=0.0001, skip_pts=0)
-m.create_contour('H', zero_cntr=50, skip_pts=200) # 50 meter thickness contour
-m.eliminate_intersections(dist=200)               # eliminate interscting lines
+m.create_contour('H', zero_cntr=50, skip_pts=20) # 50 meter thickness contour
+m.eliminate_intersections(dist=200)              # eliminate interscting lines
 
 #===============================================================================
 # a box region :

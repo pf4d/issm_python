@@ -11,7 +11,7 @@ def get_index_map(coord_to, coord_from, tol=1e-2):
   return np.array(idx)
 
 # momentum approximation data directories :
-mdl_odr = 'BP'
+mdl_odr = 'FS'
 plt_dir = './images/compare/'  + mdl_odr + '/'
 issm_dir  = './results/issm/'  + mdl_odr + '/'
 cslvr_dir = './results/cslvr/' + mdl_odr + '/'
@@ -81,7 +81,7 @@ plot_variable(u                   = diff,
               direc               = plt_dir, 
               coords              = (cslvr_x, cslvr_y),
               cells               = cells,
-              figsize             = (8,7),
+              figsize             = (8,8),
               cmap                = 'viridis',
               scale               = 'lin',
               numLvls             = 10,
@@ -120,7 +120,7 @@ plot_variable(u                   = d_w,
               direc               = plt_dir, 
               coords              = (cslvr_x, cslvr_y),
               cells               = cells,
-              figsize             = (8,7),
+              figsize             = (8,8),
               cmap                = 'RdGy',
               scale               = 'lin',
               numLvls             = 10,
@@ -158,7 +158,7 @@ plot_variable(u                   = d_p,
               direc               = plt_dir, 
               coords              = (cslvr_x, cslvr_y),
               cells               = cells,
-              figsize             = (8,7),
+              figsize             = (8,8),
               cmap                = 'viridis',
               scale               = 'lin',
               numLvls             = 10,

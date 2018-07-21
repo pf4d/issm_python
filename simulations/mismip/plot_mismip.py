@@ -15,7 +15,9 @@ mdl_odr = 'HO'
 #name    = 'shelf_bc_subelement'
 #name    = 'shelf_bc_subelement_slip'
 #name    = 'shelf_bc_subelement_slip_low_fric'
-name    = 'shelf_bc_subelement_slip_fric_1e2'
+#name    = 'shelf_bc_subelement_slip_fric_1e2'
+#name    = 'shelf_bc_subelement_slip_fric_1e3'
+name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr

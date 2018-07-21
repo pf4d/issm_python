@@ -14,7 +14,8 @@ mdl_odr = 'HO'
 #name    = 'marine_bc_subelement'
 #name    = 'shelf_bc_subelement'
 #name    = 'shelf_bc_subelement_slip'
-name    = 'shelf_bc_subelement_slip_fric_1e3'
+#name    = 'shelf_bc_subelement_slip_fric_1e3'
+name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
@@ -56,7 +57,7 @@ Hini   =  100.0       # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
 A      =  2e-17       # [Pa^{-n} s^{-1}] flow 
-beta   =  1e3         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
+beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  1.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
@@ -165,7 +166,7 @@ md.stressbalance.referential              = np.nan * A_ones
 md.stressbalance.loadingforce             = np.nan * b_ones
 
 # Set the default boundary conditions for an ice-sheet :
-md = im.SetMarineIceSheetBC(md)
+md = im.SetMarineIceSheetBC(md, './exp/mismip_front.exp')
 #md = im.SetIceShelfBC(md)
 
 ## upper side wall :

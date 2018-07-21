@@ -1,4 +1,11 @@
+"""
+BP ENTIRE time to compute: 112.161 seconds
+BP SOLVE  time to compute: 110.533 seconds
+FS SOLVE  time to compute: 508.476 seconds
+"""
+
 from fenics_viz      import *
+from time            import time
 import issm              as im
 import numpy             as np
 import matplotlib.pyplot as plt
@@ -111,7 +118,10 @@ print_text('::: issm -- solving :::', 'red')
 
 md.cluster = im.generic('name', im.gethostname(), 'np', 1)
 md.verbose = im.verbose('convergence', True)
+
+t0         = time()             # start the timer
 md         = im.solve(md, 'Stressbalance')
+print_text("total time to compute: %g seconds" % (time() - t0), 'red', 1)
 
 # plot the results :
 print_text('::: issm -- plotting :::', 'red')
@@ -176,6 +186,44 @@ plot_variable(u                   = u,
               ext                 = '.pdf',
               normalize_vec       = True,
               plot_quiver         = False,
+              quiver_kwargs       = quiver_kwargs,
+              res                 = 150,
+              cb                  = True,
+              cb_format           = '%g')
+
+u_z_tit  = r'$u_z |_S^{\mathrm{ISSM}}$'
+u_z_lvls = np.array([u_z.min(), -4, -3, -2, -1,
+                                 1,  2,  3,  4, u_z.max()])
+
+plot_variable(u                   = u_z.flatten(),
+              name                = 'u_z',
+              direc               = plt_dir, 
+              coords              = (md.mesh.x2d, md.mesh.y2d),
+              cells               = md.mesh.elements2d - 1,
+              figsize             = (8,8),
+              cmap                = 'RdGy',
+              scale               = 'lin',
+              numLvls             = 10,
+              levels              = u_z_lvls,
+              levels_2            = None,
+              umin                = None,
+              umax                = None,
+              plot_tp             = False,
+              tp_kwargs           = tp_kwargs,
+              show                = False,
+              hide_x_tick_labels  = False,
+              hide_y_tick_labels  = False,
+              xlabel              = r'$x$',
+              ylabel              = r'$y$',
+              equal_axes          = True,
+              title               = u_z_tit,
+              hide_axis           = False,
+              colorbar_loc        = 'right',
+              contour_type        = 'filled',#'lines',
+              extend              = 'neither',
+              ext                 = '.pdf',
+              normalize_vec       = False,
+              plot_quiver         = True,
               quiver_kwargs       = quiver_kwargs,
               res                 = 150,
               cb                  = True,

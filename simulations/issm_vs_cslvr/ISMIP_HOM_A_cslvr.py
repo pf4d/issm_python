@@ -1,8 +1,12 @@
+"""
+BP ENTIRE time to compute: 26.5688 seconds
+BP SOLVE  time to compute: 6.67546 seconds
+FS SOLVE  time to compute: 82.6909 seconds
+"""
+
 from cslvr       import *
 from fenics_viz  import *
 from time        import time
-
-t0    = time()             # start the timer
 
 a     = 0.5 * pi / 180     # surface slope in radians
 L     = 80000.0            # width of domain (also 8000, 10000, 14000)
@@ -14,7 +18,7 @@ p2    = Point(L,   L,   1)            # x, y, z corner
 mesh  = BoxMesh(p1, p2, 49, 49, 5)    # a box to fill the void 
 
 # output directiories :
-mdl_odr = 'BP'
+mdl_odr = 'BP'#'FS_stab'
 out_dir = './results/cslvr/' + mdl_odr + '/'
 plt_dir = './images/cslvr/' + mdl_odr + '/'
 
@@ -51,10 +55,11 @@ elif mdl_odr == 'FS_stab':
   mom = MomentumNitscheStokes(model, stabilized=True)
 elif mdl_odr == 'FS_th':
   mom = MomentumNitscheStokes(model, stabilized=False)
-mom.solve_params['solver']['newton_solver']['relative_tolerance'] = 5e-15
+mom.solve_params['solver']['newton_solver']['relative_tolerance'] = 3.16e-07
 mom.solve_params['solver']['newton_solver']['maximum_iterations'] = 60
-mom.solve()
 
+t0    = time()             # start the timer
+mom.solve()
 print_text("total time to compute: %g seconds" % (time() - t0), 'red', 1)
 
 # let's investigate the velocity divergence :
@@ -109,13 +114,15 @@ U_lvls = array([U_min, 10, 20, 30, 40, 50, 60, 70, 80, U_max])
 
 p_min  = bedmodel.p.vector().min()
 p_max  = bedmodel.p.vector().max()
-#p_lvls = array([4e6, 5e6, 6e6, 7e6, 8e6, 9e6, 1e7, 1.1e7, 1.2e7, p_max])
-p_lvls = array([4e6, 5e6, 6e6, 7e6, 8e6, p_max])
+p_lvls = array([4e6, 5e6, 6e6, 7e6, 8e6, 9e6, 1e7, 1.1e7, 1.2e7, p_max])
 
 d_min  = divU_b.vector().min()
 d_max  = divU_b.vector().max()
 d_lvls = array([d_min, -5e-3, -2.5e-3, -1e-3, 
                 1e-3, 2.5e-3, 5e-3, d_max])
+
+w_lvls = np.array([w.min(), -4, -3, -2, -1,
+                             1,  2,  3,  4, w.max()])
 
 tp_kwargs     = {'linestyle'      : '-',
                  'lw'             : 1.0,
@@ -169,6 +176,7 @@ plot_variable(u                   = srfmodel.U3,
               cb_format           = '%g')
 
 plot_variable(u = bedmodel.p, name = 'p', direc = plt_dir,
+              figsize             = (8,8),
               ext                 = '.pdf',
               title               = r'$p |_B$',
               levels              = p_lvls,
@@ -179,6 +187,7 @@ plot_variable(u = bedmodel.p, name = 'p', direc = plt_dir,
               cb_format           = '%.1e')
 
 plot_variable(u = divU_b, name = 'divU', direc = plt_dir,
+              figsize             = (8,8),
               ext                 = '.pdf',
               title               = r'$\nabla \cdot \underline{u} |_B$',
               cmap                = 'RdGy',
@@ -187,6 +196,17 @@ plot_variable(u = divU_b, name = 'divU', direc = plt_dir,
               show                = False,
               extend              = 'neither',
               cb_format           = '%.1e')
+
+plot_variable(u = srfmodel.w, name = 'u_z', direc = plt_dir,
+              figsize             = (8,8),
+              ext                 = '.pdf',
+              title               = r'$u_z |_S^{\mathrm{ISSM}}$',
+              cmap                = 'RdGy',
+              levels              = w_lvls,
+              plot_tp             = False,
+              show                = False,
+              extend              = 'neither',
+              cb_format           = '%g')
 
 
 
