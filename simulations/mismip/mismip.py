@@ -1,3 +1,15 @@
+"""
+Time to compute using 5 processes on a Intel(R) Xeon(R) CPU E5-1620 v4 @ 3.50GHz
+is:
+
+   FemModel initialization elapsed time:   0.636059
+   Core solution elapsed time:             37978
+
+   Total elapsed time: 10 hrs 32 min 58 sec
+
+"""
+
+
 from netCDF4    import Dataset
 from fenics_viz import *
 import issm         as im
@@ -15,7 +27,7 @@ mdl_odr = 'HO'
 #name    = 'shelf_bc_subelement'
 #name    = 'shelf_bc_subelement_slip'
 #name    = 'shelf_bc_subelement_slip_fric_1e3'
-name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront'
+name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront_dx_5000'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
@@ -37,8 +49,9 @@ print_text('::: issm -- initializing model :::', 'red')
 # define the geometry of the simulation :
 Lx     =  640000.0    # [m] domain length (along ice flow)
 Ly     =  80000.0     # [m] domain width (across ice flow)
-nx     =  64          # [--] number of x-coordinate divisions
-ny     =  20          # [--] number of y-coordinate divisions
+dx     =  5000.0      # [m] element diameter 
+nx     =  int(Lx/dx)  # [--] number of x-coordinate divisions
+ny     =  int(Ly/dx)  # [--] number of y-coordinate divisions
 B0     = -150.0       # [m] bedrock topography at x = 0
 B2     = -728.8       # [m] second bedrock topography coefficient
 B4     =  343.91      # [m] third bedrock topography coefficient
@@ -61,7 +74,7 @@ beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  1.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
-tf     =  2000.0      # [a] final time
+tf     =  2.0     # [a] final time
 dt     =  1.0         # [a] time step
 dt_sav =  10.0        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
@@ -243,19 +256,26 @@ md.flowequation.fe_HO = 'P1'
 
 #===============================================================================
 # save the state of the model :
-#im.savevars(out_dir + 'mismip_init.md', 'md', md)
+im.savevars(out_dir + 'mismip_init.md', 'md', md)
 
 #===============================================================================
 # solve :
 print_text('::: issm -- solving :::', 'red')
     
-md.cluster = im.generic('name', im.gethostname(), 'np', 2)
+md.cluster = im.generic('name', im.gethostname(), 'np', 5)
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Transient')
 
 #===============================================================================
 # save the state of the model :
-im.savevars(out_dir + name + '.md', 'md', md)
+# FIXME: the savevars method will work for small problems, but fails without 
+#        error for large ones.  Thus this doesn't work :
+#
+#          im.savevars(out_dir + name + `.md', 'md', md)
+#
+#        and instead we do this :
+out_file = open(out_dir + name + '.md', 'w')
+im.save(out_file, md)
 
 
 

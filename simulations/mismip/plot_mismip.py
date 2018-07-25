@@ -17,30 +17,32 @@ mdl_odr = 'HO'
 #name    = 'shelf_bc_subelement_slip_low_fric'
 #name    = 'shelf_bc_subelement_slip_fric_1e2'
 #name    = 'shelf_bc_subelement_slip_fric_1e3'
-name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront'
+#name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront'
+name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront_dx_5000'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
 plt_dir = './images/' + mdl_pfx + '/' + name + '/'
 out_dir = './results/' + mdl_pfx + '/'
 
-# load the model mesh created by gen_nio_mesh.py :
-md = im.loadmodel(out_dir + name + '.md')
+## load the model mesh created by gen_nio_mesh.py :
+#md = im.loadmodel(out_dir + name + '.md')
 
 #===============================================================================
 # load the model mesh created by gen_nio_mesh.py :
 
-## set the current result number :
-#rst_num = '07-11-2018-16-48-15-18062'
-#rst_num = '07-12-2018-15-27-02-31448'
-#
-#md   = im.loadmodel(out_dir + 'mismip_init.md')
-#
-## get the current output :
-#data = '/home/pf4d/software/issm/trunk/execution/%s-%s/%s.outbin'
-#
-## update the model with current output :
-#md   = im.loadresultsfromdisk(md, data % (name,rst_num,name))
+# set the current result number :
+rst_num = '07-11-2018-16-48-15-18062'
+rst_num = '07-12-2018-15-27-02-31448'
+rst_num = '07-21-2018-16-11-59-31372'
+
+md   = im.loadmodel(out_dir + 'mismip_init.md')
+
+# get the current output :
+data = '/home/pf4d/software/issm/trunk/execution/%s-%s/%s.outbin'
+
+# update the model with current output :
+md   = im.loadresultsfromdisk(md, data % (name,rst_num,name))
 
 #===============================================================================
 # plot the results :
