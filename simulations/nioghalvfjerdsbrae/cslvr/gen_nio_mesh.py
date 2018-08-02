@@ -37,9 +37,10 @@ dmg.rescale_field('U_ob', 'ref', umin=5000.0, umax=500000.0, inverse=True)
 # generate the contour :
 m = cs.MeshGenerator(dbm, mesh_name, out_dir)
 
-#m.create_contour('mask', zero_cntr=0.0001, skip_pts=50)
-m.create_contour('H', zero_cntr=100, skip_pts=20)   # 50 meter thickness contour
+#m.create_contour('mask', zero_cntr=1e-4, skip_pts=20)
+m.create_contour('H', zero_cntr=100, skip_pts=20)  # thickness contour
 m.eliminate_intersections(dist=10)                 # eliminate interscting lines
+m.save_contour('contour.txt')                      # save the contour for later
 
 #===============================================================================
 # a box region :

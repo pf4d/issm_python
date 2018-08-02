@@ -163,7 +163,7 @@ md.inversion                    = im.m1qn3inversion(md.inversion)
 md.inversion.iscontrol          = 1 # Do inversion? 1 = yes; 0 = no
 md.inversion.incomplete_adjoint = 1 # 1 = linear viscosity; 0 = non-linear visc
 md.inversion.control_parameters = ['FrictionCoefficient']
-md.inversion.nsteps             = 100 # number of inversion steps
+md.inversion.nsteps             = 3000 # number of inversion steps
 md.inversion.min_parameters     = 1e-16 * v_ones
 md.inversion.max_parameters     = 1e6   * v_ones
 
@@ -180,21 +180,25 @@ md.inversion.max_parameters     = 1e6   * v_ones
 #   502: RheologyBbarAbsGradient
 #   503: ThicknessAbsGradient
 #
-md.inversion.cost_functions                   = [103]
-md.inversion.cost_functions_coefficients      = 1.0 * v_ones
-#md.inversion.cost_functions                   = np.array([101, 103, 501])
-#md.inversion.cost_functions_coefficients      = v_ones
-#md.inversion.cost_functions_coefficients[:,0] = 350
-#md.inversion.cost_functions_coefficients[:,1] = 60
-#md.inversion.cost_functions_coefficients[:,2] = 2
+md.inversion.cost_functions                   = [101, 103, 501]
+md.inversion.cost_functions_coefficients      = np.vstack([v_ones]*3).T
+md.inversion.cost_functions_coefficients[:,0] = 1e0
+md.inversion.cost_functions_coefficients[:,1] = 1e2
+md.inversion.cost_functions_coefficients[:,2] = 1e-7
 
-# issm::m1qn3inversion-specific parameters :
-md.inversion.maxsteps           = 20    # max gradient evaluations
-md.inversion.maxiter            = 40    # max objective evaluations
-md.inversion.dxmin              = 1e-4  # convergence criterion 1
-md.inversion.gttol              = 1e-10 # convergence criterion 2 :
-                                        # ||g(X)|| / ||g(X0)||   where
-                                        # g(X0): gradient at initial guess X0
+# brent search specific parameters :
+md.inversion.step_threshold          = 0.7 * np.ones(md.inversion.nsteps)
+md.inversion.maxiter_per_step        = 20  * np.ones(md.inversion.nsteps)
+md.inversion.gradient_scaling        = 50  * np.ones(md.inversion.nsteps)
+md.inversion.cost_function_threshold = np.nan 
+
+## issm::m1qn3inversion-specific parameters :
+#md.inversion.maxsteps           = 3000  # max gradient evaluations
+#md.inversion.maxiter            = 3000  # max objective evaluations
+#md.inversion.dxmin              = 1e-16  # convergence criterion 1
+#md.inversion.gttol              = 1e-16 # convergence criterion 2 :
+#                                        # ||g(X)|| / ||g(X0)||   where
+#                                        # g(X0): gradient at initial guess X0
 
 ## FIXME: it is not obvious that the velocity observations have to be extruded :
 #md.inversion.vx_obs   = im.project3d(md,'vector',
@@ -210,7 +214,7 @@ md.inversion.gttol              = 1e-10 # convergence criterion 2 :
 
 #===============================================================================
 # assimilate the velocity data :
-md.cluster = im.generic('name', im.gethostname(), 'np', 1)
+md.cluster = im.generic('name', im.gethostname(), 'np', 2)
 md.verbose = im.verbose('solution', True, 'control', True)
 md         = im.solve(md, 'Stressbalance')
 
@@ -251,7 +255,7 @@ quiver_kwargs = {'pivot'          : 'middle',
                  'headaxislength' : 3.0}
 
 plot_variable(u                   = u,
-              name                = 'U_opt',
+              name                = 'U_opt_morlighem_brent',
               direc               = plt_dir, 
               coords              = (md.mesh.x2d, md.mesh.y2d),
               cells               = md.mesh.elements2d - 1,
