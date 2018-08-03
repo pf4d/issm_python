@@ -5,7 +5,7 @@ USER root
 
 ENV  ISSM_HOME /home/issm/
 ENV  ISSM_DIR $ISSM_HOME/issm/trunk
-ENV  ISSM_VERSION 14.2
+ENV  ISSM_VERSION 4.12
 
 # get ubuntu updates :
 RUN apt-get update && \
