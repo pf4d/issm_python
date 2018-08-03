@@ -11,22 +11,22 @@ First, import all the packages we will need::
   import issm  as im
   import numpy as np
 
-First, create an empty :class:`~model.model` instance and name the simulation::
+First, create an empty :class:`~issm.model.model` instance and name the simulation::
 
   md = im.model()
   md.miscellaneous.name = 'ISMIP_HOM_A'
   
-Next, we make a simple three-dimensional box mesh with 49 cells in the :math:`x` and :math:`y` directions over a width of 8 km using :class:`~squaremesh.squaremesh`::
+Next, we make a simple three-dimensional box mesh with 49 cells in the :math:`x` and :math:`y` directions over a width of 8 km using :class:`~issm.squaremesh.squaremesh`::
 
   L  = 80000.0
   n  = 15
   md = im.squaremesh(md, L, L, n, n)
 
-Let the entire domain be defined over grounded ice with :class:`~setmask.setmask`::
+Let the entire domain be defined over grounded ice with :class:`~issm.setmask.setmask`::
 
   md = im.setmask(md, 'all', '')
 
-The ISMIP-HOM experiment "A" geometry is created by directly editing the coordinates of the :class:`~mesh2d.mesh2d` instance created above::
+The ISMIP-HOM experiment "A" geometry is created by directly editing the coordinates of the :class:`~issm.mesh2d.mesh2d` instance created above::
   
   # surface :
   md.geometry.surface = - md.mesh.x * np.tan(0.5*np.pi/180.0)
@@ -44,7 +44,7 @@ We will also need to define the element-wise multiplicative identities::
   v_ones = np.ones(md.mesh.numberofvertices)  # rank-zero tensor vertex
   e_ones = np.ones(md.mesh.numberofelements)  # rank-zero tensor element
 
-The material parameters may be changed to match those of the ISMIP HOM experiment by changing either the :class:`~model.model`'s :class:`~constants.constants` or material properties :class:`~matice.matice`::
+The material parameters may be changed to match those of the ISMIP HOM experiment by changing either the :class:`~issm.model.model`'s :class:`~issm.constants.constants` or material properties :class:`~issm.matice.matice`::
 
   md.materials.rho_ice    = 910.0              # ice density
   md.constants.g          = 9.80665            # gravitational acc.
@@ -56,13 +56,13 @@ The material parameters may be changed to match those of the ISMIP HOM experimen
   md.materials.rheology_B = B * v_ones
   md.materials.rheology_n = n * e_ones
 
-While no-slip basal velocity boundary conditions are imposed, the :class:`~friction.friction` coefficient must be defined::
+While no-slip basal velocity boundary conditions are imposed, the :class:`~issm.friction.friction` coefficient must be defined::
  
   md.friction.coefficient = 1.0 * v_ones
   md.friction.p           = 1.0 * e_ones
   md.friction.q           = 0.0 * e_ones
 
-Next, configure the model for "ice-sheet" boundary conditions via :class:`~SetIceSheetBC.SetIceSheetBC`, extrude vertically 5 cells in the :math:`z` direction with :func:`~model.model.extrude`, and set the appropriate "flow equation" with :class:`~setflowequation.setflowequation`::
+Next, configure the model for "ice-sheet" boundary conditions via :class:`~issm.SetIceSheetBC.SetIceSheetBC`, extrude vertically 5 cells in the :math:`z` direction with :func:`~issm.model.model.extrude`, and set the appropriate "flow equation" with :class:`~issm.setflowequation.setflowequation`::
  
   md = im.SetIceSheetBC(md)  # create placeholder arrays for indicies 
   md.extrude(6, 1.0)
@@ -73,7 +73,7 @@ Now that the 2D mesh has been converted to 3D, we have to redefine the element-w
   v_ones = np.ones(md.mesh.numberofvertices)  # rank-zero tensor vertex
   e_ones = np.ones(md.mesh.numberofelements)  # rank-zero tensor element
 
-The no-slip basal-velocity boundary conditions are then set within the :class:`~model.model` property :class:`~stressbalance.stressbalance`:: 
+The no-slip basal-velocity boundary conditions are then set within the :class:`~issm.model.model` property :class:`~issm.stressbalance.stressbalance`:: 
   	
   md.stressbalance.spcvx = np.nan * v_ones
   md.stressbalance.spcvy = np.nan * v_ones
@@ -104,7 +104,7 @@ The periodic-velocity-lateral-boundary conditions specified by the ISMIP HOM exp
 Solve the momentum balance
 --------------------------
 
-Now, set up the computing environment variables using the :class:`~generic.generic` class, enable verbose solver output with :class:`~verbose.verbose`, and finally solve the system with the :class:`~solve.solve` class::
+Now, set up the computing environment variables using the :class:`~issm.generic.generic` class, enable verbose solver output with :class:`~issm.verbose.verbose`, and finally solve the system with the :class:`~issm.solve.solve` class::
   
   md.cluster = im.generic('name', im.gethostname(), 'np', 1)
   md.verbose = im.verbose('convergence', True)
