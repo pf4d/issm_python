@@ -1,7 +1,12 @@
 BSD 3-Clause License
 
-Copyright (c) 2017, Evan Cummings
-All rights reserved.
+ISSM is California Institute of Technology Copyright, Distributed under BSD Three Clause License.
+
+Original copyright (c) 2002-2011, California Institute of Technology.
+All rights reserved.  Based on Government Sponsored Research under contracts
+NAS7-1407 and/or NAS7-03001.
+
+Additions to this software made here copyright (c) 2017, Evan Cummings.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
