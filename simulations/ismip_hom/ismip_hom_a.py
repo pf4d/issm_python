@@ -1,8 +1,6 @@
 from fenics_viz      import *
 import issm              as im
 import numpy             as np
-import matplotlib.pyplot as plt
-import matplotlib.tri    as tri
 import os
 
 # directories for saving data :
@@ -48,16 +46,20 @@ md.materials.rho_ice = 910.0
 md.constants.g       = 9.80665
 md.constants.yts     = 31556926.0
 
+# set up element-wise multiplicative identities :
+v_ones = np.ones(md.mesh.numberofvertices)  # rank-zero tensor vertex
+e_ones = np.ones(md.mesh.numberofelements)  # rank-zero tensor element
+
 # one friciton coefficient per node :
 print_text('::: issm -- defining friction parameters :::', 'red')
 
-md.friction.coefficient = 10 * np.ones(md.mesh.numberofvertices)
+md.friction.coefficient = 10 * v_ones
 #floating_v = numpy.where(md.mask.groundedice_levelset < 0)[0]
 #md.friction.coefficient[floating_v] = 0
 
 # one friciton exponent (p,q) per element :
-md.friction.p = np.ones(md.mesh.numberofelements)
-md.friction.q = np.zeros(md.mesh.numberofelements)
+md.friction.p = 1.0 * e_ones
+md.friction.q = 0.0 * e_ones
 
 print_text('::: issm -- construct ice rheological properties :::', 'red')
 
@@ -68,10 +70,10 @@ n   = 3.0
 spy = md.constants.yts   # s a^{-1}
 A   = 1e-16              # Pa^{-n} s^{-1}
 B   = (A / spy)**(-1/n)
-md.materials.rheology_B = B * np.ones(md.mesh.numberofvertices)
+md.materials.rheology_B = B * v_ones
 
 # n has one value per element :
-md.materials.rheology_n = n * np.ones(md.mesh.numberofelements)
+md.materials.rheology_n = n * e_ones
 
 print_text('::: issm -- set boundary conditions :::', 'red')
 
@@ -79,13 +81,21 @@ print_text('::: issm -- set boundary conditions :::', 'red')
 md = im.SetIceSheetBC(md)  # create placeholder arrays for indicies 
 md.extrude(6, 1.0)
 md = im.setflowequation(md, mdl_odr, 'all')
+
+# FIXME: if you do not call ``md.extrude()`` before, ``md.mesh.vertexonbase``
+#        does not exist.
+basal_v  = md.mesh.vertexonbase
+
+# FIXME: since the model was extruded, we have to re-define the element-wise 
+#        multiplicative identities.  This is not ideal :
+v_ones = np.ones(md.mesh.numberofvertices)  # rank-zero tensor vertex
+e_ones = np.ones(md.mesh.numberofelements)  # rank-zero tensor element
 	
-md.stressbalance.spcvx = np.nan * np.ones(md.mesh.numberofvertices)
-md.stressbalance.spcvy = np.nan * np.ones(md.mesh.numberofvertices)
-md.stressbalance.spcvz = np.nan * np.ones(md.mesh.numberofvertices)
+md.stressbalance.spcvx = np.nan * v_ones
+md.stressbalance.spcvy = np.nan * v_ones
+md.stressbalance.spcvz = np.nan * v_ones
 
 # set no-slip basal velocity BC :
-basal_v                         = md.mesh.vertexonbase
 md.stressbalance.spcvx[basal_v] = 0.0
 md.stressbalance.spcvy[basal_v] = 0.0
 md.stressbalance.spcvz[basal_v] = 0.0
@@ -136,12 +146,12 @@ U_lvls = np.array([U_mag.min(), 10, 20, 30, 40, 50, 60, 70, 80, U_mag.max()])
 tp_kwargs     = {'linestyle'      : '-',
                  'lw'             : 1.0,
                  'color'          : 'k',
-                 'alpha'          : 0.5}
+                 'alpha'          : 0.2}
 
 quiver_kwargs = {'pivot'          : 'middle',
-                 'color'          : 'k',
+                 'color'          : '0.5',
                  'scale'          : None,
-                 'alpha'          : 0.8,
+                 'alpha'          : 1.0,
                  'width'          : 0.005,
                  'headwidth'      : 3.0, 
                  'headlength'     : 3.0, 
@@ -152,7 +162,7 @@ plot_variable(u                   = u,
               direc               = plt_dir, 
               coords              = (md.mesh.x2d, md.mesh.y2d),
               cells               = md.mesh.elements2d - 1,
-              figsize             = (8,7),
+              figsize             = (7,7),
               cmap                = 'viridis',
               scale               = 'lin',
               numLvls             = 10,
@@ -175,7 +185,7 @@ plot_variable(u                   = u,
               extend              = 'neither',
               ext                 = '.pdf',
               normalize_vec       = True,
-              plot_quiver         = False,
+              plot_quiver         = True,
               quiver_kwargs       = quiver_kwargs,
               res                 = 150,
               cb                  = True,

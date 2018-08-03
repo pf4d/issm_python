@@ -8,35 +8,23 @@ Set up the model
 
 First, import all the packages we will need::
 
-  from squaremesh      import squaremesh
-  from model           import model
-  from solve           import solve
-  from setmask         import setmask
-  from setflowequation import setflowequation
-  from verbose         import verbose
-  from SetIceSheetBC   import SetIceSheetBC
-  from socket          import gethostname
-  from generic         import generic
-  from fenics_viz      import *
-  import numpy             as np
-  import matplotlib.pyplot as plt
-  import matplotlib.tri    as tri
-  import os
+  import issm  as im
+  import numpy as np
 
 First, create an empty :class:`~model.model` instance and name the simulation::
 
-  md = model()
+  md = im.model()
   md.miscellaneous.name = 'ISMIP_HOM_A'
   
 Next, we make a simple three-dimensional box mesh with 49 cells in the :math:`x` and :math:`y` directions over a width of 8 km using :class:`~squaremesh.squaremesh`::
 
   L  = 80000.0
-  n  = 50
-  md = squaremesh(md, L, L, n, n)
+  n  = 15
+  md = im.squaremesh(md, L, L, n, n)
 
 Let the entire domain be defined over grounded ice with :class:`~setmask.setmask`::
 
-  md = setmask(md, 'all', '')
+  md = im.setmask(md, 'all', '')
 
 The ISMIP-HOM experiment "A" geometry is created by directly editing the coordinates of the :class:`~mesh2d.mesh2d` instance created above::
   
@@ -51,6 +39,11 @@ The ISMIP-HOM experiment "A" geometry is created by directly editing the coordin
   # thickness is the difference between surface and base :
   md.geometry.thickness = md.geometry.surface - md.geometry.base
 
+We will also need to define the element-wise multiplicative identities::
+
+  v_ones = np.ones(md.mesh.numberofvertices)  # rank-zero tensor vertex
+  e_ones = np.ones(md.mesh.numberofelements)  # rank-zero tensor element
+
 The material parameters may be changed to match those of the ISMIP HOM experiment by changing either the :class:`~model.model`'s :class:`~constants.constants` or material properties :class:`~matice.matice`::
 
   md.materials.rho_ice    = 910.0              # ice density
@@ -60,26 +53,31 @@ The material parameters may be changed to match those of the ISMIP HOM experimen
   spy                     = md.constants.yts   # s a^{-1}
   A                       = 1e-16              # Pa^{-n} s^{-1}
   B                       = (A / spy)**(-1/n)
-  md.materials.rheology_B = B * np.ones(md.mesh.numberofvertices)
-  md.materials.rheology_n = n * np.ones(md.mesh.numberofelements)
+  md.materials.rheology_B = B * v_ones
+  md.materials.rheology_n = n * e_ones
 
 While no-slip basal velocity boundary conditions are imposed, the :class:`~friction.friction` coefficient must be defined::
  
-  md.friction.coefficient = np.ones(md.mesh.numberofvertices)
-  md.friction.p           = np.ones(md.mesh.numberofelements)
-  md.friction.q           = np.zeros(md.mesh.numberofelements)
+  md.friction.coefficient = 1.0 * v_ones
+  md.friction.p           = 1.0 * e_ones
+  md.friction.q           = 0.0 * e_ones
 
 Next, configure the model for "ice-sheet" boundary conditions via :class:`~SetIceSheetBC.SetIceSheetBC`, extrude vertically 5 cells in the :math:`z` direction with :func:`~model.model.extrude`, and set the appropriate "flow equation" with :class:`~setflowequation.setflowequation`::
  
-  md = SetIceSheetBC(md)  # create placeholder arrays for indicies 
+  md = im.SetIceSheetBC(md)  # create placeholder arrays for indicies 
   md.extrude(6, 1.0)
-  md = setflowequation(md, mdl_odr, 'all')
+  md = im.setflowequation(md, mdl_odr, 'all')
 
-The basal-velocity-boundary conditions are then set within the :class:`~model.model` property :class:`~stressbalance.stressbalance`:: 
+Now that the 2D mesh has been converted to 3D, we have to redefine the element-wise multiplicitave identies::
+
+  v_ones = np.ones(md.mesh.numberofvertices)  # rank-zero tensor vertex
+  e_ones = np.ones(md.mesh.numberofelements)  # rank-zero tensor element
+
+The no-slip basal-velocity boundary conditions are then set within the :class:`~model.model` property :class:`~stressbalance.stressbalance`:: 
   	
-  md.stressbalance.spcvx = np.nan * np.ones(md.mesh.numberofvertices)
-  md.stressbalance.spcvy = np.nan * np.ones(md.mesh.numberofvertices)
-  md.stressbalance.spcvz = np.nan * np.ones(md.mesh.numberofvertices)
+  md.stressbalance.spcvx = np.nan * v_ones
+  md.stressbalance.spcvy = np.nan * v_ones
+  md.stressbalance.spcvz = np.nan * v_ones
   
   basal_v                         = md.mesh.vertexonbase
   md.stressbalance.spcvx[basal_v] = 0.0
@@ -108,13 +106,86 @@ Solve the momentum balance
 
 Now, set up the computing environment variables using the :class:`~generic.generic` class, enable verbose solver output with :class:`~verbose.verbose`, and finally solve the system with the :class:`~solve.solve` class::
   
-  md.cluster = generic('name', gethostname(), 'np', 1)
-  md.verbose = verbose('convergence', True)
-  md         = solve(md, 'Stressbalance')
+  md.cluster = im.generic('name', im.gethostname(), 'np', 1)
+  md.verbose = im.verbose('convergence', True)
+  md         = im.solve(md, 'Stressbalance')
 
 Plot the results
 ----------------
 
-TODO
+You can plot the resulting variables on the surface or the be easily like so::
+
+  p   = md.results.StressbalanceSolution.Pressure[md.mesh.vertexonbase]
+  u_x = md.results.StressbalanceSolution.Vx[md.mesh.vertexonsurface] 
+  u_y = md.results.StressbalanceSolution.Vy[md.mesh.vertexonsurface] 
+  u_z = md.results.StressbalanceSolution.Vz[md.mesh.vertexonsurface] 
+  u   = np.array([u_x.flatten(), u_y.flatten(), u_z.flatten()]) 
+
+You can then save the data if you like using NumPy::
+  
+  np.savetxt(out_dir + 'x.txt',   md.mesh.x2d)
+  np.savetxt(out_dir + 'y.txt',   md.mesh.y2d)
+  np.savetxt(out_dir + 'u_x.txt', u[0])
+  np.savetxt(out_dir + 'u_y.txt', u[1])
+  np.savetxt(out_dir + 'u_z.txt', u[2])
+  np.savetxt(out_dir + 'p.txt',   p)
+
+You can utilize the plotting capabilities of the `fenics_viz <https://github.com/pf4d/fenics_viz>`_ package::
+
+  from fenics_viz import *
 
 
+  U_mag  = np.sqrt(u[0]**2 + u[1]**2 + u[2]**2 + 1e-16)
+  U_lvls = np.array([U_mag.min(), 10, 20, 30, 40, 50, 60, 70, 80, U_mag.max()])
+  
+  tp_kwargs     = {'linestyle'      : '-',
+                   'lw'             : 1.0,
+                   'color'          : 'k',
+                   'alpha'          : 0.2}
+  
+  quiver_kwargs = {'pivot'          : 'middle',
+                   'color'          : '0.5',
+                   'scale'          : None,
+                   'alpha'          : 1.0,
+                   'width'          : 0.005,
+                   'headwidth'      : 3.0, 
+                   'headlength'     : 3.0, 
+                   'headaxislength' : 3.0}
+  
+  plot_variable(u                   = u,
+                name                = 'U',
+                direc               = plt_dir, 
+                coords              = (md.mesh.x2d, md.mesh.y2d),
+                cells               = md.mesh.elements2d - 1,
+                figsize             = (7,7),
+                cmap                = 'viridis',
+                scale               = 'lin',
+                numLvls             = 10,
+                levels              = U_lvls,
+                levels_2            = None,
+                umin                = None,
+                umax                = None,
+                plot_tp             = True,
+                tp_kwargs           = tp_kwargs,
+                show                = False,
+                hide_x_tick_labels  = False,
+                hide_y_tick_labels  = False,
+                xlabel              = r'$x$',
+                ylabel              = r'$y$',
+                equal_axes          = True,
+                title               = r'$\underline{u} |_S^{\mathrm{ISSM}}$',
+                hide_axis           = False,
+                colorbar_loc        = 'right',
+                contour_type        = 'filled',
+                extend              = 'neither',
+                ext                 = '.png',
+                normalize_vec       = True,
+                plot_quiver         = True,
+                quiver_kwargs       = quiver_kwargs,
+                res                 = 150,
+                cb                  = True,
+                cb_format           = '%g')
+
+This will produce a plot of the velocity at the upper surface like this :
+
+.. image:: images/U.png
