@@ -5,7 +5,7 @@ https://issm.jpl.nasa.gov/
 
 Documentation here :
 
-http://issm.readthedocs.io/en/latest/
+http://issm_python.readthedocs.io/en/latest/
 
 Docker repository here :
 
