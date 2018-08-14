@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.initialization &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.initialization</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.initialization</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">issm.project3d</span> <span class="k">import</span> <span class="n">project3d</span>
+<span class="kn">from</span> <span class="nn">issm.fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">issm.checkfield</span> <span class="k">import</span> <span class="n">checkfield</span>
+<span class="kn">from</span> <span class="nn">issm.WriteData</span> <span class="k">import</span> <span class="n">WriteData</span>
+<span class="kn">import</span> <span class="nn">issm.MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+
+<div class="viewcode-block" id="initialization"><a class="viewcode-back" href="../../api/issm.html#issm.initialization.initialization">[docs]</a><span class="k">class</span> <span class="nc">initialization</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	INITIALIZATION class definition</span>
+<span class="sd">	</span>
+<span class="sd">	Usage:</span>
+<span class="sd">	initialization=initialization();</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+					
+		<span class="bp">self</span><span class="o">.</span><span class="n">vx</span>            <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vy</span>            <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vz</span>            <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vel</span>           <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">pressure</span>      <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">temperature</span>   <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">waterfraction</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">watercolumn</span>   <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">sediment_head</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">epl_head</span>      <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">epl_thickness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+
+		<span class="c1">#set defaults</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">setdefaultparameters</span><span class="p">()</span>
+
+		<span class="c1">#}}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="n">string</span><span class="o">=</span><span class="s1">&#39;   initial field values:&#39;</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vx&#39;</span><span class="p">,</span><span class="s1">&#39;x component of velocity [m/yr]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vy&#39;</span><span class="p">,</span><span class="s1">&#39;y component of velocity [m/yr]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vz&#39;</span><span class="p">,</span><span class="s1">&#39;z component of velocity [m/yr]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vel&#39;</span><span class="p">,</span><span class="s1">&#39;velocity norm [m/yr]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;pressure&#39;</span><span class="p">,</span><span class="s1">&#39;pressure [Pa]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;temperature&#39;</span><span class="p">,</span><span class="s1">&#39;temperature [K]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;waterfraction&#39;</span><span class="p">,</span><span class="s1">&#39;fraction of water in the ice&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;watercolumn&#39;</span><span class="p">,</span><span class="s1">&#39;thickness of subglacial water [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;sediment_head&#39;</span><span class="p">,</span><span class="s1">&#39;sediment water head of subglacial system [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;epl_head&#39;</span><span class="p">,</span><span class="s1">&#39;epl water head of subglacial system [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;epl_thickness&#39;</span><span class="p">,</span><span class="s1">&#39;thickness of the epl [m]&#39;</span><span class="p">))</span>
+
+		<span class="k">return</span> <span class="n">string</span>
+		<span class="c1">#}}}</span>
+<div class="viewcode-block" id="initialization.extrude"><a class="viewcode-back" href="../../api/issm.html#issm.initialization.initialization.extrude">[docs]</a>	<span class="k">def</span> <span class="nf">extrude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vx</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">vx</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vy</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">vy</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vz</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">vz</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vel</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">vel</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">waterfraction</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">waterfraction</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">watercolumn</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">watercolumn</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">sediment_head</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">sediment_head</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">,</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">epl_head</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">epl_head</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">,</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">epl_thickness</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">epl_thickness</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">,</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="c1">#Lithostatic pressure by default</span>
+		<span class="c1">#		self.pressure=md.constants.g*md.materials.rho_ice*(md.geometry.surface[:,0]-md.mesh.z)</span>
+		<span class="c1">#self.pressure=md.constants.g*md.materials.rho_ice*(md.geometry.surface-md.mesh.z.reshape(-1,))</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">surface</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Reshaping md.geometry.surface for you convenience but you should fix it in you files&#39;</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">pressure</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">g</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rho_ice</span><span class="o">*</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span><span class="o">-</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">pressure</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">g</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rho_ice</span><span class="o">*</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">surface</span><span class="o">-</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="initialization.setdefaultparameters"><a class="viewcode-back" href="../../api/issm.html#issm.initialization.initialization.setdefaultparameters">[docs]</a>	<span class="k">def</span> <span class="nf">setdefaultparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="initialization.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.initialization.initialization.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="k">if</span> <span class="s1">&#39;StressbalanceAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">vx</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">vy</span><span class="p">))):</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.vx&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.vy&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="k">if</span> <span class="s1">&#39;MasstransportAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.vx&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.vy&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="k">if</span> <span class="s1">&#39;BalancethicknessAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.vx&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.vy&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="c1">#Triangle with zero velocity</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">vx</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span>\
+			                               <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">vy</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">)):</span>
+				<span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s2">&quot;at least one triangle has all its vertices with a zero velocity&quot;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="s1">&#39;ThermalAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.vx&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.vy&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.temperature&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="p">()</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.vz&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.pressure&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="k">if</span> <span class="p">(</span><span class="s1">&#39;EnthalpyAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span> <span class="ow">and</span> <span class="n">md</span><span class="o">.</span><span class="n">thermal</span><span class="o">.</span><span class="n">isenthalpy</span><span class="p">):</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.waterfraction&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.watercolumn&#39;</span>  <span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+				<span class="n">pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">waterfraction</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="k">if</span><span class="p">(</span><span class="n">pos</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+					<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span> <span class="s1">&#39;delta Tpmp&#39;</span><span class="p">,</span> <span class="s1">&#39;field&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">absolute</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">temperature</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">-</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">meltingpoint</span><span class="o">-</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">beta</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">pressure</span><span class="p">[</span><span class="n">pos</span><span class="p">])),</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span><span class="mf">1e-11</span><span class="p">,</span>	<span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s1">&#39;set temperature to pressure melting point at locations with waterfraction&gt;0&#39;</span><span class="p">);</span>
+		<span class="k">if</span> <span class="s1">&#39;HydrologyShreveAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">hydrology</span><span class="p">,</span><span class="s1">&#39;hydrologyshreve&#39;</span><span class="p">):</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.watercolumn&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="k">if</span> <span class="s1">&#39;HydrologyDCInefficientAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">hydrology</span><span class="p">,</span><span class="s1">&#39;hydrologydc&#39;</span><span class="p">):</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.sediment_head&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="k">if</span> <span class="s1">&#39;HydrologyDCEfficientAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">hydrology</span><span class="p">,</span><span class="s1">&#39;hydrologydc&#39;</span><span class="p">):</span>
+				<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">hydrology</span><span class="o">.</span><span class="n">isefficientlayer</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+					<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.epl_head&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+					<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;initialization.epl_thickness&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="initialization.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.initialization.initialization.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="n">yts</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span>
+
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;vx&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;vy&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;vz&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;pressure&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;temperature&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;waterfraction&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;sediment_head&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;epl_head&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;epl_thickness&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;watercolumn&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		
+		<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">thermal</span><span class="o">.</span><span class="n">isenthalpy</span><span class="p">:</span>
+			<span class="n">tpmp</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">meltingpoint</span> <span class="o">-</span> <span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">beta</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">pressure</span><span class="p">;</span>
+			<span class="n">pos</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">waterfraction</span> <span class="o">&gt;</span> <span class="mf">0.</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">enthalpy</span>      <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">heatcapacity</span><span class="o">*</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">temperature</span><span class="o">-</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">referencetemperature</span><span class="p">);</span>
+			<span class="n">enthalpy</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">heatcapacity</span><span class="o">*</span><span class="p">(</span><span class="n">tpmp</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span> <span class="o">-</span> <span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">referencetemperature</span><span class="p">)</span> <span class="o">+</span> <span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">latentheat</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">waterfraction</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+			<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">enthalpy</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.initialization.enthalpy&#39;</span><span class="p">);</span></div></div>
+
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

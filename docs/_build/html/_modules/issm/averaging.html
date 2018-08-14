@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.averaging &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.averaging</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.averaging</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span>  <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">GetAreas</span> <span class="k">import</span> <span class="n">GetAreas</span>
+<span class="kn">import</span> <span class="nn">MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+<span class="k">try</span><span class="p">:</span>
+	<span class="kn">from</span> <span class="nn">scipy.sparse</span> <span class="k">import</span> <span class="n">csc_matrix</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+	<span class="nb">print</span> <span class="s2">&quot;could not import scipy, no averaging capabilities enabled&quot;</span>
+
+<div class="viewcode-block" id="averaging"><a class="viewcode-back" href="../../api/issm.html#issm.averaging.averaging">[docs]</a><span class="k">def</span> <span class="nf">averaging</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">iterations</span><span class="p">,</span><span class="n">layer</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	AVERAGING - smooths the input over the mesh</span>
+<span class="sd">	</span>
+<span class="sd">	   This routine takes a list over the elements or the nodes in input</span>
+<span class="sd">	   and return a list over the nodes.</span>
+<span class="sd">	   For each iterations it computes the average over each element (average </span>
+<span class="sd">	   of the vertices values) and then computes the average over each node</span>
+<span class="sd">	   by taking the average of the element around a node weighted by the</span>
+<span class="sd">	   elements volume</span>
+<span class="sd">	   For 3d mesh, a last argument can be added to specify the layer to be averaged on.</span>
+<span class="sd">	</span>
+<span class="sd">	   Usage:</span>
+<span class="sd">	      smoothdata=averaging(md,data,iterations)</span>
+<span class="sd">	      smoothdata=averaging(md,data,iterations,layer)</span>
+<span class="sd">	</span>
+<span class="sd">	   Examples:</span>
+<span class="sd">	      velsmoothed=averaging(md,md.initialization.vel,4)</span>
+<span class="sd">	      pressure=averaging(md,md.initialization.pressure,0)</span>
+<span class="sd">	      temperature=averaging(md,md.initialization.temperature,1,1)</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">!=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">!=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="n">StandardError</span><span class="p">(</span><span class="s1">&#39;averaging error message: data not supported yet&#39;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="p">()</span><span class="o">==</span><span class="mi">3</span> <span class="ow">and</span> <span class="n">layer</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">layer</span><span class="o">&lt;=</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">layer</span><span class="o">&gt;</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberoflayers</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;layer should be between 1 and md.mesh.numberoflayers&#39;</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">layer</span><span class="o">=</span><span class="mi">0</span>
+	
+	<span class="c1">#initialization</span>
+	<span class="k">if</span> <span class="n">layer</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+		<span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,)</span>
+		<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">,)</span>
+		<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">[(</span><span class="n">layer</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">layer</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">,:]</span>
+	
+	<span class="c1">#load some variables (it is much faster if the variabes are loaded from md once for all)</span>
+	<span class="k">if</span> <span class="n">layer</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+		<span class="n">index</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span>
+		<span class="n">numberofnodes</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span>
+		<span class="n">numberofelements</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">index</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements2d</span>
+		<span class="n">numberofnodes</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span>
+		<span class="n">numberofelements</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span>
+
+	
+	<span class="c1">#build some variables</span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="p">()</span><span class="o">==</span><span class="mi">3</span> <span class="ow">and</span> <span class="n">layer</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+		<span class="n">rep</span><span class="o">=</span><span class="mi">6</span>
+		<span class="n">areas</span><span class="o">=</span><span class="n">GetAreas</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+	<span class="k">elif</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="p">()</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+		<span class="n">rep</span><span class="o">=</span><span class="mi">3</span>
+		<span class="n">areas</span><span class="o">=</span><span class="n">GetAreas</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">rep</span><span class="o">=</span><span class="mi">3</span>
+		<span class="n">areas</span><span class="o">=</span><span class="n">GetAreas</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x2d</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y2d</span><span class="p">)</span>
+
+	<span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span> <span class="c1"># since python indexes starting from zero</span>
+	<span class="n">line</span><span class="o">=</span><span class="n">index</span><span class="o">.</span><span class="n">flatten</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+	<span class="n">areas</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">areas</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	<span class="n">summation</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="n">rep</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">rep</span><span class="p">,)</span>
+	<span class="n">linesize</span><span class="o">=</span><span class="n">rep</span><span class="o">*</span><span class="n">numberofelements</span>
+	
+	<span class="c1">#update weights that holds the volume of all the element holding the node i</span>
+	<span class="n">weights</span><span class="o">=</span><span class="n">csc_matrix</span><span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">areas</span><span class="p">,(</span><span class="n">rep</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),(</span><span class="n">line</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">linesize</span><span class="p">,))),</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">numberofnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+	
+	<span class="c1">#initialization</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="n">numberofelements</span><span class="p">:</span>
+		<span class="n">average_node</span><span class="o">=</span><span class="n">csc_matrix</span><span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">areas</span><span class="o">*</span><span class="n">data</span><span class="p">,(</span><span class="n">rep</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),(</span><span class="n">line</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">linesize</span><span class="p">,))),</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">numberofnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+		<span class="n">average_node</span><span class="o">=</span><span class="n">average_node</span><span class="o">/</span><span class="n">weights</span>
+		<span class="n">average_node</span> <span class="o">=</span> <span class="n">csc_matrix</span><span class="p">(</span><span class="n">average_node</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">average_node</span><span class="o">=</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+	<span class="c1">#loop over iteration</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">iterations</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+		<span class="n">average_el</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">average_node</span><span class="o">.</span><span class="n">todense</span><span class="p">()[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">numberofelements</span><span class="p">,</span><span class="n">rep</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">summation</span><span class="p">)))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+		<span class="n">average_node</span><span class="o">=</span><span class="n">csc_matrix</span><span class="p">(</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">areas</span><span class="o">*</span><span class="n">average_el</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),(</span><span class="n">rep</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),(</span><span class="n">line</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">linesize</span><span class="p">,))),</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">numberofnodes</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+		<span class="n">average_node</span><span class="o">=</span><span class="n">average_node</span><span class="o">/</span><span class="n">weights</span>
+		<span class="n">average_node</span><span class="o">=</span><span class="n">csc_matrix</span><span class="p">(</span><span class="n">average_node</span><span class="p">)</span>
+	
+	<span class="c1">#return output as a full matrix (C code do not like sparse matrices)</span>
+	<span class="n">average</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">average_node</span><span class="o">.</span><span class="n">todense</span><span class="p">())</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+
+	<span class="k">return</span> <span class="n">average</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -15,7 +15,8 @@ Contents:
    :caption: Preliminaries
 
    install
-   get_started
+   ismip_hom
+   mismip_plus
    api/issm
 
 Indices and tables

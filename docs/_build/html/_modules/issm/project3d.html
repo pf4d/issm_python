@@ -1,0 +1,332 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.project3d &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.project3d</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.project3d</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pairoptions</span> <span class="k">import</span> <span class="n">pairoptions</span>
+
+<div class="viewcode-block" id="project3d"><a class="viewcode-back" href="../../api/issm.html#issm.project3d.project3d">[docs]</a><span class="k">def</span> <span class="nf">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	PROJECT3D - vertically project a vector from 2d mesh</span>
+
+<span class="sd">	   vertically project a vector from 2d mesh (split in noncoll and coll areas) into a 3d mesh.</span>
+<span class="sd">	   This vector can be a node vector of size (md.mesh.numberofvertices2d,N/A) or an </span>
+<span class="sd">	   element vector of size (md.mesh.numberofelements2d,N/A). </span>
+<span class="sd">	   arguments: </span>
+<span class="sd">	      &#39;vector&#39;: 2d vector</span>
+<span class="sd">	      &#39;type&#39;: &#39;element&#39; or &#39;node&#39;. </span>
+<span class="sd">	   options: </span>
+<span class="sd">	      &#39;layer&#39; a layer number where vector should keep its values. If not specified, all layers adopt the </span>
+<span class="sd">	             value of the 2d vector.</span>
+<span class="sd">	      &#39;padding&#39;: default to 0 (value adopted by other 3d layers not being projected</span>
+
+<span class="sd">	   Examples:</span>
+<span class="sd">	      extruded_vector=project3d(md,&#39;vector&#39;,vector2d,&#39;type&#39;,&#39;node&#39;,&#39;layer&#39;,1,&#39;padding&#39;,NaN)</span>
+<span class="sd">	      extruded_vector=project3d(md,&#39;vector&#39;,vector2d,&#39;type&#39;,&#39;element&#39;,&#39;padding&#39;,0)</span>
+<span class="sd">	      extruded_vector=project3d(md,&#39;vector&#39;,vector2d,&#39;type&#39;,&#39;node&#39;)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#some regular checks</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">md</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;bad usage&quot;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">domaintype</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;3d&#39;</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;input model is not 3d&quot;</span><span class="p">)</span>
+
+	<span class="c1">#retrieve parameters from options.</span>
+	<span class="n">options</span>      <span class="o">=</span> <span class="n">pairoptions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+	<span class="n">vector2d</span>     <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;vector&#39;</span><span class="p">)</span>       <span class="c1">#mandatory</span>
+	<span class="n">vectype</span>      <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>         <span class="c1">#mandatory</span>
+	<span class="n">layer</span>        <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>      <span class="c1">#optional (do all layers otherwise)</span>
+	<span class="n">paddingvalue</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;padding&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>    <span class="c1">#0 by default</span>
+
+	<span class="n">vector1d</span><span class="o">=</span><span class="kc">False</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vector2d</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">vector2d</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+		<span class="n">vector1d</span><span class="o">=</span><span class="kc">True</span>
+		<span class="n">vector2d</span><span class="o">=</span><span class="n">vector2d</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vector2d</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">vector2d</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+		<span class="n">projected_vector</span><span class="o">=</span><span class="n">vector2d</span>
+
+	<span class="k">elif</span> <span class="n">vectype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;node&#39;</span><span class="p">:</span>
+
+		<span class="c1">#Initialize 3d vector</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">vector2d</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">vector2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="o">=</span><span class="p">(</span><span class="n">paddingvalue</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">vector2d</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">vector2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="o">=</span><span class="p">(</span><span class="n">paddingvalue</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">vector2d</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+				<span class="n">projected_vector</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">vector2d</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+				<span class="n">vector2d</span><span class="o">=</span><span class="n">vector2d</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;vector length not supported&quot;</span><span class="p">)</span>
+			<span class="c1">#Fill in</span>
+			<span class="k">if</span> <span class="n">layer</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberoflayers</span><span class="p">):</span>
+					<span class="n">projected_vector</span><span class="p">[(</span><span class="n">i</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">):((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">)]</span><span class="o">=</span><span class="n">vector2d</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="p">[((</span><span class="n">layer</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">):(</span><span class="n">layer</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">)]</span><span class="o">=</span><span class="n">vector2d</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">vector2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="o">=</span><span class="p">(</span><span class="n">paddingvalue</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">vector2d</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">vector2d</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">vector2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="o">=</span><span class="p">(</span><span class="n">paddingvalue</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">vector2d</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">vector2d</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+				<span class="n">projected_vector</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">=</span><span class="n">vector2d</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+				<span class="n">vector2d</span><span class="o">=</span><span class="n">vector2d</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;vector length not supported&quot;</span><span class="p">)</span>
+			<span class="c1">#Fill in</span>
+			<span class="k">if</span> <span class="n">layer</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberoflayers</span><span class="p">):</span>
+					<span class="n">projected_vector</span><span class="p">[(</span><span class="n">i</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">):((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">),:]</span><span class="o">=</span><span class="n">vector2d</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="p">[((</span><span class="n">layer</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">):(</span><span class="n">layer</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">),:]</span><span class="o">=</span><span class="n">vector2d</span>
+
+
+	<span class="k">elif</span> <span class="n">vectype</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;element&#39;</span><span class="p">:</span>
+
+		<span class="c1">#Initialize 3d vector</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">vector2d</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">vector2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="o">=</span><span class="p">(</span><span class="n">paddingvalue</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">vector2d</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">vector2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="o">=</span><span class="p">(</span><span class="n">paddingvalue</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">vector2d</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+				<span class="n">projected_vector</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">vector2d</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+				<span class="n">vector2d</span><span class="o">=</span><span class="n">vector2d</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;vector length not supported&quot;</span><span class="p">)</span>
+			<span class="c1">#Fill in</span>
+			<span class="k">if</span> <span class="n">layer</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberoflayers</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+					<span class="n">projected_vector</span><span class="p">[(</span><span class="n">i</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">):((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">)]</span><span class="o">=</span><span class="n">vector2d</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="p">[((</span><span class="n">layer</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">):(</span><span class="n">layer</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">)]</span><span class="o">=</span><span class="n">vector2d</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">vector2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="o">=</span><span class="p">(</span><span class="n">paddingvalue</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">,</span>  <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">vector2d</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">vector2d</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="n">vector2d</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="o">=</span><span class="p">(</span><span class="n">paddingvalue</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">vector2d</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">vector2d</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+				<span class="n">projected_vector</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">=</span><span class="n">vector2d</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+				<span class="n">vector2d</span><span class="o">=</span><span class="n">vector2d</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;vector length not supported&quot;</span><span class="p">)</span>
+			<span class="c1">#Fill in</span>
+			<span class="k">if</span> <span class="n">layer</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberoflayers</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+					<span class="n">projected_vector</span><span class="p">[(</span><span class="n">i</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">):((</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">),:]</span><span class="o">=</span><span class="n">vector2d</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">projected_vector</span><span class="p">[((</span><span class="n">layer</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">):(</span><span class="n">layer</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">),:]</span><span class="o">=</span><span class="n">vector2d</span>
+
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;project3d error message: unknown projection type&quot;</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="n">vector1d</span><span class="p">:</span>
+		<span class="n">projected_vector</span><span class="o">=</span><span class="n">projected_vector</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+
+	<span class="k">return</span> <span class="n">projected_vector</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

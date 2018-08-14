@@ -1,0 +1,328 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>whichdb &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>whichdb</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for whichdb</h1><div class="highlight"><pre>
+<span></span><span class="c1"># !/usr/bin/env python</span>
+<span class="sd">&quot;&quot;&quot;Guess which db package to use to open a db file.&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">dbm</span>
+    <span class="n">_dbmerror</span> <span class="o">=</span> <span class="n">dbm</span><span class="o">.</span><span class="n">error</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">dbm</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># just some sort of valid exception which might be raised in the</span>
+    <span class="c1"># dbm test</span>
+    <span class="n">_dbmerror</span> <span class="o">=</span> <span class="ne">IOError</span>
+
+<div class="viewcode-block" id="whichdb"><a class="viewcode-back" href="../api/issm.html#issm.whichdb">[docs]</a><span class="k">def</span> <span class="nf">whichdb</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Guess which db package to use to open a db file.</span>
+
+<span class="sd">    Return values:</span>
+
+<span class="sd">    - None if the database file can&#39;t be read;</span>
+<span class="sd">    - empty string if the file can be read but can&#39;t be recognized</span>
+<span class="sd">    - the module name (e.g. &quot;dbm&quot; or &quot;gdbm&quot;) if recognized.</span>
+
+<span class="sd">    Importing the given module may still fail, and opening the</span>
+<span class="sd">    database using that module may still fail.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Check for dbm first -- this has a .pag and a .dir file</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">extsep</span> <span class="o">+</span> <span class="s2">&quot;pag&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1"># dbm linked with gdbm on OS/2 doesn&#39;t have .dir file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">dbm</span><span class="o">.</span><span class="n">library</span> <span class="o">==</span> <span class="s2">&quot;GNU gdbm&quot;</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s2">&quot;os2emx&quot;</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">extsep</span> <span class="o">+</span> <span class="s2">&quot;dir&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="s2">&quot;dbm&quot;</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="c1"># some dbm emulations based on Berkeley DB generate a .db file</span>
+        <span class="c1"># some do not, but they should be caught by the dbhash checks</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">extsep</span> <span class="o">+</span> <span class="s2">&quot;db&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="c1"># guarantee we can actually open the file using dbm</span>
+            <span class="c1"># kind of overkill, but since we are dealing with emulations</span>
+            <span class="c1"># it seems like a prudent step</span>
+            <span class="k">if</span> <span class="n">dbm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">dbm</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">return</span> <span class="s2">&quot;dbm&quot;</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="n">_dbmerror</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># Check for dumbdbm next -- this has a .dir and a .dat file</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># First check for presence of files</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">extsep</span> <span class="o">+</span> <span class="s2">&quot;dat&quot;</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">extsep</span> <span class="o">+</span> <span class="s2">&quot;dir&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">st_size</span>
+        <span class="c1"># dumbdbm files with no keys are empty</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;dumbdbm&quot;</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">extsep</span> <span class="o">+</span> <span class="s2">&quot;dir&quot;</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s2">&quot;dumbdbm&quot;</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># See if the file exists, return None if not</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># Read the start of the file -- the magic number</span>
+    <span class="n">s16</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">s16</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+
+    <span class="c1"># Return &quot;&quot; if not at least 4 bytes</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># Convert to 4-byte int in native byte order -- return &quot;&quot; if impossible</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">magic</span><span class="p">,)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;=l&quot;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># Check for GNU dbm</span>
+    <span class="k">if</span> <span class="n">magic</span> <span class="ow">in</span> <span class="p">(</span><span class="mh">0x13579ace</span><span class="p">,</span> <span class="mh">0x13579acd</span><span class="p">,</span> <span class="mh">0x13579acf</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;gdbm&quot;</span>
+
+    <span class="c1"># Check for old Berkeley db hash file format v2</span>
+    <span class="k">if</span> <span class="n">magic</span> <span class="ow">in</span> <span class="p">(</span><span class="mh">0x00061561</span><span class="p">,</span> <span class="mh">0x61150600</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;bsddb185&quot;</span>
+
+    <span class="c1"># Later versions of Berkeley db hash file have a 12-byte pad in</span>
+    <span class="c1"># front of the file type</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">magic</span><span class="p">,)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;=l&quot;</span><span class="p">,</span> <span class="n">s16</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:])</span>
+    <span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="c1"># Check for BSD hash</span>
+    <span class="k">if</span> <span class="n">magic</span> <span class="ow">in</span> <span class="p">(</span><span class="mh">0x00061561</span><span class="p">,</span> <span class="mh">0x61150600</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;dbhash&quot;</span>
+
+    <span class="c1"># Unknown</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span></div>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="nb">print</span> <span class="n">whichdb</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;UNKNOWN&quot;</span><span class="p">,</span> <span class="n">filename</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

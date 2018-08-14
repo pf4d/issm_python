@@ -1,0 +1,626 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.WriteData &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.WriteData</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.WriteData</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">from</span> <span class="nn">issm.pairoptions</span> <span class="k">import</span> <span class="n">pairoptions</span>
+<span class="kn">import</span> <span class="nn">issm.MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+
+<div class="viewcode-block" id="WriteData"><a class="viewcode-back" href="../../api/issm.html#issm.WriteData.WriteData">[docs]</a><span class="k">def</span> <span class="nf">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	WRITEDATA - write model field in binary file</span>
+<span class="sd"> </span>
+<span class="sd">	   Usage:</span>
+<span class="sd">	      WriteData(fid,varargin)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#process options</span>
+	<span class="n">options</span><span class="o">=</span><span class="n">pairoptions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+	<span class="c1">#Get data properties</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">):</span>
+		<span class="c1">#This is an object field, construct enum and data</span>
+		<span class="n">obj</span>       <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;object&#39;</span><span class="p">)</span>
+		<span class="n">fieldname</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;fieldname&#39;</span><span class="p">)</span>
+		<span class="n">classname</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+		<span class="n">name</span>      <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="n">prefix</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="o">+</span><span class="n">fieldname</span><span class="p">);</span>
+		<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">):</span>
+			<span class="n">data</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">data</span>      <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">fieldname</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="c1">#No processing required</span>
+		<span class="n">data</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
+		<span class="n">name</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+
+	<span class="nb">format</span>  <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;format&#39;</span><span class="p">)</span>
+	<span class="n">mattype</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>    <span class="c1">#only required for matrices</span>
+	<span class="n">timeserieslength</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+	<span class="c1">#Process sparse matrices</span>
+<span class="c1">#	if issparse(data),</span>
+<span class="c1">#		data=full(data);</span>
+<span class="c1">#	end</span>
+
+	<span class="c1">#Scale data if necesarry</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">):</span>
+		<span class="n">scale</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="n">timeserieslength</span><span class="p">:</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+				<span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">scale</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">data</span>  <span class="o">=</span> <span class="n">scale</span><span class="o">*</span><span class="n">data</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">data</span>  <span class="o">=</span> <span class="n">scale</span><span class="o">*</span><span class="n">data</span>
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="n">timeserieslength</span><span class="p">:</span>
+			<span class="n">yts</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;yts&#39;</span><span class="p">)</span>
+			<span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">yts</span><span class="o">*</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+
+	<span class="c1">#Step 1: write the enum to identify this record uniquely</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">),</span><span class="n">name</span><span class="p">))</span> 
+
+	<span class="c1">#Step 2: write the data itself.</span>
+	<span class="k">if</span>   <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+<span class="c1">#		if len(data) !=1:</span>
+<span class="c1">#			raise ValueError(&#39;field %s cannot be marshalled as it has more than one element!&#39; % name[0])</span>
+
+		<span class="c1">#first write length of record</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="p">))</span>  <span class="c1">#1 bool (disguised as an int)+code</span>
+
+		<span class="c1">#write data code: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+
+		<span class="c1">#now write integer</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>  <span class="c1">#send an int, not easy to send a bool</span>
+		<span class="c1"># }}}</span>
+
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+<span class="c1">#		if len(data) !=1:</span>
+<span class="c1">#			raise ValueError(&#39;field %s cannot be marshalled as it has more than one element!&#39; % name[0])</span>
+
+		<span class="c1">#first write length of record</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="p">))</span>  <span class="c1">#1 integer + code</span>
+
+		<span class="c1">#write data code: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+
+		<span class="c1">#now write integer</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">data</span><span class="p">))</span> 
+		<span class="c1"># }}}</span>
+
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+<span class="c1">#		if len(data) !=1:</span>
+<span class="c1">#			raise ValueError(&#39;field %s cannot be marshalled as it has more than one element!&#39; % name[0])</span>
+
+		<span class="c1">#first write length of record</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">8</span><span class="o">+</span><span class="mi">4</span><span class="p">))</span>  <span class="c1">#1 double+code</span>
+
+		<span class="c1">#write data code: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+
+		<span class="c1">#now write double</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="n">data</span><span class="p">))</span> 
+		<span class="c1"># }}}</span>
+
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;String&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="c1">#first write length of record</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="p">))</span>  <span class="c1">#string + string size + code</span>
+
+		<span class="c1">#write data code: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+
+		<span class="c1">#now write string</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span> 
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span><span class="n">data</span><span class="p">))</span> 
+		<span class="c1"># }}}</span>
+
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;BooleanMat&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="nb">bool</span><span class="p">):</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="p">])</span>
+		<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">),)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+		<span class="c1">#Get size</span>
+		<span class="n">s</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+		<span class="c1">#if matrix = NaN, then do not write anything</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+			<span class="n">s</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+		<span class="c1">#first write length of record</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">8</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="p">))</span>    <span class="c1">#2 integers (32 bits) + the double matrix + code + matrix type</span>
+
+		<span class="c1">#write data code and matrix type: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">mattype</span><span class="p">))</span>
+
+		<span class="c1">#now write matrix</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> 
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>    <span class="c1">#get to the &quot;c&quot; convention, hence the transpose</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> 
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+				<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])))</span>    <span class="c1">#get to the &quot;c&quot; convention, hence the transpose</span>
+		<span class="c1"># }}}</span>
+
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;IntMat&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,(</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">)):</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="p">])</span>
+		<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">),)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+		<span class="c1">#Get size</span>
+		<span class="n">s</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+		<span class="c1">#if matrix = NaN, then do not write anything</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+			<span class="n">s</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+		<span class="c1">#first write length of record</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">8</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="p">))</span>    <span class="c1">#2 integers (32 bits) + the double matrix + code + matrix type</span>
+
+		<span class="c1">#write data code and matrix type: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">mattype</span><span class="p">))</span>
+
+		<span class="c1">#now write matrix</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> 
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>    <span class="c1">#get to the &quot;c&quot; convention, hence the transpose</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> 
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+				<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])))</span>    <span class="c1">#get to the &quot;c&quot; convention, hence the transpose</span>
+		<span class="c1"># }}}</span>
+
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="p">])</span>
+		<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">),)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+		<span class="c1">#Get size</span>
+		<span class="n">s</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+		<span class="c1">#if matrix = NaN, then do not write anything</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+			<span class="n">s</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+		<span class="c1">#first write length of record</span>
+		<span class="n">recordlength</span><span class="o">=</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">8</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="p">;</span> <span class="c1">#2 integers (32 bits) + the double matrix + code + matrix type</span>
+		<span class="k">if</span> <span class="n">recordlength</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="o">**</span><span class="mi">31</span> <span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;field </span><span class="si">%s</span><span class="s1"> cannot be marshalled because it is larger than 4^31 bytes!&#39;</span> <span class="o">%</span> <span class="n">enum</span><span class="p">)</span>
+
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">recordlength</span><span class="p">))</span>  <span class="c1">#2 integers (32 bits) + the double matrix + code + matrix type</span>
+
+		<span class="c1">#write data code and matrix type: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">mattype</span><span class="p">))</span>
+
+		<span class="c1">#now write matrix</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> 
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>    <span class="c1">#get to the &quot;c&quot; convention, hence the transpose</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> 
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+				<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])))</span>    <span class="c1">#get to the &quot;c&quot; convention, hence the transpose</span>
+		<span class="c1"># }}}</span>
+
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;CompressedMat&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="p">])</span>
+		<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">),)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+		<span class="c1">#Get size</span>
+		<span class="n">s</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+		   <span class="n">n2</span><span class="o">=</span><span class="mi">1</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">n2</span><span class="o">=</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+		<span class="c1">#if matrix = NaN, then do not write anything</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+			<span class="n">s</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+			<span class="n">n2</span><span class="o">=</span><span class="mi">0</span>
+
+		<span class="c1">#first write length of record</span>
+		<span class="n">recordlength</span><span class="o">=</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">8</span><span class="o">+</span><span class="mi">8</span><span class="o">+</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">n2</span><span class="o">+</span><span class="mi">8</span><span class="o">*</span><span class="n">n2</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span> <span class="c1">#2 integers (32 bits) + the matrix + code + matrix type</span>
+		<span class="k">if</span> <span class="n">recordlength</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="o">**</span><span class="mi">31</span> <span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;field </span><span class="si">%s</span><span class="s1"> cannot be marshalled because it is larger than 4^31 bytes!&#39;</span> <span class="o">%</span> <span class="n">enum</span><span class="p">)</span>
+
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">recordlength</span><span class="p">))</span>  <span class="c1">#2 integers (32 bits) + the matrix + code + matrix type</span>
+
+		<span class="c1">#write data code and matrix type: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">mattype</span><span class="p">))</span>
+
+		<span class="c1">#Write offset and range</span>
+		<span class="n">A</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">offsetA</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+		<span class="n">rangeA</span> <span class="o">=</span> <span class="n">A</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">offsetA</span>
+
+		<span class="k">if</span> <span class="n">rangeA</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">A</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="mi">0</span> 
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">A</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span><span class="o">-</span><span class="n">offsetA</span><span class="p">)</span><span class="o">/</span><span class="n">rangeA</span><span class="o">*</span><span class="mf">255.</span> 
+		
+		<span class="c1">#now write matrix</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">offsetA</span><span class="p">)))</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">rangeA</span><span class="p">)))</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>
+
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">])))</span>    <span class="c1">#get to the &quot;c&quot; convention, hence the transpose</span>
+
+		<span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">offsetA</span><span class="p">)))</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">rangeA</span><span class="p">)))</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+				<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">,</span><span class="nb">int</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])))</span>    <span class="c1">#get to the &quot;c&quot; convention, hence the transpose</span>
+
+			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">])))</span>
+
+		<span class="c1"># }}}</span>
+
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;MatArray&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="c1">#first get length of record</span>
+		<span class="n">recordlength</span><span class="o">=</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span>    <span class="c1">#number of records + code</span>
+		<span class="k">for</span> <span class="n">matrix</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+			<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+				<span class="n">matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">matrix</span><span class="p">])</span>
+			<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
+				<span class="n">matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+				<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
+					<span class="n">matrix</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">matrix</span><span class="p">),)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">matrix</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+			<span class="n">s</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span>
+			<span class="n">recordlength</span><span class="o">+=</span><span class="mi">4</span><span class="o">*</span><span class="mi">2</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">)</span><span class="o">*</span><span class="mi">8</span>    <span class="c1">#row and col of matrix + matrix of doubles</span>
+
+		<span class="c1">#write length of record</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">recordlength</span><span class="p">))</span> 
+
+		<span class="c1">#write data code: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+
+		<span class="c1">#write data, first number of records</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span> 
+
+		<span class="c1">#write each matrix: </span>
+		<span class="k">for</span> <span class="n">matrix</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+			<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+				<span class="n">matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">matrix</span><span class="p">])</span>
+			<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">matrix</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
+				<span class="n">matrix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+				<span class="n">matrix</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">matrix</span><span class="p">),)</span>
+
+			<span class="n">s</span><span class="o">=</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span> 
+				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span>    <span class="c1">#get to the &quot;c&quot; convention, hence the transpose</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> 
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> 
+				<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+					<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+						<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])))</span>
+		<span class="c1"># }}}</span>
+
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="c1">#first get length of record</span>
+		<span class="n">recordlength</span><span class="o">=</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span>    <span class="c1">#for length of array + code</span>
+		<span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+			<span class="n">recordlength</span><span class="o">+=</span><span class="mi">4</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>    <span class="c1">#for each string</span>
+
+		<span class="c1">#write length of record</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">recordlength</span><span class="p">))</span> 
+
+		<span class="c1">#write data code: </span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">)))</span> 
+
+		<span class="c1">#now write length of string array</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span> 
+
+		<span class="c1">#now write the strings</span>
+		<span class="k">for</span> <span class="n">string</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)))</span> 
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">),</span><span class="n">string</span><span class="p">))</span> 
+		<span class="c1"># }}}</span>
+
+	<span class="k">else</span><span class="p">:</span>    <span class="c1"># {{{</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;WriteData error message: data type: </span><span class="si">%d</span><span class="s1"> not supported yet! (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="n">enum</span><span class="p">))</span></div>
+	<span class="c1"># }}}</span>
+
+<div class="viewcode-block" id="FormatToCode"><a class="viewcode-back" href="../../api/issm.html#issm.WriteData.FormatToCode">[docs]</a><span class="k">def</span> <span class="nf">FormatToCode</span><span class="p">(</span><span class="nb">format</span><span class="p">):</span> <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This routine takes the format string, and hardcodes it into an integer, which </span>
+<span class="sd">	is passed along the record, in order to identify the nature of the dataset being </span>
+<span class="sd">	sent.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">if</span>   <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">1</span>
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">2</span>
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">3</span>
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;String&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">4</span>
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;BooleanMat&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">5</span>
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;IntMat&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">6</span>
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">7</span>
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;MatArray&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">8</span>
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">9</span>
+	<span class="k">elif</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmpi</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="s1">&#39;CompressedMat&#39;</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">10</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="n">InputError</span><span class="p">(</span><span class="s1">&#39;FormatToCode error message: data type not supported yet!&#39;</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">code</span></div>
+<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.export_gl &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.export_gl</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.export_gl</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">issm.plotoptions</span> <span class="k">import</span> <span class="n">plotoptions</span>
+<span class="kn">from</span> <span class="nn">issm.checkplotoptions</span> <span class="k">import</span> <span class="n">checkplotoptions</span>
+<span class="kn">from</span> <span class="nn">issm.model</span> <span class="k">import</span> <span class="n">model</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span>  <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">issm.writejsfile</span> <span class="k">import</span> <span class="n">writejsfile</span>
+
+<div class="viewcode-block" id="export_gl"><a class="viewcode-back" href="../../api/issm.html#issm.export_gl.export_gl">[docs]</a><span class="k">def</span> <span class="nf">export_gl</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="o">*</span><span class="n">varargin</span><span class="p">):</span>
+	<span class="k">class</span> <span class="nc">ResultObj</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+		<span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+
+	<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;getting options&#39;</span><span class="p">)</span>
+	<span class="n">templist</span><span class="o">=</span><span class="n">plotoptions</span><span class="p">(</span><span class="n">varargin</span><span class="p">);</span> 
+	<span class="n">optionslist</span><span class="o">=</span><span class="n">templist</span><span class="o">.</span><span class="n">list</span><span class="p">;</span>
+	<span class="n">options</span><span class="o">=</span><span class="n">optionslist</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+	<span class="n">options</span><span class="o">=</span><span class="n">checkplotoptions</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">options</span><span class="p">);</span>
+	<span class="c1">#print (templist,options)</span>
+	<span class="c1">#templist contains options 0-3. Use in the future to rework.</span>
+	
+	<span class="c1">#Setup unique directory in present dir: </span>
+	<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;setting directory&#39;</span><span class="p">)</span>
+	<span class="n">directory</span><span class="o">=</span><span class="n">optionslist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;directory&#39;</span><span class="p">);</span>
+	<span class="n">databasename</span><span class="o">=</span><span class="n">optionslist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;database&#39;</span><span class="p">);</span>
+	
+	<span class="c1">#scaling factor: </span>
+	<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;setting scaling factor&#39;</span><span class="p">)</span>
+	<span class="n">scaling_factor</span><span class="o">=</span><span class="n">optionslist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;scaling_factor&#39;</span><span class="p">);</span>
+
+	<span class="c1">#Deal with title: </span>
+	<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;setting title&#39;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">optionslist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">):</span>
+		<span class="n">title</span><span class="o">=</span><span class="n">optionslist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;title&#39;</span><span class="p">);</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">title</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">;</span>
+
+	<span class="c1">#initialize model: </span>
+	<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;initializing model&#39;</span><span class="p">)</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">;</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">initialZoomFactor</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;zoom&#39;</span><span class="p">,</span><span class="o">-.</span><span class="mi">25</span><span class="p">);</span>
+
+	<span class="c1">#Deal with contour {{{</span>
+	<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;getting contour&#39;</span><span class="p">)</span>
+	<span class="nb">print</span> <span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">)</span>
+	<span class="n">segmenets0</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]);</span>
+	<span class="n">segmenets1</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]);</span>
+	
+	<span class="n">contour_lat1</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">segmenets0</span><span class="p">)</span>
+	<span class="n">contour_lat2</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">lat</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">segmenets1</span><span class="p">);</span>
+	<span class="n">contour_long1</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">segmenets0</span><span class="p">);</span>
+	<span class="n">contour_long2</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">long</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">segmenets1</span><span class="p">);</span>
+	<span class="n">contour_surface1</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">segmenets0</span><span class="p">);</span>
+	<span class="n">contour_surface2</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">segmenets1</span><span class="p">);</span>
+
+	<span class="n">R1</span><span class="o">=</span><span class="mi">6371000</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">contour_surface1</span><span class="p">))</span><span class="o">+</span><span class="n">scaling_factor</span><span class="o">*</span><span class="n">contour_surface1</span><span class="p">;</span>
+	<span class="n">R2</span><span class="o">=</span><span class="mi">6371000</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">contour_surface2</span><span class="p">))</span><span class="o">+</span><span class="n">scaling_factor</span><span class="o">*</span><span class="n">contour_surface2</span><span class="p">;</span>
+
+	<span class="n">model</span><span class="o">.</span><span class="n">contourx1</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">long</span><span class="p">:</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long</span><span class="p">)),</span> <span class="n">R1</span><span class="p">,</span> <span class="n">contour_lat1</span><span class="p">,</span> <span class="n">contour_long1</span><span class="p">);</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">contoury1</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">long</span><span class="p">:</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long</span><span class="p">)),</span> <span class="n">R1</span><span class="p">,</span> <span class="n">contour_lat1</span><span class="p">,</span> <span class="n">contour_long1</span><span class="p">);</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">contourz1</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)),</span> <span class="n">R1</span><span class="p">,</span> <span class="n">contour_lat1</span><span class="p">);</span>
+	
+	<span class="n">model</span><span class="o">.</span><span class="n">contourx2</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">long</span><span class="p">:</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long</span><span class="p">)),</span> <span class="n">R2</span><span class="p">,</span> <span class="n">contour_lat2</span><span class="p">,</span> <span class="n">contour_long2</span><span class="p">);</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">contoury2</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">long</span><span class="p">:</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long</span><span class="p">)),</span> <span class="n">R2</span><span class="p">,</span> <span class="n">contour_lat2</span><span class="p">,</span> <span class="n">contour_long2</span><span class="p">);</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">contourz2</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)),</span> <span class="n">R2</span><span class="p">,</span> <span class="n">contour_lat2</span><span class="p">);</span>
+
+	<span class="c1">#}}}</span>
+	<span class="c1">#Deal with mesh and results {{{</span>
+	<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;getting mesh&#39;</span><span class="p">)</span>
+	<span class="n">surface</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">surface</span><span class="o">.</span><span class="n">flatten</span><span class="p">();</span>
+	<span class="n">numberofelements</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">;</span>
+	<span class="n">numberofvertices</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">;</span>
+	<span class="n">R</span><span class="o">=</span><span class="mi">6371000</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">lat</span><span class="p">))</span><span class="o">+</span><span class="n">scaling_factor</span><span class="o">*</span><span class="n">surface</span><span class="p">;</span>
+	
+	<span class="n">x</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">long</span><span class="p">:</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long</span><span class="p">)),</span> <span class="n">R</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">long</span><span class="p">);</span>
+	<span class="n">y</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">long</span><span class="p">:</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">))</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">long</span><span class="p">)),</span> <span class="n">R</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">lat</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">long</span><span class="p">);</span>
+	<span class="n">z</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">r</span><span class="p">,</span> <span class="n">lat</span><span class="p">:</span> <span class="n">r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)),</span> <span class="n">R</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">lat</span><span class="p">);</span>
+	
+	<span class="c1">#Deal with triangulation: </span>
+	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;getting triangulation&#39;</span><span class="p">)</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">;</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">;</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">;</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">;</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">surface</span><span class="o">=</span><span class="n">surface</span><span class="p">;</span>
+	
+	<span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+	<span class="nb">print</span><span class="p">(</span><span class="n">optionslist</span><span class="p">)</span>	
+	<span class="c1">#Deal with data: </span>
+	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;getting data&#39;</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">optionslist</span><span class="p">)):</span>
+		<span class="n">options</span><span class="o">=</span><span class="n">optionslist</span><span class="p">[</span><span class="n">i</span><span class="p">];</span> 
+		<span class="n">options</span><span class="o">=</span><span class="n">checkplotoptions</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">options</span><span class="p">);</span>
+		<span class="n">data</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">();</span>
+		<span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ResultObj</span><span class="p">())</span>
+		<span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">;</span>
+		<span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">caxis</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;caxis&#39;</span><span class="p">,[</span><span class="nb">min</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">data</span><span class="p">)]);</span>
+
+		<span class="n">label</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+		<span class="k">if</span> <span class="n">label</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+			<span class="c1">#create generic label: </span>
+			<span class="n">label</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)];</span>
+		<span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">;</span>
+
+		<span class="n">shortlabel</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;shortlabel&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+		<span class="k">if</span> <span class="n">shortlabel</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+			<span class="c1">#create generic short label: </span>
+			<span class="n">shortlabel</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)];</span>
+		<span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shortlabel</span><span class="o">=</span><span class="n">shortlabel</span><span class="p">;</span>
+
+		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">!=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+			<span class="n">time_range</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;time_range&#39;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">]);</span>
+			<span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">time_range</span><span class="o">=</span><span class="n">time_range</span><span class="p">;</span>
+
+		<span class="n">unit</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+		<span class="k">if</span> <span class="n">unit</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span>
+			<span class="c1">#create generic unit: </span>
+			<span class="n">unit</span><span class="o">=</span><span class="s1">&#39;SI&#39;</span><span class="p">;</span>
+		<span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">;</span>
+	<span class="n">model</span><span class="o">.</span><span class="n">results</span><span class="o">=</span><span class="n">results</span><span class="p">;</span>
+	
+	<span class="c1">#Write model to javascript database file: </span>
+	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;writing to file&#39;</span><span class="p">)</span>
+	<span class="n">writejsfile</span><span class="p">(</span><span class="n">directory</span> <span class="o">+</span> <span class="n">databasename</span> <span class="o">+</span> <span class="s1">&#39;.js&#39;</span><span class="p">,</span><span class="n">model</span><span class="p">,</span><span class="n">databasename</span><span class="p">);</span></div>
+<span class="c1">#}}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

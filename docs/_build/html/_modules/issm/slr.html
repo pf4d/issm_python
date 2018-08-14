@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.slr &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.slr</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.slr</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">MatlabFuncs</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">model</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">checkfield</span> <span class="k">import</span> <span class="n">checkfield</span>
+<span class="kn">from</span> <span class="nn">WriteData</span> <span class="k">import</span> <span class="n">WriteData</span>
+
+<div class="viewcode-block" id="slr"><a class="viewcode-back" href="../../api/issm.html#issm.slr.slr">[docs]</a><span class="k">class</span> <span class="nc">slr</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	SLR class definition</span>
+<span class="sd">	</span>
+<span class="sd">		Usage:</span>
+<span class="sd">		  slr=slr();</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">deltathickness</span>    <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">sealevel</span>          <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span>           <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">reltol</span>            <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">abstol</span>            <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">love_h</span>            <span class="o">=</span> <span class="mi">0</span> <span class="c1">#provided by PREM model()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">love_k</span>            <span class="o">=</span> <span class="mi">0</span> <span class="c1">#ideam</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">love_l</span>            <span class="o">=</span> <span class="mi">0</span> <span class="c1">#ideam</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">tide_love_h</span>       <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">tide_love_k</span>       <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fluid_love</span>        <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">equatorial_moi</span>    <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">polar_moi</span>	       <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">angular_velocity</span>  <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rigid</span>             <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">elastic</span>           <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rotation</span>          <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">ocean_area_scaling</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">degacc</span>            <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">transitions</span>       <span class="o">=</span> <span class="p">[]</span>
+		
+		<span class="c1">#set defaults</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">setdefaultparameters</span><span class="p">()</span>
+		<span class="c1">#}}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+			<span class="n">string</span><span class="o">=</span><span class="s1">&#39;   slr parameters:&#39;</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;deltathickness&#39;</span><span class="p">,</span><span class="s1">&#39;thickness change (main loading of the slr solution core [m]&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;reltol&#39;</span><span class="p">,</span><span class="s1">&#39;sea level rise relative convergence criterion, (default, NaN: not applied)&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;abstol&#39;</span><span class="p">,</span><span class="s1">&#39;sea level rise absolute convergence criterion, NaN: not applied&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;maxiter&#39;</span><span class="p">,</span><span class="s1">&#39;maximum number of nonlinear iterations&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;love_h&#39;</span><span class="p">,</span><span class="s1">&#39;load Love number for radial displacement&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;love_k&#39;</span><span class="p">,</span><span class="s1">&#39;load Love number for gravitational potential perturbation&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;love_l&#39;</span><span class="p">,</span><span class="s1">&#39;load Love number for horizontal displaements&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;tide_love_k&#39;</span><span class="p">,</span><span class="s1">&#39;tidal load Love number (degree 2)&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;tide_love_h&#39;</span><span class="p">,</span><span class="s1">&#39;tidal load Love number (degree 2)&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fluid_love&#39;</span><span class="p">,</span><span class="s1">&#39;secular fluid Love number&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;equatorial_moi&#39;</span><span class="p">,</span><span class="s1">&#39;mean equatorial moment of inertia [kg m^2]&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;polar_moi&#39;</span><span class="p">,</span><span class="s1">&#39;polar moment of inertia [kg m^2]&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;angular_velocity&#39;</span><span class="p">,</span><span class="s1">&#39;mean rotational velocity of earth [per second]&#39;</span><span class="p">));</span> 
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;rigid&#39;</span><span class="p">,</span><span class="s1">&#39;rigid earth graviational potential perturbation&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;elastic&#39;</span><span class="p">,</span><span class="s1">&#39;elastic earth graviational potential perturbation&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;rotation&#39;</span><span class="p">,</span><span class="s1">&#39;earth rotational potential perturbation&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;ocean_area_scaling&#39;</span><span class="p">,</span><span class="s1">&#39;correction for model representation of ocean area [default: No correction]&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;degacc&#39;</span><span class="p">,</span><span class="s1">&#39;accuracy (default .01 deg) for numerical discretization of the Green&#39;&#39;s functions&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;transitions&#39;</span><span class="p">,</span><span class="s1">&#39;indices into parts of the mesh that will be icecaps&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;additional outputs requested&#39;</span><span class="p">))</span>
+
+			<span class="k">return</span> <span class="n">string</span>
+		<span class="c1"># }}}</span>
+<div class="viewcode-block" id="slr.setdefaultparameters"><a class="viewcode-back" href="../../api/issm.html#issm.slr.slr.setdefaultparameters">[docs]</a>	<span class="k">def</span> <span class="nf">setdefaultparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		
+		<span class="c1">#Convergence criterion: absolute, relative and residual</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">reltol</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span> <span class="c1">#default</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">abstol</span><span class="o">=</span><span class="mf">0.001</span> <span class="c1">#1 mm of sea level rise</span>
+
+		<span class="c1">#maximum of non-linear iterations.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span><span class="o">=</span><span class="mi">10</span>
+
+		<span class="c1">#computational flags: </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rigid</span><span class="o">=</span><span class="mi">1</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">elastic</span><span class="o">=</span><span class="mi">1</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rotation</span><span class="o">=</span><span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">ocean_area_scaling</span><span class="o">=</span><span class="mi">0</span>
+
+		<span class="c1">#tidal love numbers: </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">tide_love_h</span><span class="o">=</span><span class="mf">0.6149</span><span class="p">;</span> <span class="c1">#degree 2</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">tide_love_k</span><span class="o">=</span><span class="mf">0.3055</span><span class="p">;</span> <span class="c1">#degree 2</span>
+		
+                <span class="c1">#secular fluid love number: </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fluid_love</span><span class="o">=</span><span class="mf">0.942</span><span class="p">;</span> 
+		
+		<span class="c1">#moment of inertia: </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">equatorial_moi</span><span class="o">=</span><span class="mf">8.0077</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">37</span><span class="p">;</span> <span class="c1"># [kg m^2] </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">polar_moi</span>	   <span class="o">=</span><span class="mf">8.0345</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">37</span><span class="p">;</span> <span class="c1"># [kg m^2] </span>
+
+		<span class="c1">#mean rotational velocity of earth </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">angular_velocity</span><span class="o">=</span><span class="mf">7.2921</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">5</span><span class="p">;</span> <span class="c1"># [s^-1] </span>
+
+		<span class="c1">#numerical discretization accuracy</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">degacc</span><span class="o">=.</span><span class="mi">01</span>
+		
+		<span class="c1">#output default:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span>
+
+		<span class="c1">#transitions should be a cell array of vectors: </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">transitions</span><span class="o">=</span><span class="p">[]</span>
+
+		<span class="c1">#default output</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+		<span class="c1">#}}}</span>
+<div class="viewcode-block" id="slr.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.slr.slr.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="c1">#Early return</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">solution</span><span class="o">!=</span><span class="s1">&#39;SealevelriseAnalysis&#39;</span><span class="p">):</span>
+			<span class="k">return</span> <span class="n">md</span>
+
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.deltathickness&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.sealevel&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.love_h&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.love_k&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.love_l&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.tide_love_h&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.tide_love_k&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.fluid_love&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.equatorial_moi&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.polar_moi&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.angular_velocity&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.reltol&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.abstol&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.maxiter&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.degacc&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mf">1e-10</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;slr.requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;stringrow&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="c1">#check that love numbers are provided at the same level of accuracy: </span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">love_h</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">love_k</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">love_h</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">love_l</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
+			<span class="n">error</span><span class="p">(</span><span class="s1">&#39;slr error message: love numbers should be provided at the same level of accuracy&#39;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="slr.defaultoutputs"><a class="viewcode-back" href="../../api/issm.html#issm.slr.slr.defaultoutputs">[docs]</a>	<span class="k">def</span> <span class="nf">defaultoutputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Sealevel&#39;</span><span class="p">]</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="slr.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.slr.slr.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;deltathickness&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;sealevel&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;reltol&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;abstol&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;maxiter&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;love_h&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;love_k&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;love_l&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;tide_love_h&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;tide_love_k&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;fluid_love&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;equatorial_moi&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;polar_moi&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;angular_velocity&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;rigid&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;elastic&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;rotation&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;ocean_area_scaling&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;degacc&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;transitions&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;MatArray&#39;</span><span class="p">)</span>
+	
+		<span class="c1">#process requested outputs</span>
+		<span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span>
+		<span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">]</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">outputscopy</span><span class="o">=</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultoutputs</span><span class="p">(</span><span class="n">md</span><span class="p">)</span><span class="o">+</span><span class="n">outputs</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+			<span class="n">outputs</span>    <span class="o">=</span><span class="n">outputscopy</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">outputs</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.slr.requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">)</span></div></div>
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,305 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.expread &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.expread</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.expread</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+
+<div class="viewcode-block" id="expread"><a class="viewcode-back" href="../../api/issm.html#issm.expread.expread">[docs]</a><span class="k">def</span> <span class="nf">expread</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+
+	<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">	EXPREAD - read a file exp and build a Structure</span>
+
+<span class="sd">	   This routine reads a file .exp and builds a list of dicts containing the </span>
+<span class="sd">	   fields x and y corresponding to the coordinates, one for the filename of</span>
+<span class="sd">	   the exp file, for the density, for the nodes, and a field closed to </span>
+<span class="sd">	   indicate if the domain is closed. </span>
+<span class="sd">	   The first argument is the .exp file to be read and the second one (optional) </span>
+<span class="sd">	   indicate if the last point shall be read (1 to read it, 0 not to).</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      contours=expread(filename)</span>
+
+<span class="sd">	   Example:</span>
+<span class="sd">	      contours=expread(&#39;domainoutline.exp&#39;)</span>
+<span class="sd">	      contours=expread(&#39;domainoutline.exp&#39;)</span>
+
+<span class="sd">	   See also EXPDOC, EXPWRITEASVERTICES</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1">#some checks</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="ne">OSError</span><span class="p">(</span><span class="s2">&quot;expread error message: file &#39;</span><span class="si">%s</span><span class="s2">&#39; not found!&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+	<span class="c1">#initialize number of profile</span>
+	<span class="n">contours</span><span class="o">=</span><span class="p">[]</span>
+	<span class="c1">#open file</span>
+	<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+	<span class="c1">#loop over the number of profiles</span>
+	<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+		<span class="c1">#update number of profiles</span>
+		<span class="n">contour</span><span class="o">=</span><span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="c1">#Get file name</span>
+		<span class="n">A</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+		<span class="k">while</span> <span class="n">A</span><span class="o">==</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">:</span>
+			<span class="n">A</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">A</span><span class="p">:</span>
+			<span class="k">break</span>
+		<span class="n">A</span><span class="o">=</span><span class="n">A</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;##&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strncmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;Name:&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">)):</span>
+			<span class="k">break</span>
+
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">&gt;</span><span class="mi">5</span><span class="p">:</span> 
+			<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">5</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+
+		<span class="c1">#Get Icon</span>
+		<span class="n">A</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;##&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strncmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;Icon:&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">)):</span>
+			<span class="k">break</span>
+		<span class="c1">#Get Info</span>
+		<span class="n">A</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;#&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;Points&#39;</span><span class="p">)):</span>
+			<span class="k">break</span>
+
+		<span class="c1">#Get number of nodes and density</span>
+		<span class="n">A</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+		<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;nods&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+		<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;density&#39;</span><span class="p">]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+		<span class="c1">#Get Info</span>
+		<span class="n">A</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;#&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;X&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="s1">&#39;pos&#39;</span><span class="p">)</span> 
+						<span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="s1">&#39;pos&#39;</span><span class="p">)):</span>
+			<span class="k">break</span>
+		<span class="c1">#Get Coordinates</span>
+		<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">contour</span><span class="p">[</span><span class="s1">&#39;nods&#39;</span><span class="p">])</span>
+		<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">contour</span><span class="p">[</span><span class="s1">&#39;nods&#39;</span><span class="p">])</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">contour</span><span class="p">[</span><span class="s1">&#39;nods&#39;</span><span class="p">])):</span>
+			<span class="n">A</span><span class="o">=</span><span class="n">fid</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+			<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+			<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+		<span class="c1">#Check if closed</span>
+		<span class="k">if</span> <span class="p">(</span><span class="n">contour</span><span class="p">[</span><span class="s1">&#39;nods&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">and</span> \
+		   <span class="p">(</span><span class="n">contour</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">contour</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> \
+		   <span class="p">(</span><span class="n">contour</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">contour</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
+			<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;closed&#39;</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">contour</span><span class="p">[</span><span class="s1">&#39;closed&#39;</span><span class="p">]</span><span class="o">=</span><span class="kc">False</span>
+
+		<span class="n">contours</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">contour</span><span class="p">)</span>
+	<span class="c1">#close file</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="k">return</span> <span class="n">contours</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

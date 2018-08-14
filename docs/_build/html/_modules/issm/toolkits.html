@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.toolkits &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.toolkits</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.toolkits</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">IssmConfig</span> <span class="k">import</span> <span class="n">IssmConfig</span>
+<span class="kn">from</span> <span class="nn">mumpsoptions</span> <span class="k">import</span> <span class="n">mumpsoptions</span>
+<span class="kn">from</span> <span class="nn">iluasmoptions</span> <span class="k">import</span> <span class="n">iluasmoptions</span>
+<span class="kn">from</span> <span class="nn">fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">checkfield</span> <span class="k">import</span> <span class="n">checkfield</span>
+<span class="kn">from</span> <span class="nn">issmgslsolver</span> <span class="k">import</span> <span class="n">issmgslsolver</span>
+<span class="kn">from</span> <span class="nn">issmmumpssolver</span> <span class="k">import</span> <span class="n">issmmumpssolver</span>
+
+<div class="viewcode-block" id="toolkits"><a class="viewcode-back" href="../../api/issm.html#issm.toolkits.toolkits">[docs]</a><span class="k">class</span> <span class="nc">toolkits</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	TOOLKITS class definition</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      self=toolkits();</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="c1">#default toolkits</span>
+		<span class="k">if</span> <span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_HAVE_PETSC_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+			<span class="c1">#MUMPS is the default toolkits</span>
+			<span class="k">if</span> <span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_HAVE_MUMPS_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">DefaultAnalysis</span>           <span class="o">=</span> <span class="n">mumpsoptions</span><span class="p">()</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">DefaultAnalysis</span>           <span class="o">=</span> <span class="n">iluasmoptions</span><span class="p">()</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_HAVE_MUMPS_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">DefaultAnalysis</span>           <span class="o">=</span> <span class="n">issmmumpssolver</span><span class="p">()</span>
+			<span class="k">elif</span> <span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_HAVE_GSL_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">DefaultAnalysis</span>           <span class="o">=</span> <span class="n">issmgslsolver</span><span class="p">()</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;ToolkitsFile error: need at least Mumps or Gsl to define issm solver type&quot;</span><span class="p">)</span>
+
+		<span class="c1">#The other properties are dynamic</span>
+	<span class="c1"># }}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="n">s</span> <span class="o">=</span><span class="s2">&quot;List of toolkits options per analysis:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+		<span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">():</span>
+			<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">analysis</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">s</span>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="toolkits.addoptions"><a class="viewcode-back" href="../../api/issm.html#issm.toolkits.toolkits.addoptions">[docs]</a>	<span class="k">def</span> <span class="nf">addoptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">analysis</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="c1"># Usage example:</span>
+		<span class="c1">#    md.toolkits=addoptions(md.toolkits,&#39;StressbalanceAnalysis&#39;,FSoptions());</span>
+		<span class="c1">#    md.toolkits=addoptions(md.toolkits,&#39;StressbalanceAnalysis&#39;);</span>
+
+		<span class="c1">#Create dynamic property if property does not exist yet</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">analysis</span><span class="p">):</span>
+			<span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">analysis</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+
+		<span class="c1">#Add toolkits options to analysis</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">analysis</span><span class="p">,</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="toolkits.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.toolkits.toolkits.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">():</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">analysis</span><span class="p">):</span>
+				<span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s2">&quot;md.toolkits.</span><span class="si">%s</span><span class="s2"> is empty&quot;</span> <span class="o">%</span> <span class="n">analysis</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="toolkits.ToolkitsFile"><a class="viewcode-back" href="../../api/issm.html#issm.toolkits.toolkits.ToolkitsFile">[docs]</a>	<span class="k">def</span> <span class="nf">ToolkitsFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		TOOLKITSFILE- build toolkits file</span>
+
+<span class="sd">		   Build a Petsc compatible options file, from the toolkits model field  + return options string</span>
+<span class="sd">		   This file will also be used when the toolkit used is &#39;issm&#39; instead of &#39;petsc&#39;</span>
+
+
+<span class="sd">		   Usage:     ToolkitsFile(toolkits,filename);</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="c1">#open file for writing</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+		<span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;ToolkitsFile error: could not open &#39;</span><span class="si">%s</span><span class="s2">&#39; for writing.&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+		<span class="c1">#write header</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s%s%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;%Petsc options file: &#39;</span><span class="p">,</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39; written from Matlab toolkits array&#39;</span><span class="p">))</span>
+
+		<span class="c1">#start writing options</span>
+		<span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">():</span>
+			<span class="n">options</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">analysis</span><span class="p">)</span>
+
+			<span class="c1">#first write analysis:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">+</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">analysis</span><span class="p">)</span>    <span class="c1">#append a + to recognize it&#39;s an analysis enum</span>
+
+			<span class="c1">#now, write options</span>
+			<span class="k">for</span> <span class="n">optionname</span><span class="p">,</span><span class="n">optionvalue</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">optionvalue</span><span class="p">:</span>
+					<span class="c1">#this option has only one argument</span>
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;-</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">optionname</span><span class="p">)</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="c1">#option with value. value can be string or scalar</span>
+					<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">optionvalue</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+						<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;-</span><span class="si">%s</span><span class="s2"> </span><span class="si">%g</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">optionname</span><span class="p">,</span><span class="n">optionvalue</span><span class="p">))</span>
+					<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">optionvalue</span><span class="p">,(</span><span class="nb">str</span><span class="p">,</span><span class="n">unicode</span><span class="p">)):</span>
+						<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;-</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">optionname</span><span class="p">,</span><span class="n">optionvalue</span><span class="p">))</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;ToolkitsFile error: option &#39;</span><span class="si">%s</span><span class="s2">&#39; is not well formatted.&quot;</span> <span class="o">%</span> <span class="n">optionname</span><span class="p">)</span>
+
+		<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

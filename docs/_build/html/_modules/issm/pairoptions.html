@@ -1,0 +1,382 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.pairoptions &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.pairoptions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.pairoptions</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+
+<div class="viewcode-block" id="pairoptions"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions">[docs]</a><span class="k">class</span> <span class="nc">pairoptions</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	PAIROPTIONS class definition</span>
+<span class="sd"> </span>
+<span class="sd">	   Usage:</span>
+<span class="sd">	      pairoptions=pairoptions();</span>
+<span class="sd">	      pairoptions=pairoptions(&#39;module&#39;,true,&#39;solver&#39;,false);</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">arg</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">functionname</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">list</span>         <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+		<span class="c1">#get calling function name</span>
+		<span class="kn">import</span> <span class="nn">inspect</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">functionname</span><span class="o">=</span><span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+
+		<span class="c1">#initialize list</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+			<span class="k">pass</span>    <span class="c1">#Do nothing,</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">buildlist</span><span class="p">(</span><span class="o">*</span><span class="n">arg</span><span class="p">)</span>
+	<span class="c1"># }}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="n">s</span><span class="o">=</span><span class="s2">&quot;   functionname: &#39;</span><span class="si">%s</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">functionname</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">:</span>
+			<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   list: (</span><span class="si">%i</span><span class="s2">x</span><span class="si">%i</span><span class="s2">)</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">),</span><span class="mi">2</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+				<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],(</span><span class="nb">str</span><span class="p">,</span><span class="n">unicode</span><span class="p">)):</span>
+					<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;     field: </span><span class="si">%-10s</span><span class="s2"> value: &#39;</span><span class="si">%s</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+				<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+					<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;     field: </span><span class="si">%-10s</span><span class="s2"> value: </span><span class="si">%g</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;     field: </span><span class="si">%-10s</span><span class="s2"> value: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">type</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   list: empty</span><span class="se">\n</span><span class="s2">&quot;</span>
+		<span class="k">return</span> <span class="n">s</span>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="pairoptions.buildlist"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions.buildlist">[docs]</a>	<span class="k">def</span> <span class="nf">buildlist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">arg</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="sd">&quot;&quot;&quot;BUILDLIST - build list of objects from input&quot;&quot;&quot;</span>
+
+		<span class="c1">#check length of input</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Invalid parameter/value pair arguments&#39;</span><span class="p">)</span> 
+		<span class="n">numoptions</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+
+		<span class="c1">#go through arg and build list of objects</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">numoptions</span><span class="p">):</span>
+			<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">],(</span><span class="nb">str</span><span class="p">,</span><span class="n">unicode</span><span class="p">)):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">];</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="c1">#option is not a string, ignore it</span>
+				<span class="nb">print</span> <span class="s2">&quot;WARNING: option number </span><span class="si">%d</span><span class="s2"> is not a string and will be ignored.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="pairoptions.addfield"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions.addfield">[docs]</a>	<span class="k">def</span> <span class="nf">addfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="sd">&quot;&quot;&quot;ADDFIELD - add a field to an options list&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,(</span><span class="nb">str</span><span class="p">,</span><span class="n">unicode</span><span class="p">)):</span>
+			<span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">:</span>
+				<span class="nb">print</span> <span class="s2">&quot;WARNING: field &#39;</span><span class="si">%s</span><span class="s2">&#39; with value=</span><span class="si">%s</span><span class="s2"> exists and will be overwritten with value=</span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="n">field</span><span class="p">]),</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="pairoptions.addfielddefault"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions.addfielddefault">[docs]</a>	<span class="k">def</span> <span class="nf">addfielddefault</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="sd">&quot;&quot;&quot;ADDFIELDDEFAULT - add a field to an options list if it does not already exist&quot;&quot;&quot;</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,(</span><span class="nb">str</span><span class="p">,</span><span class="n">unicode</span><span class="p">)):</span>
+			<span class="k">if</span> <span class="n">field</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">:</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="pairoptions.AssignObjectFields"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions.AssignObjectFields">[docs]</a>	<span class="k">def</span> <span class="nf">AssignObjectFields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">obj2</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="sd">&quot;&quot;&quot;ASSIGNOBJECTFIELDS - assign object fields from options&quot;&quot;&quot;</span>
+		<span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+			<span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">obj2</span><span class="p">):</span>
+				<span class="nb">setattr</span><span class="p">(</span><span class="n">obj2</span><span class="p">,</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="nb">print</span> <span class="s2">&quot;WARNING: field &#39;</span><span class="si">%s</span><span class="s2">&#39; is not a property of &#39;</span><span class="si">%s</span><span class="s2">&#39;.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">type</span><span class="p">(</span><span class="n">obj2</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">obj2</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="pairoptions.changefieldvalue"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions.changefieldvalue">[docs]</a>	<span class="k">def</span> <span class="nf">changefieldvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">,</span><span class="n">newvalue</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="sd">&quot;&quot;&quot;CHANGEOPTIONVALUE - change the value of an option in an option list&quot;&quot;&quot;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="o">=</span><span class="n">newvalue</span><span class="p">;</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="pairoptions.exist"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions.exist">[docs]</a>	<span class="k">def</span> <span class="nf">exist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="sd">&quot;&quot;&quot;EXIST - check if the option exist&quot;&quot;&quot;</span>
+
+		<span class="c1">#some argument checking: </span>
+		<span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;exist error message: bad usage&#39;</span><span class="p">);</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,(</span><span class="nb">str</span><span class="p">,</span><span class="n">unicode</span><span class="p">)):</span>
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;exist error message: field &#39;</span><span class="si">%s</span><span class="s2">&#39; should be a string.&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="p">));</span>
+
+		<span class="c1">#Recover option</span>
+		<span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">True</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="kc">False</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="pairoptions.getfieldvalue"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions.getfieldvalue">[docs]</a>	<span class="k">def</span> <span class="nf">getfieldvalue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">,</span><span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		GETOPTION - get the value of an option</span>
+<span class="sd">	</span>
+<span class="sd">		Usage:</span>
+<span class="sd">		   value=options.getfieldvalue(field,default)</span>
+<span class="sd">	 </span>
+<span class="sd">		Find an option value from a field. A default option</span>
+<span class="sd">		can be given in input if the field does not exist</span>
+<span class="sd">	 </span>
+<span class="sd">		Examples:</span>
+<span class="sd">		   value=options.getfieldvalue(options,&#39;caxis&#39;)</span>
+<span class="sd">		   value=options.getfieldvalue(options,&#39;caxis&#39;,[0 2])</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="c1">#some argument checking: </span>
+		<span class="k">if</span> <span class="n">field</span> <span class="o">==</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;getfieldvalue error message: bad usage&#39;</span><span class="p">);</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,(</span><span class="nb">str</span><span class="p">,</span><span class="n">unicode</span><span class="p">)):</span>
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;getfieldvalue error message: field &#39;</span><span class="si">%s</span><span class="s2">&#39; should be a string.&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="p">));</span>
+
+		<span class="c1">#Recover option</span>
+		<span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">:</span>
+			<span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">default</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+				<span class="n">value</span><span class="o">=</span><span class="n">default</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;error message: field &#39;</span><span class="si">%s</span><span class="s2">&#39; has not been provided by user (and no default value has been specified).&quot;</span> <span class="o">%</span> <span class="n">field</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">value</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="pairoptions.removefield"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions.removefield">[docs]</a>	<span class="k">def</span> <span class="nf">removefield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field</span><span class="p">,</span><span class="n">warn</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		REMOVEFIELD - delete a field in an option list</span>
+<span class="sd">	 </span>
+<span class="sd">		Usage:</span>
+<span class="sd">		   obj=removefield(self,field,warn)</span>
+<span class="sd">	 </span>
+<span class="sd">		if warn==1 display an info message to warn user that</span>
+<span class="sd">		some of his options have been removed.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="c1">#check if field exist</span>
+		<span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">:</span>
+
+			<span class="c1">#remove duplicates from the options list</span>
+			<span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+
+			<span class="c1">#warn user if requested</span>
+			<span class="k">if</span> <span class="n">warn</span><span class="p">:</span>
+				<span class="nb">print</span> <span class="s2">&quot;removefield info: option &#39;</span><span class="si">%s</span><span class="s2">&#39; has been removed from the list of options.&quot;</span> <span class="o">%</span> <span class="n">field</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="pairoptions.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.pairoptions.pairoptions.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">,</span><span class="n">firstindex</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()):</span>
+			<span class="n">name</span>  <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">value</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+			<span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;need to sync with MATLAB&#39;</span><span class="p">)</span></div></div>
+
+			<span class="c1">##Write option name</span>
+			<span class="c1">#WriteData(fid,prefix,&#39;enum&#39;,(firstindex-1)+2*i+1,&#39;data&#39;,name,&#39;format&#39;,&#39;String&#39;)</span>
+
+			<span class="c1">##Write option value</span>
+			<span class="c1">#if   isinstance(value,(str,unicode)):</span>
+			<span class="c1">#	WriteData(fid,prefix,&#39;enum&#39;,(firstindex-1)+2*i+2,&#39;data&#39;,value,&#39;format&#39;,&#39;String&#39;)</span>
+			<span class="c1">#elif isinstance(value,(bool,int,long,float)):</span>
+			<span class="c1">#	WriteData(fid,prefix,&#39;enum&#39;,(firstindex-1)+2*i+2,&#39;data&#39;,value,&#39;format&#39;,&#39;Double&#39;)</span>
+			<span class="c1">#else:</span>
+				<span class="c1">#raise TypeError(&quot;Cannot marshall option &#39;%s&#39;: format not supported yet.&quot; % name)</span>
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

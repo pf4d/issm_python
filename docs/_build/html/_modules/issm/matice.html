@@ -1,0 +1,380 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.matice &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.matice</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.matice</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">issm.fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">issm.project3d</span> <span class="k">import</span> <span class="n">project3d</span>
+<span class="kn">from</span> <span class="nn">issm.checkfield</span> <span class="k">import</span> <span class="n">checkfield</span>
+<span class="kn">from</span> <span class="nn">issm.WriteData</span> <span class="k">import</span> <span class="n">WriteData</span>
+
+<div class="viewcode-block" id="matice"><a class="viewcode-back" href="../../api/issm.html#issm.matice.matice">[docs]</a><span class="k">class</span> <span class="nc">matice</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	MATICE class definition</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      matice=matice();</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rho_ice</span>                   <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rho_water</span>                 <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rho_freshwater</span>            <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mu_water</span>                  <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">heatcapacity</span>              <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">latentheat</span>                <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">thermalconductivity</span>       <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">temperateiceconductivity</span>  <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">meltingpoint</span>              <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">beta</span>                      <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mixed_layer_capacity</span>      <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">thermal_exchange_velocity</span> <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rheology_B</span>                <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rheology_n</span>                <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rheology_law</span>              <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+		<span class="c1">#giaivins: </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">lithosphere_shear_modulus</span>  <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">lithosphere_density</span>        <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mantle_shear_modulus</span>       <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mantle_density</span>             <span class="o">=</span> <span class="mf">0.</span>  
+		
+		<span class="c1">#SLR</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">earth_density</span><span class="o">=</span> <span class="mi">5512</span><span class="p">;</span>  
+
+
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">setdefaultparameters</span><span class="p">()</span>
+		<span class="c1">#}}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;   Materials:&quot;</span>
+
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;rho_ice&quot;</span><span class="p">,</span><span class="s2">&quot;ice density [kg/m^3]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;rho_water&quot;</span><span class="p">,</span><span class="s2">&quot;water density [kg/m^3]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;rho_freshwater&quot;</span><span class="p">,</span><span class="s2">&quot;fresh water density [kg/m^3]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;mu_water&quot;</span><span class="p">,</span><span class="s2">&quot;water viscosity [N s/m^2]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;heatcapacity&quot;</span><span class="p">,</span><span class="s2">&quot;heat capacity [J/kg/K]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;thermalconductivity&quot;</span><span class="p">,</span><span class="s2">&quot;ice thermal conductivity [W/m/K]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;temperateiceconductivity&quot;</span><span class="p">,</span><span class="s2">&quot;temperate ice thermal conductivity [W/m/K]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;meltingpoint&quot;</span><span class="p">,</span><span class="s2">&quot;melting point of ice at 1atm in K&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;latentheat&quot;</span><span class="p">,</span><span class="s2">&quot;latent heat of fusion [J/m^3]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;beta&quot;</span><span class="p">,</span><span class="s2">&quot;rate of change of melting point with pressure [K/Pa]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;mixed_layer_capacity&quot;</span><span class="p">,</span><span class="s2">&quot;mixed layer capacity [W/kg/K]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;thermal_exchange_velocity&quot;</span><span class="p">,</span><span class="s2">&quot;thermal exchange velocity [m/s]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;rheology_B&quot;</span><span class="p">,</span><span class="s2">&quot;flow law parameter [Pa/s^(1/n)]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;rheology_n&quot;</span><span class="p">,</span><span class="s2">&quot;Glen&#39;s flow law exponent&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;rheology_law&quot;</span><span class="p">,</span><span class="s2">&quot;law for the temperature dependance of the rheology: &#39;None&#39;, &#39;BuddJacka&#39;, &#39;Cuffey&#39;, &#39;CuffeyTemperate&#39;, &#39;Paterson&#39;, &#39;Arrhenius&#39; or &#39;LliboutryDuval&#39;&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;lithosphere_shear_modulus&quot;</span><span class="p">,</span><span class="s2">&quot;Lithosphere shear modulus [Pa]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;lithosphere_density&quot;</span><span class="p">,</span><span class="s2">&quot;Lithosphere density [g/cm^-3]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;mantle_shear_modulus&quot;</span><span class="p">,</span><span class="s2">&quot;Mantle shear modulus [Pa]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;mantle_density&quot;</span><span class="p">,</span><span class="s2">&quot;Mantle density [g/cm^-3]&quot;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;earth_density&quot;</span><span class="p">,</span><span class="s2">&quot;Mantle density [kg/m^-3]&quot;</span><span class="p">))</span>
+
+
+		<span class="k">return</span> <span class="n">string</span>
+		<span class="c1">#}}}</span>
+<div class="viewcode-block" id="matice.extrude"><a class="viewcode-back" href="../../api/issm.html#issm.matice.matice.extrude">[docs]</a>	<span class="k">def</span> <span class="nf">extrude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rheology_B</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rheology_B</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rheology_n</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rheology_n</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;element&#39;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="matice.setdefaultparameters"><a class="viewcode-back" href="../../api/issm.html#issm.matice.matice.setdefaultparameters">[docs]</a>	<span class="k">def</span> <span class="nf">setdefaultparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="c1">#ice density (kg/m^3)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rho_ice</span><span class="o">=</span><span class="mf">917.</span>
+
+		<span class="c1">#ocean water density (kg/m^3)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rho_water</span><span class="o">=</span><span class="mf">1023.</span>
+
+		<span class="c1">#fresh water density (kg/m^3)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rho_freshwater</span><span class="o">=</span><span class="mf">1000.</span>
+
+		<span class="c1">#water viscosity (N.s/m^2)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mu_water</span><span class="o">=</span><span class="mf">0.001787</span>  
+
+		<span class="c1">#ice heat capacity cp (J/kg/K)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">heatcapacity</span><span class="o">=</span><span class="mf">2093.</span>
+
+		<span class="c1">#ice latent heat of fusion L (J/kg)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">latentheat</span><span class="o">=</span><span class="mf">3.34</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">5</span>
+
+		<span class="c1">#ice thermal conductivity (W/m/K)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">thermalconductivity</span><span class="o">=</span><span class="mf">2.4</span>
+
+		<span class="c1">#temperate ice thermal conductivity (W/m/K)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">temperateiceconductivity</span><span class="o">=</span><span class="mf">0.24</span>
+
+		<span class="c1">#the melting point of ice at 1 atmosphere of pressure in K</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">meltingpoint</span><span class="o">=</span><span class="mf">273.15</span>
+
+		<span class="c1">#rate of change of melting point with pressure (K/Pa)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">beta</span><span class="o">=</span><span class="mf">9.8</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">8</span>
+
+		<span class="c1">#mixed layer (ice-water interface) heat capacity (J/kg/K)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mixed_layer_capacity</span><span class="o">=</span><span class="mf">3974.</span>
+
+		<span class="c1">#thermal exchange velocity (ice-water interface) (m/s)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">thermal_exchange_velocity</span><span class="o">=</span><span class="mf">1.00</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">4</span>
+
+		<span class="c1">#Rheology law: what is the temperature dependence of B with T</span>
+		<span class="c1">#available: none, paterson and arrhenius</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rheology_law</span><span class="o">=</span><span class="s1">&#39;Paterson&#39;</span>
+
+		<span class="c1"># GIA:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">lithosphere_shear_modulus</span>  <span class="o">=</span> <span class="mf">6.7</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">10</span>  <span class="c1"># (Pa)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">lithosphere_density</span>        <span class="o">=</span> <span class="mf">3.32</span>        <span class="c1"># (g/cm^-3)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mantle_shear_modulus</span>       <span class="o">=</span> <span class="mf">1.45</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">11</span> <span class="c1"># (Pa)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mantle_density</span>             <span class="o">=</span> <span class="mf">3.34</span>        <span class="c1"># (g/cm^-3)</span>
+		
+		<span class="c1">#SLR</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">earth_density</span><span class="o">=</span> <span class="mi">5512</span><span class="p">;</span>  <span class="c1"># average density of the Earth, (kg/m^3)</span>
+
+
+		<span class="k">return</span> <span class="bp">self</span></div>
+		<span class="c1">#}}}</span>
+<div class="viewcode-block" id="matice.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.matice.matice.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.rho_ice&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.rho_water&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.rho_freshwater&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.mu_water&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.rheology_B&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;timeseries&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.rheology_n&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.rheology_law&#39;</span><span class="p">,</span><span class="s1">&#39;values&#39;</span><span class="p">,[</span><span class="s1">&#39;None&#39;</span><span class="p">,</span><span class="s1">&#39;BuddJacka&#39;</span><span class="p">,</span><span class="s1">&#39;Cuffey&#39;</span><span class="p">,</span><span class="s1">&#39;CuffeyTemperate&#39;</span><span class="p">,</span><span class="s1">&#39;Paterson&#39;</span><span class="p">,</span><span class="s1">&#39;Arrhenius&#39;</span><span class="p">,</span><span class="s1">&#39;LliboutryDuval&#39;</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.lithosphere_shear_modulus&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">]);</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.lithosphere_density&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">]);</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.mantle_shear_modulus&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">]);</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.mantle_density&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">]);</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;materials.earth_density&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">]);</span>
+
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="matice.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.matice.matice.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.materials.type&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;rho_ice&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;rho_water&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;rho_freshwater&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mu_water&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;heatcapacity&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;latentheat&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thermalconductivity&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;temperateiceconductivity&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;meltingpoint&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;beta&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mixed_layer_capacity&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thermal_exchange_velocity&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;rheology_B&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;rheology_n&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rheology_law</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.materials.rheology_law&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;String&#39;</span><span class="p">)</span>
+
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;lithosphere_shear_modulus&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;lithosphere_density&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">10.</span><span class="o">**</span><span class="mf">3.</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mantle_shear_modulus&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mantle_density&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">10.</span><span class="o">**</span><span class="mf">3.</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;materials&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;earth_density&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span></div></div>
+
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -23,10 +23,15 @@ sys.path.insert(0, os.path.abspath('../issm/'))
 
 # -- General configuration ------------------------------------------------
 
-intersphinx_mapping = {'python': ('http://docs.python.org/2.7', None),
-                       'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-                       'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),
-                       'matplotlib': ('http://matplotlib.sourceforge.net/', None)}
+intersphinx_mapping = \
+{
+  'python'    : ('http://docs.python.org/2.7', None),
+  'numpy'     : ('http://docs.scipy.org/doc/numpy/', None),
+  'scipy'     : ('http://docs.scipy.org/doc/scipy/reference/', None),
+  'matplotlib': ('http://matplotlib.sourceforge.net/', None),
+  'dolfin'    : ('https://fenics.readthedocs.io/en/latest/', None),
+  'ufl'       : ('https://fenics.readthedocs.io/projects/ufl/en/latest/', None)
+}
 
 # mock out packages for autodoc
 
@@ -135,12 +140,12 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#
-#import sphinx_rtd_theme
-#
-#html_theme = 'sphinx_rtd_theme'
-#
-#html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
+import sphinx_rtd_theme
+
+html_theme = 'sphinx_rtd_theme'
+
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.qmu &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.qmu</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.qmu</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">project3d</span> <span class="k">import</span> <span class="n">project3d</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">checkfield</span> <span class="k">import</span> <span class="n">checkfield</span>
+<span class="kn">from</span> <span class="nn">WriteData</span> <span class="k">import</span> <span class="n">WriteData</span>
+
+<div class="viewcode-block" id="qmu"><a class="viewcode-back" href="../../api/issm.html#issm.qmu.qmu">[docs]</a><span class="k">class</span> <span class="nc">qmu</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	QMU class definition</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      qmu=qmu();</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">isdakota</span>                    <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">variables</span>                   <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">responses</span>                   <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">method</span>                      <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">params</span>                      <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">results</span>                     <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">partition</span>                   <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">numberofpartitions</span>          <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">numberofresponses</span>           <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">variabledescriptors</span>         <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">responsedescriptors</span>         <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mass_flux_profile_directory</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mass_flux_profiles</span>          <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mass_flux_segments</span>          <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">adjacency</span>                   <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vertex_weight</span>               <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+
+		<span class="c1">#set defaults</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">setdefaultparameters</span><span class="p">()</span>
+
+		<span class="c1">#}}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="n">s</span> <span class="o">=</span><span class="s1">&#39;   qmu parameters:</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;isdakota&#39;</span><span class="p">,</span><span class="s1">&#39;is qmu analysis activated?&#39;</span><span class="p">)</span>
+		<span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">:</span>
+			<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;         variables</span><span class="si">%s</span><span class="s2">:  (arrays of each variable class)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
+			<span class="n">fnames</span><span class="o">=</span><span class="nb">vars</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
+			<span class="n">maxlen</span><span class="o">=</span><span class="mi">0</span>
+			<span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+				<span class="n">maxlen</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">maxlen</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+
+			<span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+				<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;&#39;            </span><span class="si">%-*s</span><span class="s2">:    [</span><span class="si">%i</span><span class="s2">x</span><span class="si">%i</span><span class="s2">]    &#39;</span><span class="si">%s</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> \
+						<span class="p">(</span><span class="n">maxlen</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">size</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span><span class="n">fname</span><span class="p">)),</span><span class="nb">type</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">variable</span><span class="p">,</span><span class="n">fname</span><span class="p">)))</span>
+
+		<span class="k">for</span> <span class="n">response</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">responses</span><span class="p">:</span>
+			<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;         responses</span><span class="si">%s</span><span class="s2">:  (arrays of each response class)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">responses</span><span class="p">)</span>
+			<span class="n">fnames</span><span class="o">=</span><span class="nb">vars</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+			<span class="n">maxlen</span><span class="o">=</span><span class="mi">0</span>
+			<span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+				<span class="n">maxlen</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">maxlen</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+
+			<span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+				<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;            </span><span class="si">%-*s</span><span class="s2">:    [</span><span class="si">%i</span><span class="s2">x</span><span class="si">%i</span><span class="s2">]    &#39;</span><span class="si">%s</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> \
+						<span class="p">(</span><span class="n">maxlen</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">size</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">response</span><span class="p">,</span><span class="n">fname</span><span class="p">)),</span><span class="nb">type</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">response</span><span class="p">,</span><span class="n">fname</span><span class="p">)))</span>
+
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;numberofresponses&#39;</span><span class="p">,</span><span class="s1">&#39;number of responses&#39;</span><span class="p">)</span> 
+
+		<span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">:</span>
+			<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">method</span><span class="p">,</span><span class="s1">&#39;dakota_method&#39;</span><span class="p">):</span>
+				<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;            method</span><span class="si">%s</span><span class="s2"> :    &#39;</span><span class="si">%s</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> \
+						<span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">method</span><span class="p">),</span><span class="n">method</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+
+		<span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+			<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;         params</span><span class="si">%s</span><span class="s2">:  (array of method-independent parameters)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+			<span class="n">fnames</span><span class="o">=</span><span class="nb">vars</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+			<span class="n">maxlen</span><span class="o">=</span><span class="mi">0</span>
+			<span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+				<span class="n">maxlen</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">maxlen</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+
+			<span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+				<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;            </span><span class="si">%-*s</span><span class="s2">: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> \
+						<span class="p">(</span><span class="n">maxlen</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">any2str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">param</span><span class="p">,</span><span class="n">fname</span><span class="p">)))</span>
+
+		<span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">:</span>
+			<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;         results</span><span class="si">%s</span><span class="s2">:  (information from dakota files)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+			<span class="n">fnames</span><span class="o">=</span><span class="nb">vars</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+			<span class="n">maxlen</span><span class="o">=</span><span class="mi">0</span>
+			<span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+				<span class="n">maxlen</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">maxlen</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>
+
+			<span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+				<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;            </span><span class="si">%-*s</span><span class="s2">:    [</span><span class="si">%i</span><span class="s2">x</span><span class="si">%i</span><span class="s2">]    &#39;</span><span class="si">%s</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> \
+						<span class="p">(</span><span class="n">maxlen</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">size</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">fname</span><span class="p">)),</span><span class="nb">type</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">fname</span><span class="p">)))</span>
+
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;partition&#39;</span><span class="p">,</span><span class="s1">&#39;user provided mesh partitioning, defaults to metis if not specified&#39;</span><span class="p">)</span> 
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;numberofpartitions&#39;</span><span class="p">,</span><span class="s1">&#39;number of partitions for semi-discrete qmu&#39;</span><span class="p">)</span> 
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;variabledescriptors&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;responsedescriptors&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;method&#39;</span><span class="p">,</span><span class="s1">&#39;array of dakota_method class&#39;</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;mass_flux_profile_directory&#39;</span><span class="p">,</span><span class="s1">&#39;directory for mass flux profiles&#39;</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;mass_flux_profiles&#39;</span><span class="p">,</span><span class="s1">&#39;list of mass_flux profiles&#39;</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;mass_flux_segments&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;adjacency&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vertex_weight&#39;</span><span class="p">,</span><span class="s1">&#39;weight applied to each mesh vertex&#39;</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">s</span>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="qmu.extrude"><a class="viewcode-back" href="../../api/issm.html#issm.qmu.qmu.extrude">[docs]</a>	<span class="k">def</span> <span class="nf">extrude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">partition</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">partition</span><span class="p">),</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="qmu.setdefaultparameters"><a class="viewcode-back" href="../../api/issm.html#issm.qmu.qmu.setdefaultparameters">[docs]</a>	<span class="k">def</span> <span class="nf">setdefaultparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="qmu.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.qmu.qmu.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="c1">#Early return</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">isdakota</span><span class="p">:</span>
+			<span class="k">return</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">evaluation_concurrency</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s2">&quot;concurrency should be set to 1 when running dakota in library mode&quot;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">partition</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">partition</span><span class="p">)</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">:</span>
+				<span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s2">&quot;user supplied partition for qmu analysis should have size md.mesh.numberofvertices x 1&quot;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">min</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">partition</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+				<span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s2">&quot;partition vector not indexed from 0 on&quot;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="nb">max</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">partition</span><span class="p">)</span><span class="o">&gt;=</span><span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">numberofpartitions</span><span class="p">:</span>
+				<span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s2">&quot;for qmu analysis, partitioning vector cannot go over npart, number of partition areas&quot;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">name</span><span class="o">!=</span><span class="s1">&#39;none&#39;</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">md</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">waitonlock</span><span class="p">:</span>
+				<span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s2">&quot;waitonlock should be activated when running qmu in parallel mode!&quot;</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="qmu.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.qmu.qmu.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;isdakota&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isdakota</span><span class="p">:</span>
+			<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.qmu.mass_flux_segments_present&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">);</span>
+			<span class="k">return</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;partition&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;numberofpartitions&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;numberofresponses&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;variabledescriptors&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;responsedescriptors&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mass_flux_segments</span><span class="p">:</span>
+			<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mass_flux_segments</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.qmu.mass_flux_segments&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;MatArray&#39;</span><span class="p">);</span>
+			<span class="n">flag</span><span class="o">=</span><span class="kc">True</span><span class="p">;</span> 
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">flag</span><span class="o">=</span><span class="kc">False</span><span class="p">;</span> 
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">flag</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.qmu.mass_flux_segments_present&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">);</span></div></div>
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

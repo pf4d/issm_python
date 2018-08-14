@@ -7,7 +7,6 @@ msh_dir  = '../dump/meshes/cslvr/'
 # collect the raw data :
 searise  = DataFactory.get_searise()
 bedmach  = DataFactory.get_bedmachine(thklim=1.0)
-#rignot   = DataFactory.get_rignot()
 mouginot = DataFactory.get_mouginot()
 
 # define the mesh :
@@ -19,15 +18,12 @@ contour  = np.loadtxt(msh_dir + 'contour.txt')
 # create data objects to use with varglas :
 dsr      = DataInput(searise,  mesh=mesh)
 dbm      = DataInput(bedmach,  mesh=mesh)
-#drg      = DataInput(rignot,   mesh=mesh)
 dmg      = DataInput(mouginot, mesh=mesh)
 
 dbm.data['S'][dbm.data['S'] < 1.0] = 1.0
 
 # change the projection of all data to be the same as the mesh :
-#dbm.change_projection(drg)
-#dsr.change_projection(drg)
-#drg.change_projection(dbm)
+dsr.change_projection(dbm)
 
 # get the expressions used by varglas :
 S     = dbm.get_expression('S',        near=False)

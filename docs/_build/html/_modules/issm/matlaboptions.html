@@ -1,0 +1,240 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.matlaboptions &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.matlaboptions</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.matlaboptions</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">issm.pairoptions</span>
+
+<div class="viewcode-block" id="matlaboptions"><a class="viewcode-back" href="../../api/issm.html#issm.matlaboptions.matlaboptions">[docs]</a><span class="k">def</span> <span class="nf">matlaboptions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+	<span class="c1">#MATLABOPTIONS - return Matlab petsc options</span>
+	<span class="c1">#</span>
+	<span class="c1">#   Usage:</span>
+	<span class="c1">#      options=matlaboptions;</span>
+	
+	<span class="c1">#retrieve options provided in varargin</span>
+	<span class="n">arguments</span><span class="o">=</span><span class="n">pairoptions</span><span class="o">.</span><span class="n">pairoptions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span> 
+	
+	<span class="n">options</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;toolkit&#39;</span><span class="p">,</span><span class="s1">&#39;petsc&#39;</span><span class="p">],[</span><span class="s1">&#39;ksp_type&#39;</span><span class="p">,</span><span class="s1">&#39;matlab&#39;</span><span class="p">]];</span>
+
+	<span class="c1">#now, go through our arguments, and write over default options.</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arguments</span><span class="o">.</span><span class="n">list</span><span class="p">)):</span>
+		<span class="n">arg1</span><span class="o">=</span><span class="n">arguments</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">arg2</span><span class="o">=</span><span class="n">arguments</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">found</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">options</span><span class="p">)):</span>
+			<span class="n">joption</span><span class="o">=</span><span class="n">options</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">if</span> <span class="n">joption</span><span class="o">==</span><span class="n">arg1</span><span class="p">:</span>
+				<span class="n">joption</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">arg2</span><span class="p">;</span>
+				<span class="n">options</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">joption</span><span class="p">;</span>
+				<span class="n">found</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+				<span class="k">break</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+			<span class="c1">#this option did not exist, add it: </span>
+			<span class="n">options</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">arg1</span><span class="p">,</span><span class="n">arg2</span><span class="p">])</span>
+	<span class="k">return</span> <span class="n">options</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

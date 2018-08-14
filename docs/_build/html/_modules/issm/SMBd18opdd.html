@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.SMBd18opdd &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.SMBd18opdd</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.SMBd18opdd</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">issm.fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">issm.checkfield</span> <span class="k">import</span> <span class="n">checkfield</span>
+<span class="kn">from</span> <span class="nn">issm.WriteData</span> <span class="k">import</span> <span class="n">WriteData</span>
+<span class="kn">from</span> <span class="nn">issm.project3d</span> <span class="k">import</span> <span class="n">project3d</span>
+
+<div class="viewcode-block" id="SMBd18opdd"><a class="viewcode-back" href="../../api/issm.html#issm.SMBd18opdd.SMBd18opdd">[docs]</a><span class="k">class</span> <span class="nc">SMBd18opdd</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	SMBd18opdd Class definition</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      SMBd18opdd=SMBd18opdd();</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">desfac</span>                    <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">s0p</span>                       <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">s0t</span>                       <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rlaps</span>                     <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rlapslgm</span>                  <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">dpermil</span>                   <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">f</span>                         <span class="o">=</span> <span class="mf">0.</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">Tdiff</span>                     <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">sealev</span>                    <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">ismungsm</span>                  <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">isd18opd</span>                  <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">delta18o</span>                  <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">delta18o_surface</span>          <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">temperatures_presentday</span>   <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">precipitations_presentday</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+
+		<span class="c1">#set defaults</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">setdefaultparameters</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span>      <span class="o">=</span> <span class="p">[]</span>
+		<span class="c1">#}}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;   surface forcings parameters:&quot;</span>
+
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;isd18opd&#39;</span><span class="p">,</span><span class="s1">&#39;is delta18o parametrisation from present day temperature and precipitation activated (0 or 1, default is 0)&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;desfac&#39;</span><span class="p">,</span><span class="s1">&#39;desertification elevation factor (between 0 and 1, default is 0.5) [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;s0p&#39;</span><span class="p">,</span><span class="s1">&#39;should be set to elevation from precip source (between 0 and a few 1000s m, default is 0) [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;s0t&#39;</span><span class="p">,</span><span class="s1">&#39;should be set to elevation from temperature source (between 0 and a few 1000s m, default is 0) [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;rlaps&#39;</span><span class="p">,</span><span class="s1">&#39;present day lapse rate [degree/km]&#39;</span><span class="p">))</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isd18opd</span><span class="p">:</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;temperatures_presentday&#39;</span><span class="p">,</span><span class="s1">&#39;monthly present day surface temperatures [K], required if delta18o/mungsm is activated&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;precipitations_presentday&#39;</span><span class="p">,</span><span class="s1">&#39;monthly surface precipitation [m/yr water eq], required if delta18o or mungsm is activated&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;delta18o&#39;</span><span class="p">,</span><span class="s1">&#39;delta18o [per mil], required if pdd is activated and delta18o activated&#39;</span><span class="p">))</span>
+			<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;dpermil&#39;</span><span class="p">,</span><span class="s1">&#39;degree per mil, required if d18opd is activated&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;additional outputs requested&#39;</span><span class="p">))</span>
+
+		<span class="k">return</span> <span class="n">string</span>
+		<span class="c1">#}}}</span>
+<div class="viewcode-block" id="SMBd18opdd.extrude"><a class="viewcode-back" href="../../api/issm.html#issm.SMBd18opdd.SMBd18opdd.extrude">[docs]</a>	<span class="k">def</span> <span class="nf">extrude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isd18opd</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperatures_presentday</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">temperatures_presentday</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isd18opd</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">precipitations_presentday</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">precipitations_presentday</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">s0p</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">s0p</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">s0t</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">s0t</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="SMBd18opdd.defaultoutputs"><a class="viewcode-back" href="../../api/issm.html#issm.SMBd18opdd.SMBd18opdd.defaultoutputs">[docs]</a>	<span class="k">def</span> <span class="nf">defaultoutputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="k">return</span> <span class="p">[]</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="SMBd18opdd.initialize"><a class="viewcode-back" href="../../api/issm.html#issm.SMBd18opdd.SMBd18opdd.initialize">[docs]</a>	<span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s0p</span><span class="p">)):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">s0p</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">))</span>
+			<span class="nb">print</span> <span class="s2">&quot;      no SMBd18opdd.s0p specified: values set as zero&quot;</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s0t</span><span class="p">)):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">s0t</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">))</span>
+			<span class="nb">print</span> <span class="s2">&quot;      no SMBd18opdd.s0t specified: values set as zero&quot;</span>
+			
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="SMBd18opdd.setdefaultparameters"><a class="viewcode-back" href="../../api/issm.html#issm.SMBd18opdd.SMBd18opdd.setdefaultparameters">[docs]</a>	<span class="k">def</span> <span class="nf">setdefaultparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+
+		<span class="c1">#pdd method not used in default mode</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">ismungsm</span>   <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">isd18opd</span>   <span class="o">=</span> <span class="mi">1</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">desfac</span>     <span class="o">=</span> <span class="mf">0.5</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">rlaps</span>      <span class="o">=</span> <span class="mf">6.5</span> 
+		<span class="bp">self</span><span class="o">.</span><span class="n">rlapslgm</span>   <span class="o">=</span> <span class="mf">6.5</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">dpermil</span>    <span class="o">=</span> <span class="mf">2.4</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">f</span>          <span class="o">=</span> <span class="mf">0.169</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="SMBd18opdd.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.SMBd18opdd.SMBd18opdd.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="k">if</span> <span class="s1">&#39;MasstransportAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.desfac&#39;</span><span class="p">,</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.s0p&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.s0t&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.rlaps&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.rlapslgm&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">])</span>
+
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isd18opd</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.temperatures_presentday&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">12</span><span class="p">],</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;timeseries&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.precipitations_presentday&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="mi">12</span><span class="p">],</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;timeseries&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.delta18o&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="mi">2</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span><span class="s1">&#39;singletimeseries&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.dpermil&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">])</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.f&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">])</span>
+
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;masstransport.requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;stringrow&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="SMBd18opdd.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.SMBd18opdd.SMBd18opdd.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="n">yts</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span>
+
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.smb.model&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;ismungsm&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;isd18opd&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;desfac&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;s0p&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;s0t&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;rlaps&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;rlapslgm&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;Tdiff&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;sealev&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isd18opd</span><span class="p">:</span>
+			<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;temperatures_presentday&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+			<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;precipitations_presentday&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+			<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;delta18o&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+			<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;dpermil&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+			<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;f&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="c1">#process requested outputs</span>
+		<span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span>
+		<span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">]</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">outputscopy</span><span class="o">=</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultoutputs</span><span class="p">(</span><span class="n">md</span><span class="p">)</span><span class="o">+</span><span class="n">outputs</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+			<span class="n">outputs</span>    <span class="o">=</span><span class="n">outputscopy</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">outputs</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.smb.requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">)</span></div></div>
+
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

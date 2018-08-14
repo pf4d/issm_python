@@ -1,0 +1,404 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.adinversion &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.adinversion</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.adinversion</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">== == == == == == == == == == == == == == == == == == ==</span>
+<span class="sd">Auto generated python script for ISSM:   /home/andrei/issm/trunk-jpl/src/m/classes/adinversion.m</span>
+<span class="sd">Created on 2015-05-15 via translateToPy.py Ver 1.0 by andrei</span>
+<span class="sd">== == == == == == == == == == == == == == == == == == ==</span>
+
+<span class="sd">Matlab script conversion into python</span>
+<span class="sd">translateToPy.py Author: Michael Pellegrin</span>
+<span class="sd">translateToPy.py Date: 09/24/12</span>
+<span class="sd">== == == == == == == == == == == == == == == == == == ==</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">MatlabFuncs</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># ADINVERSION class definition</span>
+<span class="c1"># </span>
+<span class="c1">#    Usage:</span>
+<span class="c1">#       adinversion=adinversion();</span>
+
+<div class="viewcode-block" id="adinversion"><a class="viewcode-back" href="../../api/issm.html#issm.adinversion.adinversion">[docs]</a><span class="k">class</span> <span class="nc">adinversion</span><span class="p">:</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> 
+		<span class="n">iscontrol</span>                   <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">control_parameters</span>          <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">control_scaling_factors</span>     <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">maxsteps</span>                    <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">maxiter</span>                     <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">dxmin</span>                       <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">gttol</span>                       <span class="o">=</span> <span class="mi">0</span>
+		<span class="n">cost_functions</span>              <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">cost_functions_coefficients</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">min_parameters</span>              <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">max_parameters</span>              <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">vx_obs</span>                      <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">vy_obs</span>                      <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">vz_obs</span>                      <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">vel_obs</span>                     <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">thickness_obs</span>               <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+		<span class="n">surface_obs</span>                 <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="adinversion.setdefaultparameters"><a class="viewcode-back" href="../../api/issm.html#issm.adinversion.adinversion.setdefaultparameters">[docs]</a>	<span class="k">def</span> <span class="nf">setdefaultparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">control_parameters</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;FrictionCoefficient&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># 		Scaling factor for each control</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">control_scaling_factors</span><span class="o">=</span><span class="mi">1</span>
+
+<span class="c1"># 		number of iterations</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">maxsteps</span><span class="o">=</span><span class="mi">20</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span><span class="o">=</span><span class="mi">40</span>
+
+<span class="c1">#		several responses can be used:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;FrictionCoefficient&#39;</span><span class="p">]</span>
+
+<span class="c1"># 		m1qn3 parameters</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">dxmin</span>  <span class="o">=</span> <span class="mf">0.1</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">gttol</span> <span class="o">=</span> <span class="mf">1e-4</span>
+
+		<span class="k">return</span> <span class="bp">self</span></div>
+	
+<div class="viewcode-block" id="adinversion.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.adinversion.adinversion.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">md</span><span class="p">,</span> <span class="n">solution</span><span class="p">,</span> <span class="n">analyses</span><span class="p">):</span> 
+
+<span class="c1"># 			Early return</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscontrol</span><span class="p">:</span>
+			<span class="k">return</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_HAVE_M1QN3_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkmessage</span><span class="p">(</span><span class="n">md</span><span class="p">,[</span><span class="s1">&#39;M1QN3 has not been installed, ISSM needs to be reconfigured and recompiled with AD&#39;</span><span class="p">])</span>
+
+
+		<span class="n">num_controls</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">numel</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">inversion</span><span class="o">.</span><span class="n">control_parameters</span><span class="p">)</span>
+		<span class="n">num_costfunc</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">inversion</span><span class="o">.</span><span class="n">cost_functions</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.iscontrol&#39;</span><span class="p">,</span><span class="s1">&#39;values&#39;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.control_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;cell&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;values&#39;</span><span class="p">,</span>\
+			<span class="p">[</span><span class="s1">&#39;BalancethicknessThickeningRate&#39;</span> <span class="s1">&#39;FrictionCoefficient&#39;</span> <span class="s1">&#39;MaterialsRheologyBbar&#39;</span> <span class="s1">&#39;DamageDbar&#39;</span><span class="p">,</span>\
+			<span class="s1">&#39;Vx&#39;</span> <span class="s1">&#39;Vy&#39;</span> <span class="s1">&#39;Thickness&#39;</span> <span class="s1">&#39;BalancethicknessOmega&#39;</span> <span class="s1">&#39;BalancethicknessApparentMassbalance&#39;</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.control_scaling_factors&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_controls</span><span class="p">],</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.maxsteps&#39;</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.maxiter&#39;</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.dxmin&#39;</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.gttol&#39;</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.cost_functions&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_costfunc</span><span class="p">],</span><span class="s1">&#39;values&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">101</span><span class="p">,</span><span class="mi">106</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="mi">201</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">501</span><span class="p">,</span><span class="mi">507</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">601</span><span class="p">,</span><span class="mi">605</span><span class="p">)]</span><span class="o">+</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1001</span><span class="p">,</span> <span class="mi">1011</span><span class="p">)])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.cost_functions_coefficients&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,</span> <span class="n">num_costfunc</span><span class="p">],</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.min_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,</span> <span class="n">num_controls</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.max_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,</span> <span class="n">num_controls</span><span class="p">])</span>
+
+
+		<span class="k">if</span> <span class="n">solution</span><span class="o">==</span><span class="s1">&#39;BalancethicknessSolution&#39;</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.thickness_obs&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">],</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.surface_obs&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">],</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">solution</span><span class="o">==</span><span class="s1">&#39;BalancethicknessSoftSolution&#39;</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.thickness_obs&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">],</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.vx_obs&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">],</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">domaintype</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="p">),</span><span class="s1">&#39;2Dvertical&#39;</span><span class="p">):</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;inversion.vy_obs&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">],</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Nan&#39;</span><span class="p">),</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">md</span></div>
+
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;   adinversion parameters:&#39;</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;iscontrol&#39;</span><span class="p">,</span><span class="s1">&#39;is inversion activated?&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;control_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;ex: [&#39;&#39;FrictionCoefficient&#39;&#39;], or [&#39;&#39;MaterialsRheologyBbar&#39;&#39;]&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;control_scaling_factors&#39;</span><span class="p">,</span><span class="s1">&#39;order of magnitude of each control (useful for multi-parameter optimization)&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;maxsteps&#39;</span><span class="p">,</span><span class="s1">&#39;maximum number of iterations (gradient computation)&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;maxiter&#39;</span><span class="p">,</span><span class="s1">&#39;maximum number of Function evaluation (forward run)&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;dxmin&#39;</span><span class="p">,</span><span class="s1">&#39;convergence criterion: two points less than dxmin from eachother (sup-norm) are considered identical&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;gttol&#39;</span><span class="p">,</span><span class="s1">&#39;convergence criterion: ||g(X)||/||g(X0)|| (g(X0): gradient at initial guess X0)&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;cost_functions&#39;</span><span class="p">,</span><span class="s1">&#39;indicate the type of response for each optimization step&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;cost_functions_coefficients&#39;</span><span class="p">,</span><span class="s1">&#39;cost_functions_coefficients applied to the misfit of each vertex and for each control_parameter&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;min_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;absolute minimum acceptable value of the inversed parameter on each vertex&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;max_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;absolute maximum acceptable value of the inversed parameter on each vertex&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vx_obs&#39;</span><span class="p">,</span><span class="s1">&#39;observed velocity x component [m/yr]&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vy_obs&#39;</span><span class="p">,</span><span class="s1">&#39;observed velocity y component [m/yr]&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vel_obs&#39;</span><span class="p">,</span><span class="s1">&#39;observed velocity magnitude [m/yr]&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;thickness_obs&#39;</span><span class="p">,</span><span class="s1">&#39;observed thickness [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="s2">\</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;surface_obs&#39;</span><span class="p">,</span><span class="s1">&#39;observed surface elevation [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;Available cost functions:&#39;</span><span class="p">);</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;   101: SurfaceAbsVelMisfit&#39;</span><span class="p">);</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;   102: SurfaceRelVelMisfit&#39;</span><span class="p">);</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;   103: SurfaceLogVelMisfit&#39;</span><span class="p">);</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;   104: SurfaceLogVxVyMisfit&#39;</span><span class="p">);</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;   105: SurfaceAverageVelMisfit&#39;</span><span class="p">);</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;   201: ThicknessAbsMisfit&#39;</span><span class="p">);</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;   501: DragCoefficientAbsGradient&#39;</span><span class="p">);</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;   502: RheologyBbarAbsGradient&#39;</span><span class="p">);</span>
+		<span class="n">string</span> <span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="s1">&#39;   503: ThicknessAbsGradient&#39;</span><span class="p">);</span>
+		
+		<span class="k">return</span> <span class="n">string</span>
+
+<div class="viewcode-block" id="adinversion.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.adinversion.adinversion.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+		<span class="n">yts</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">;</span>
+
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;iscontrol&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.inversion.type&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">);</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">iscontrol</span><span class="p">:</span>
+			<span class="k">return</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;control_scaling_factors&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;maxsteps&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;maxiter&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;dxmin&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;gttol&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;cost_functions_coefficients&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;min_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;max_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;vx_obs&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;vy_obs&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;vz_obs&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">);</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">numel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">thickness_obs</span><span class="p">)</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">):</span>
+			<span class="n">mattype</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">mattype</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span>
+		
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thickness_obs&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="n">mattype</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;inversion&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;surface_obs&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="n">mattype</span><span class="p">);</span>
+
+		<span class="c1">#process control parameters</span>
+		<span class="n">num_control_parameters</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">numel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">control_parameters</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;control_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">num_control_parameters</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.inversion.num_control_parameters&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">);</span>
+
+		<span class="c1">#process cost functions</span>
+		<span class="n">num_cost_functions</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="p">,</span><span class="mi">2</span><span class="p">);</span>
+		<span class="n">data</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="p">)</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">101</span><span class="p">)]</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;SurfaceAbsVelMisfit&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">102</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SurfaceRelVelMisfit&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">103</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SurfaceLogVelMisfit&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">104</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SurfaceLogVxVyMisfit&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">105</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SurfaceAverageVelMisfit&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">201</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ThicknessAbsMisfit&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">501</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;DragCoefficientAbsGradient&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">502</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;RheologyBbarAbsGradient&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">503</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ThicknessAbsGradient&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">504</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ThicknessAlongGradient&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">505</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ThicknessAcrossGradient&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">506</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;BalancethicknessMisfit&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">601</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SurfaceAbsMisfit&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1001</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition1&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1002</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition2&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1003</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition3&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1004</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition4&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1005</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition5&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1006</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition6&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1007</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition7&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1008</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition8&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1009</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition8&#39;</span><span class="p">];</span>
+		<span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cost_functions</span><span class="o">==</span><span class="mi">1010</span><span class="p">)]</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Outputdefinition10&#39;</span><span class="p">];</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.inversion.cost_functions&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">num_cost_functions</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.inversion.num_cost_functions&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">);</span></div></div>
+		
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

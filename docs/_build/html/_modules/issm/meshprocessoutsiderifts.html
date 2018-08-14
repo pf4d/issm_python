@@ -1,0 +1,315 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.meshprocessoutsiderifts &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.meshprocessoutsiderifts</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.meshprocessoutsiderifts</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ElementsFromEdge</span> <span class="k">import</span> <span class="n">ElementsFromEdge</span>
+<span class="kn">import</span> <span class="nn">MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+
+<div class="viewcode-block" id="meshprocessoutsiderifts"><a class="viewcode-back" href="../../api/issm.html#issm.meshprocessoutsiderifts.meshprocessoutsiderifts">[docs]</a><span class="k">def</span> <span class="nf">meshprocessoutsiderifts</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">domainoutline</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	MESHPROCESSOUTSIDERIFTS - process rifts when they touch the domain outline</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      md=meshprocessoutsiderifts(md,domain)</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#go through rifts, and figure out which ones touch the domain outline</span>
+	<span class="k">for</span> <span class="n">rift</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">rifts</span><span class="o">.</span><span class="n">riftstruct</span><span class="p">:</span>
+	
+		<span class="c1">#first, flag nodes that belong to the domain outline</span>
+		<span class="n">flags</span><span class="o">=</span><span class="n">ContourToMesh</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">domainoutline</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+		<span class="n">tips</span><span class="o">=</span><span class="n">rift</span><span class="o">.</span><span class="n">tips</span>
+		<span class="n">outsidetips</span><span class="o">=</span><span class="n">tips</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="n">rift</span><span class="o">.</span><span class="n">tips</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">]]</span>
+
+		<span class="c1">#we have found outsidetips, tips that touch the domain outline. go through them</span>
+		<span class="k">for</span> <span class="n">tip</span> <span class="ow">in</span> <span class="n">outsidetips</span><span class="p">:</span>
+		
+			<span class="c1">#find tip in the segments, take first segment (there should be 2) that holds tip, </span>
+			<span class="c1">#and node_connected_to_tip is the other node on this segment:</span>
+			<span class="n">tipindex</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">rift</span><span class="o">.</span><span class="n">segments</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">tip</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">if</span> <span class="n">tipindex</span><span class="p">:</span>
+				<span class="n">tipindex</span><span class="o">=</span><span class="n">tipindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="n">node_connected_to_tip</span><span class="o">=</span><span class="n">rift</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">tipindex</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">tipindex</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">rift</span><span class="o">.</span><span class="n">segments</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">tip</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="n">tipindex</span><span class="o">=</span><span class="n">tipindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="n">node_connected_to_tip</span><span class="o">=</span><span class="n">rift</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">tipindex</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+
+			<span class="c1">#ok, we have the tip node, and the first node connected to it, on the rift. Now, </span>
+			<span class="c1">#identify all the elements that are connected to the tip, and that are on the same </span>
+			<span class="c1">#side of the rift.</span>
+			<span class="n">A</span><span class="o">=</span><span class="n">tip</span>
+			<span class="n">B</span><span class="o">=</span><span class="n">node_connected_to_tip</span>
+
+			<span class="n">elements</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">int</span><span class="p">)</span>
+
+			<span class="k">while</span> <span class="n">flags</span><span class="p">(</span><span class="n">B</span><span class="p">):</span>    <span class="c1">#as long as B does not belong to the domain outline, keep looking.</span>
+				<span class="c1">#detect elements on edge A,B:</span>
+				<span class="n">edgeelements</span><span class="o">=</span><span class="n">ElementsFromEdge</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">)</span>
+				<span class="c1">#rule out those we already detected</span>
+				<span class="n">already_detected</span><span class="o">=</span><span class="n">m</span><span class="o">.</span><span class="n">ismember</span><span class="p">(</span><span class="n">edgeelements</span><span class="p">,</span><span class="n">elements</span><span class="p">)</span>
+				<span class="n">nextelement</span><span class="o">=</span><span class="n">edgeelements</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">already_detected</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
+				<span class="c1">#add new detected element to the list of elements we are looking for.</span>
+				<span class="n">elements</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">elements</span><span class="p">,</span><span class="n">nextelement</span><span class="p">))</span>
+				<span class="c1">#new B:</span>
+				<span class="n">B</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">nextelement</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">ismember</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">nextelement</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">]))))]</span>
+		
+			<span class="c1">#take the list of elements on one side of the rift that connect to the tip, </span>
+			<span class="c1">#and duplicate the tip on them, so as to open the rift to the outside.</span>
+			<span class="n">num</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+			<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="n">tip</span><span class="p">]))</span>
+			<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="n">tip</span><span class="p">]))</span>
+			<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">=</span><span class="n">num</span>
+		
+			<span class="c1">#replace tip in elements</span>
+			<span class="n">newelements</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">elements</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+			<span class="n">pos</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">newelements</span><span class="o">==</span><span class="n">tip</span><span class="p">)</span>
+			<span class="n">newelements</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">=</span><span class="n">num</span>
+			<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">elements</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">=</span><span class="n">newelements</span>
+			<span class="n">rift</span><span class="o">.</span><span class="n">tips</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">rift</span><span class="o">.</span><span class="n">tips</span><span class="p">,</span><span class="n">num</span><span class="p">))</span>
+
+			<span class="c1">#deal with segments</span>
+			<span class="n">tipsegments</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_or</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">tip</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">tip</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">for</span> <span class="n">segment_index</span> <span class="ow">in</span> <span class="n">tipsegments</span><span class="p">:</span>
+				<span class="n">pos</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_index</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">!=</span><span class="n">tip</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+				<span class="n">other_node</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_index</span><span class="p">,</span><span class="n">pos</span><span class="p">]</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">isconnected</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">other_node</span><span class="p">,</span><span class="n">tip</span><span class="p">):</span>
+					<span class="n">pos</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_index</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="n">tip</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+					<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[</span><span class="n">segment_index</span><span class="p">,</span><span class="n">pos</span><span class="p">]</span><span class="o">=</span><span class="n">num</span>
+
+	<span class="c1">#Fill in rest of fields:</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonboundary</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">),</span><span class="nb">bool</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonboundary</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">rifts</span><span class="o">.</span><span class="n">numrifts</span><span class="o">=</span><span class="n">length</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">rifts</span><span class="o">.</span><span class="n">riftstruct</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">md</span></div>
+
+<div class="viewcode-block" id="isconnected"><a class="viewcode-back" href="../../api/issm.html#issm.meshprocessoutsiderifts.isconnected">[docs]</a><span class="k">def</span> <span class="nf">isconnected</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">):</span>    <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	ISCONNECTED: are two nodes connected by a triangulation?</span>
+
+<span class="sd">	   Usage: flag=isconnected(elements,A,B)</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="n">elements</span><span class="o">=</span><span class="n">ElementsFromEdge</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span><span class="n">A</span><span class="p">,</span><span class="n">B</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">elements</span><span class="p">:</span>
+		<span class="n">flag</span><span class="o">=</span><span class="mi">0</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">flag</span><span class="o">=</span><span class="mi">1</span>
+
+	<span class="k">return</span> <span class="n">flag</span></div>
+	<span class="c1"># }}}</span>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

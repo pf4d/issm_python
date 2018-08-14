@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.verbose &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.verbose</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.verbose</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pairoptions</span> <span class="k">import</span> <span class="n">pairoptions</span>
+<span class="kn">import</span> <span class="nn">MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+<span class="kn">from</span> <span class="nn">WriteData</span> <span class="k">import</span> <span class="n">WriteData</span>
+
+<div class="viewcode-block" id="verbose"><a class="viewcode-back" href="../../api/issm.html#issm.verbose.verbose">[docs]</a><span class="k">class</span> <span class="nc">verbose</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	VERBOSE class definition</span>
+
+<span class="sd">	   Available verbosity levels:</span>
+<span class="sd">	      mprocessor  : model processing </span>
+<span class="sd">	      module      : modules</span>
+<span class="sd">	      solution    : solution sequence</span>
+<span class="sd">	      solver      : solver info (extensive)</span>
+<span class="sd">	      convergence : convergence criteria</span>
+<span class="sd">	      control     : control method</span>
+<span class="sd">	      qmu         : sensitivity analysis</span>
+<span class="sd">	      autodiff    : AD analysis</span>
+<span class="sd">	      smb         : SMB analysis</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      verbose=verbose();</span>
+<span class="sd">	      verbose=verbose(3);</span>
+<span class="sd">	      verbose=verbose(&#39;001100&#39;);</span>
+<span class="sd">	      verbose=verbose(&#39;module&#39;,True,&#39;solver&#39;,False);</span>
+
+<span class="sd">	WARNING: some parts of this file are Synchronized with src/c/shared/Numerics/Verbosity.h</span>
+<span class="sd">	         Do not modify these sections. See src/c/shared/Numerics/README for more info</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="c1">#BEGINFIELDS</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mprocessor</span>  <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">module</span>      <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">solution</span>    <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">solver</span>      <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">convergence</span> <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">control</span>     <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">qmu</span>         <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">autodiff</span>    <span class="o">=</span> <span class="kc">False</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">smb</span>         <span class="o">=</span> <span class="kc">False</span>
+		<span class="c1">#ENDFIELDS</span>
+
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+			<span class="c1">#Don&#39;t do anything</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="o">=</span><span class="kc">True</span><span class="p">;</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">qmu</span><span class="o">=</span><span class="kc">True</span><span class="p">;</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="o">=</span><span class="kc">True</span><span class="p">;</span>
+			<span class="k">pass</span>
+
+		<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">binary</span><span class="p">,(</span><span class="nb">str</span><span class="p">,</span><span class="n">unicode</span><span class="p">)):</span>
+				<span class="k">if</span> <span class="n">binary</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">==</span><span class="s1">&#39;all&#39;</span><span class="p">:</span>
+					<span class="n">binary</span><span class="o">=</span><span class="mi">2</span><span class="o">**</span><span class="mi">11</span><span class="o">-</span><span class="mi">1</span>    <span class="c1">#all ones</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">BinaryToVerbose</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="o">=</span><span class="kc">False</span>    <span class="c1">#Do not use by default</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">binary</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">binary</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">BinaryToVerbose</span><span class="p">(</span><span class="n">binary</span><span class="p">)</span>
+			<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">binary</span><span class="p">,(</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">BinaryToVerbose</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">binary</span><span class="p">))</span>
+
+		<span class="k">else</span><span class="p">:</span>
+			<span class="c1">#Use options to initialize object</span>
+			<span class="bp">self</span><span class="o">=</span><span class="n">pairoptions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">AssignObjectFields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+			<span class="c1">#Cast to logicals</span>
+			<span class="n">listproperties</span><span class="o">=</span><span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">fieldname</span><span class="p">,</span><span class="n">fieldvalue</span> <span class="ow">in</span> <span class="n">listproperties</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+				<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fieldvalue</span><span class="p">,</span><span class="nb">bool</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fieldvalue</span><span class="p">,(</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+					<span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fieldname</span><span class="p">,</span><span class="nb">bool</span><span class="p">(</span><span class="n">fieldvalue</span><span class="p">))</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;verbose supported field values are logicals only (True or False)&quot;</span><span class="p">)</span>
+	<span class="c1"># }}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># {{{</span>
+			
+		<span class="c1">#BEGINDISP</span>
+		<span class="n">s</span> <span class="o">=</span><span class="s2">&quot;class &#39;</span><span class="si">%s</span><span class="s2">&#39;  = </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   </span><span class="si">%15s</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;mprocessor&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mprocessor</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   </span><span class="si">%15s</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;module&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   </span><span class="si">%15s</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;solution&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   </span><span class="si">%15s</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;solver&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   </span><span class="si">%15s</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;convergence&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">convergence</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   </span><span class="si">%15s</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;control&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   </span><span class="si">%15s</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;qmu&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">qmu</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   </span><span class="si">%15s</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;autodiff&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">autodiff</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;   </span><span class="si">%15s</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">smb</span><span class="p">)</span>
+		<span class="c1">#ENDDISP</span>
+
+		<span class="k">return</span> <span class="n">s</span>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="verbose.VerboseToBinary"><a class="viewcode-back" href="../../api/issm.html#issm.verbose.verbose.VerboseToBinary">[docs]</a>	<span class="k">def</span> <span class="nf">VerboseToBinary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="c1">#BEGINVERB2BIN</span>
+		<span class="n">binary</span><span class="o">=</span><span class="mi">0</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mprocessor</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">binary</span> <span class="o">|</span>  <span class="mi">1</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">binary</span> <span class="o">|</span>  <span class="mi">2</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solution</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">binary</span> <span class="o">|</span>  <span class="mi">4</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">binary</span> <span class="o">|</span>  <span class="mi">8</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">convergence</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">binary</span> <span class="o">|</span> <span class="mi">16</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">control</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">binary</span> <span class="o">|</span> <span class="mi">32</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">qmu</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">binary</span> <span class="o">|</span> <span class="mi">64</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autodiff</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">binary</span> <span class="o">|</span> <span class="mi">128</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">smb</span><span class="p">:</span>
+			<span class="n">binary</span><span class="o">=</span><span class="n">binary</span> <span class="o">|</span> <span class="mi">256</span>
+		<span class="c1">#ENDVERB2BIN</span>
+
+		<span class="k">return</span> <span class="n">binary</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="verbose.BinaryToVerbose"><a class="viewcode-back" href="../../api/issm.html#issm.verbose.verbose.BinaryToVerbose">[docs]</a>	<span class="k">def</span> <span class="nf">BinaryToVerbose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">binary</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="c1">#BEGINBIN2VERB</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mprocessor</span> <span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">binary</span> <span class="o">&amp;</span>   <span class="mi">1</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">module</span>     <span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">binary</span> <span class="o">&amp;</span>   <span class="mi">2</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">solution</span>   <span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">binary</span> <span class="o">&amp;</span>   <span class="mi">4</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">solver</span>     <span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">binary</span> <span class="o">&amp;</span>   <span class="mi">8</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">convergence</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">binary</span> <span class="o">&amp;</span>  <span class="mi">16</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">control</span>    <span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">binary</span> <span class="o">&amp;</span>  <span class="mi">32</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">qmu</span>        <span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">binary</span> <span class="o">&amp;</span>  <span class="mi">64</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">autodiff</span>   <span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">binary</span> <span class="o">&amp;</span> <span class="mi">128</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">smb</span>        <span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">binary</span> <span class="o">&amp;</span> <span class="mi">256</span><span class="p">)</span></div>
+		<span class="c1">#ENDBIN2VERB</span>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="verbose.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.verbose.verbose.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="verbose.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.verbose.verbose.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">VerboseToBinary</span><span class="p">(),</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.verbose&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span></div></div>
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

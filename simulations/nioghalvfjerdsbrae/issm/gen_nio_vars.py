@@ -29,14 +29,17 @@ md.inversion.vel_obs   = load_dict['md.inversion.vel_obs']
 
 #===============================================================================
 # collect the raw data :
-#searise  = cs.DataFactory.get_searise()
+searise  = cs.DataFactory.get_searise()
 bedmach  = cs.DataFactory.get_bedmachine(thklim=1.0)
 mouginot = cs.DataFactory.get_mouginot()
 
 # create data objects to use with varglas :
-#dsr     = cs.DataInput(searise)
+dsr     = cs.DataInput(searise)
 dbm     = cs.DataInput(bedmach)
 dmg     = cs.DataInput(mouginot)
+
+# change the projection of all data to be the same as the mesh :
+#dbm.interpolate_from_di(dsr, 'T', 'T', order=3)
 
 
 #===============================================================================
@@ -59,6 +62,9 @@ md.mask.ice_levelset         = -1 * np.ones(md.mesh.numberofvertices)
 
 #===============================================================================
 # calculate input data :
+
+T    = im.InterpFromGridToMesh(dsr.x, dsr.y, dsr.data['T'].astype('float64'),
+                               md.mesh.x, md.mesh.y, 0)[0]
 
 # geometry :
 cs.print_text('::: issm -- constructing geometry :::', 'red')
@@ -100,26 +106,28 @@ u_mag_c[u_mag_c < u_0] = u_0
 beta_sia  = np.sqrt( rhoi * g * H * gS_mag / u_mag_c )
 
 # set the issm model variables :
-md.geometry.surface     = S
-md.geometry.base        = B
-md.geometry.thickness   = H
-md.inversion.vx_obs     = u_x
-md.inversion.vy_obs     = u_y
-md.inversion.vel_obs    = u_mag
-md.friction.coefficient = beta_sia
+md.geometry.surface           = S
+md.geometry.base              = B
+md.geometry.thickness         = H
+md.inversion.vx_obs           = u_x
+md.inversion.vy_obs           = u_y
+md.inversion.vel_obs          = u_mag
+md.friction.coefficient       = beta_sia
+md.initialization.temperature = T
 
 
 #===============================================================================
 # save the state of the model :
-var_dict  = {'md.mask.groundedice_levelset' : md.mask.groundedice_levelset,
-             'md.mask.ice_levelset'         : md.mask.ice_levelset,
-             'md.geometry.surface'          : md.geometry.surface,
-             'md.geometry.base'             : md.geometry.base,
-             'md.geometry.thickness'        : md.geometry.thickness,
-             'md.inversion.vx_obs'          : md.inversion.vx_obs,
-             'md.inversion.vy_obs'          : md.inversion.vy_obs,
-             'md.inversion.vel_obs'         : md.inversion.vel_obs,
-             'md.friction_coefficient'      : md.friction.coefficient}
+var_dict  = {'md.mask.groundedice_levelset'  : md.mask.groundedice_levelset,
+             'md.mask.ice_levelset'          : md.mask.ice_levelset,
+             'md.initialization.temperature' : md.initialization.temperature,
+             'md.geometry.surface'           : md.geometry.surface,
+             'md.geometry.base'              : md.geometry.base,
+             'md.geometry.thickness'         : md.geometry.thickness,
+             'md.inversion.vx_obs'           : md.inversion.vx_obs,
+             'md.inversion.vy_obs'           : md.inversion.vy_obs,
+             'md.inversion.vel_obs'          : md.inversion.vel_obs,
+             'md.friction_coefficient'       : md.friction.coefficient}
 im.savevars(out_dir + 'issm_nio.shelve', var_dict)
 
 
@@ -150,7 +158,7 @@ plt_kwargs  =  {'direc'              : plt_dir,
                 'levels_2'           : None,
                 'umin'               : None,
                 'umax'               : None,
-                'plot_tp'            : True,
+                'plot_tp'            : False,
                 'tp_kwargs'          : tp_kwargs,
                 'show'               : False,
                 'hide_x_tick_labels' : True,
@@ -183,6 +191,10 @@ plt_kwargs['name']   = 'H'
 plt_kwargs['title']  =  r'$H |^{\mathrm{ISSM}}$'
 fv.plot_variable(u=H, **plt_kwargs)
 
+plt_kwargs['name']   = 'T'
+plt_kwargs['title']  =  r'$T |_S^{\mathrm{ISSM}}$'
+fv.plot_variable(u=T, **plt_kwargs)
+
 plt_kwargs['name']   = 'mask'
 plt_kwargs['title']  =  ''#r'$\mathrm{mask} |^{\mathrm{ISSM}}$'
 plt_kwargs['scale']  = 'bool'
@@ -190,20 +202,22 @@ plt_kwargs['cmap']   = 'gist_gray'
 fv.plot_variable(u=mask, **plt_kwargs)
 
 U_lvls = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, u_mag.max()])
-plt_kwargs['name']   = 'U_ob'
-plt_kwargs['title']  = r'$\underline{u}_{\mathrm{ob}} |_S^{\mathrm{ISSM}}$'
-plt_kwargs['levels'] = U_lvls
-plt_kwargs['scale']  = 'lin'
-plt_kwargs['cmap']   = 'viridis'
+plt_kwargs['name']        = 'U_ob'
+plt_kwargs['title']       = r'$\underline{u}_{\mathrm{ob}} |_S^{\mathrm{ISSM}}$'
+plt_kwargs['levels']      = U_lvls
+plt_kwargs['scale']       = 'lin'
+plt_kwargs['cmap']        = 'viridis'
+plt_kwargs['plot_quiver'] = True
 fv.plot_variable(u=np.array([u_x.flatten(), u_y.flatten()]), **plt_kwargs)
 
 beta_lvls = np.array([beta_sia.min()**2, 1e7, 1e8, 1e9, 5e9, 1e10, 5e10,
                       beta_sia.max()**2])
-plt_kwargs['name']   = 'beta_sia'
-plt_kwargs['title']  = r'$\beta_{\mathrm{SIA}}^2 |^{\mathrm{ISSM}}$'
-plt_kwargs['levels'] = beta_lvls
-plt_kwargs['scale']  = 'lin'
-plt_kwargs['cmap']   = 'viridis'
+plt_kwargs['name']        = 'beta_sia'
+plt_kwargs['title']       = r'$\beta_{\mathrm{SIA}}^2 |^{\mathrm{ISSM}}$'
+plt_kwargs['levels']      = beta_lvls
+plt_kwargs['scale']       = 'lin'
+plt_kwargs['cmap']        = 'viridis'
+plt_kwargs['plot_quiver'] = False
 fv.plot_variable(u=beta_sia**2, **plt_kwargs)
 
 

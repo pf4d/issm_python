@@ -1,0 +1,269 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.GetNodalFunctionsCoeff &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.GetNodalFunctionsCoeff</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.GetNodalFunctionsCoeff</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="GetNodalFunctionsCoeff"><a class="viewcode-back" href="../../api/issm.html#issm.GetNodalFunctionsCoeff.GetNodalFunctionsCoeff">[docs]</a><span class="k">def</span> <span class="nf">GetNodalFunctionsCoeff</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	GETNODELFUNCTIONSCOEFF - compute nodal functions coefficients</span>
+
+<span class="sd">	   Compute the coefficients alpha beta and optionaly gamma of</span>
+<span class="sd">	   2d triangular elements. For each element, the nodal function</span>
+<span class="sd">	   is defined as:</span>
+<span class="sd">	   N(x,y)=sum(i=1:3) alpha_i * x + beta_i * y + gamma_i</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      [alpha beta]=GetNodalFunctionsCoeff(index,x,y);</span>
+<span class="sd">	      [alpha beta gamma]=GetNodalFunctionsCoeff(index,x,y);</span>
+
+<span class="sd">	   Example:</span>
+<span class="sd">	      [alpha beta gamma]=GetNodalFunctionsCoeff(md.mesh.elements,md.mesh.x,md.mesh.y);</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#make columns out of x and y</span>
+	<span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+	<span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+	<span class="c1">#get nels and nods</span>
+	<span class="n">nels</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+	<span class="n">nods</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+	<span class="c1">#some checks</span>
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">!=</span><span class="n">nods</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;GetNodalFunctionsCoeff error message: x and y do not have the same length.&quot;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">&gt;</span><span class="n">nods</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;GetNodalFunctionsCoeff error message: index should not have values above </span><span class="si">%d</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">nods</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">!=</span><span class="mi">3</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;GetNodalFunctionsCoeff error message: only 2d meshes supported. index should have 3 columns.&quot;</span><span class="p">)</span>
+
+	<span class="c1">#initialize output</span>
+	<span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nels</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+	<span class="n">beta</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nels</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+	<span class="c1">#compute nodal functions coefficients N(x,y)=alpha x + beta y +gamma</span>
+	<span class="n">x1</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">index</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+	<span class="n">x2</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">index</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+	<span class="n">x3</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">index</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+	<span class="n">y1</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">index</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+	<span class="n">y2</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">index</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+	<span class="n">y3</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">index</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+	<span class="n">invdet</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">x1</span><span class="o">*</span><span class="p">(</span><span class="n">y2</span><span class="o">-</span><span class="n">y3</span><span class="p">)</span><span class="o">-</span><span class="n">x2</span><span class="o">*</span><span class="p">(</span><span class="n">y1</span><span class="o">-</span><span class="n">y3</span><span class="p">)</span><span class="o">+</span><span class="n">x3</span><span class="o">*</span><span class="p">(</span><span class="n">y1</span><span class="o">-</span><span class="n">y2</span><span class="p">))</span>
+
+	<span class="c1">#get alpha and beta</span>
+	<span class="n">alpha</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(((</span><span class="n">invdet</span><span class="o">*</span><span class="p">(</span><span class="n">y2</span><span class="o">-</span><span class="n">y3</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),(</span><span class="n">invdet</span><span class="o">*</span><span class="p">(</span><span class="n">y3</span><span class="o">-</span><span class="n">y1</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),(</span><span class="n">invdet</span><span class="o">*</span><span class="p">(</span><span class="n">y1</span><span class="o">-</span><span class="n">y2</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)))</span><span class="o">.</span><span class="n">T</span>
+	<span class="n">beta</span> <span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(((</span><span class="n">invdet</span><span class="o">*</span><span class="p">(</span><span class="n">x3</span><span class="o">-</span><span class="n">x2</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),(</span><span class="n">invdet</span><span class="o">*</span><span class="p">(</span><span class="n">x1</span><span class="o">-</span><span class="n">x3</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),(</span><span class="n">invdet</span><span class="o">*</span><span class="p">(</span><span class="n">x2</span><span class="o">-</span><span class="n">x1</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)))</span><span class="o">.</span><span class="n">T</span>
+
+	<span class="c1">#get gamma if requested</span>
+	<span class="n">gamma</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nels</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+	<span class="n">gamma</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(((</span><span class="n">invdet</span><span class="o">*</span><span class="p">(</span><span class="n">x2</span><span class="o">*</span><span class="n">y3</span><span class="o">-</span><span class="n">x3</span><span class="o">*</span><span class="n">y2</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),(</span><span class="n">invdet</span><span class="o">*</span><span class="p">(</span><span class="n">y1</span><span class="o">*</span><span class="n">x3</span><span class="o">-</span><span class="n">y3</span><span class="o">*</span><span class="n">x1</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,),(</span><span class="n">invdet</span><span class="o">*</span><span class="p">(</span><span class="n">x1</span><span class="o">*</span><span class="n">y2</span><span class="o">-</span><span class="n">x2</span><span class="o">*</span><span class="n">y1</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)))</span><span class="o">.</span><span class="n">T</span>
+
+	<span class="k">return</span> <span class="n">alpha</span><span class="p">,</span><span class="n">beta</span><span class="p">,</span><span class="n">gamma</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

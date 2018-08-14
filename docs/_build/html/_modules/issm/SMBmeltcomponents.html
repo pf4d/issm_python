@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.SMBmeltcomponents &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.SMBmeltcomponents</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.SMBmeltcomponents</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">issm.fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">issm.checkfield</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">issm.project3d</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">issm.WriteData</span> <span class="k">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="SMBmeltcomponents"><a class="viewcode-back" href="../../api/issm.html#issm.SMBmeltcomponents.SMBmeltcomponents">[docs]</a><span class="k">class</span> <span class="nc">SMBmeltcomponents</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	SMBmeltcomponents Class definition</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      SMBmeltcomponents=SMBmeltcomponents();</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">accumulation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">runoff</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">evaporation</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span>      <span class="o">=</span> <span class="p">[]</span>
+		<span class="c1">#}}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;   surface forcings parameters with melt (SMB=accumulation-evaporation-melt+refreeze) :&quot;</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;accumulation&#39;</span><span class="p">,</span><span class="s1">&#39;accumulated snow [m/yr ice eq]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;evaporation&#39;</span><span class="p">,</span><span class="s1">&#39;mount of ice lost to evaporative processes [m/yr ice eq]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;melt&#39;</span><span class="p">,</span><span class="s1">&#39;amount of ice melt in the ice column [m/yr ice eq]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;refreeze&#39;</span><span class="p">,</span><span class="s1">&#39;amount of ice melt refrozen in the ice column [m/yr ice eq]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;additional outputs requested&#39;</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">string</span>
+		<span class="c1">#}}}</span>
+<div class="viewcode-block" id="SMBmeltcomponents.extrude"><a class="viewcode-back" href="../../api/issm.html#issm.SMBmeltcomponents.SMBmeltcomponents.extrude">[docs]</a>	<span class="k">def</span> <span class="nf">extrude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">mass_balance</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">accumulation</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">);</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mass_balance</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">evaporation</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">);</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mass_balance</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">melt</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">);</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mass_balance</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">refreeze</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">);</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="SMBmeltcomponents.defaultoutputs"><a class="viewcode-back" href="../../api/issm.html#issm.SMBmeltcomponents.SMBmeltcomponents.defaultoutputs">[docs]</a>	<span class="k">def</span> <span class="nf">defaultoutputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="k">return</span> <span class="p">[]</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="SMBmeltcomponents.initialize"><a class="viewcode-back" href="../../api/issm.html#issm.SMBmeltcomponents.SMBmeltcomponents.initialize">[docs]</a>	<span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">accumulation</span><span class="p">)):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">accumulation</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">))</span>
+			<span class="nb">print</span> <span class="s2">&quot;      no SMB.accumulation specified: values set as zero&quot;</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaporation</span><span class="p">)):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">evaporation</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">))</span>
+			<span class="nb">print</span> <span class="s2">&quot;      no SMB.evaporation specified: values set as zero&quot;</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">melt</span><span class="p">)):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">melt</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">))</span>
+			<span class="nb">print</span> <span class="s2">&quot;      no SMB.melt specified: values set as zero&quot;</span>
+
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refreeze</span><span class="p">)):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">refreeze</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">))</span>
+			<span class="nb">print</span> <span class="s2">&quot;      no SMB.refreeze specified: values set as zero&quot;</span>
+
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="SMBmeltcomponents.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.SMBmeltcomponents.SMBmeltcomponents.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="k">if</span> <span class="s1">&#39;MasstransportAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.accumulation&#39;</span><span class="p">,</span><span class="s1">&#39;timeseries&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s1">&#39;BalancethicknessAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.accumulation&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">],</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s1">&#39;MasstransportAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.melt&#39;</span><span class="p">,</span><span class="s1">&#39;timeseries&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s1">&#39;BalancethicknessAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.melt&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">],</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s1">&#39;MasstransportAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.refreeze&#39;</span><span class="p">,</span><span class="s1">&#39;timeseries&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s1">&#39;BalancethicknessAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.refreeze&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">],</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s1">&#39;MasstransportAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.evaporation&#39;</span><span class="p">,</span><span class="s1">&#39;timeseries&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s1">&#39;BalancethicknessAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;smb.evaporation&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">],</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;masstransport.requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;stringrow&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="SMBmeltcomponents.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.SMBmeltcomponents.SMBmeltcomponents.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="n">yts</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span>
+
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.smb.model&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;accumulation&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;evaporation&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;melt&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;class&#39;</span><span class="p">,</span><span class="s1">&#39;smb&#39;</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;refreeze&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span><span class="mf">1.</span><span class="o">/</span><span class="n">yts</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+		
+		<span class="c1">#process requested outputs</span>
+		<span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span>
+		<span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">]</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">outputscopy</span><span class="o">=</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultoutputs</span><span class="p">(</span><span class="n">md</span><span class="p">)</span><span class="o">+</span><span class="n">outputs</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+			<span class="n">outputs</span>    <span class="o">=</span><span class="n">outputscopy</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">outputs</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.smb.requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">)</span></div></div>
+
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

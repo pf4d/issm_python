@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.generic &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.generic</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.generic</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">issm.IssmConfig</span> <span class="k">import</span> <span class="n">IssmConfig</span>
+<span class="kn">from</span> <span class="nn">issm.issmdir</span> <span class="k">import</span> <span class="n">issmdir</span>
+<span class="kn">from</span> <span class="nn">issm.pairoptions</span> <span class="k">import</span> <span class="n">pairoptions</span>
+<span class="kn">from</span> <span class="nn">issm.issmssh</span> <span class="k">import</span> <span class="n">issmssh</span>
+<span class="kn">from</span> <span class="nn">issm.issmscpin</span> <span class="k">import</span> <span class="n">issmscpin</span>
+<span class="kn">from</span> <span class="nn">issm.issmscpout</span> <span class="k">import</span> <span class="n">issmscpout</span>
+<span class="kn">import</span> <span class="nn">issm.MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+
+<div class="viewcode-block" id="generic"><a class="viewcode-back" href="../../api/issm.html#issm.generic.generic">[docs]</a><span class="k">class</span> <span class="nc">generic</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	GENERIC cluster class definition</span>
+<span class="sd"> </span>
+<span class="sd">	   Usage:</span>
+<span class="sd">	      cluster=generic(&#39;name&#39;,&#39;astrid&#39;,&#39;np&#39;,3);</span>
+<span class="sd">	      cluster=generic(&#39;name&#39;,gethostname(),&#39;np&#39;,3,&#39;login&#39;,&#39;username&#39;);</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="o">=</span><span class="mi">1</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="o">=</span><span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="o">=</span><span class="mi">1</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="o">=</span><span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;ISSM_PREFIX&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="s1">&#39;/bin&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="o">=</span><span class="n">issmdir</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39;/execution&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">valgrind</span><span class="o">=</span><span class="n">issmdir</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39;/externalpackages/valgrind/install/bin/valgrind&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">valgrindlib</span><span class="o">=</span><span class="n">issmdir</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39;/externalpackages/valgrind/install/lib/libmpidebug.so&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">valgrindsup</span><span class="o">=</span><span class="n">issmdir</span><span class="p">()</span><span class="o">+</span><span class="s1">&#39;/externalpackages/valgrind/issm.supp&#39;</span>
+
+		<span class="c1">#use provided options to change fields</span>
+		<span class="n">options</span><span class="o">=</span><span class="n">pairoptions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+		<span class="c1">#get name</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span>
+
+		<span class="c1">#initialize cluster using user settings if provided</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_settings.py&#39;</span><span class="p">):</span>
+			<span class="n">execfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_settings.py&#39;</span><span class="p">,</span><span class="nb">globals</span><span class="p">())</span>
+
+		<span class="c1">#OK get other fields</span>
+		<span class="bp">self</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">AssignObjectFields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+	<span class="c1"># }}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="c1">#  display the object</span>
+		<span class="n">s</span> <span class="o">=</span><span class="s2">&quot;class &#39;</span><span class="si">%s</span><span class="s2">&#39; object &#39;</span><span class="si">%s</span><span class="s2">&#39; = </span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span><span class="s1">&#39;self&#39;</span><span class="p">)</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;    name: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;    login: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">login</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;    np: </span><span class="si">%i</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">np</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;    port: </span><span class="si">%i</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;    codepath: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">codepath</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;    executionpath: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;    valgrind: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">valgrind</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;    valgrindlib: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">valgrindlib</span>
+		<span class="n">s</span><span class="o">+=</span><span class="s2">&quot;    valgrindsup: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">valgrindsup</span>
+		<span class="k">return</span> <span class="n">s</span>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="generic.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.generic.generic.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="o">&lt;</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkmessage</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;number of processors should be at least 1&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="p">):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkmessage</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;number of processors should not be NaN!&#39;</span><span class="p">)</span>
+
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="generic.BuildQueueScript"><a class="viewcode-back" href="../../api/issm.html#issm.generic.generic.BuildQueueScript">[docs]</a>	<span class="k">def</span> <span class="nf">BuildQueueScript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">io_gather</span><span class="p">,</span><span class="n">isvalgrind</span><span class="p">,</span><span class="n">isgprof</span><span class="p">,</span><span class="n">isdakota</span><span class="p">,</span><span class="n">isoceancoupling</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="n">executable</span><span class="o">=</span><span class="s1">&#39;issm.exe&#39;</span><span class="p">;</span>
+		<span class="k">if</span> <span class="n">isdakota</span><span class="p">:</span>
+			<span class="n">version</span><span class="o">=</span><span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_DAKOTA_VERSION_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+			<span class="n">version</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">version</span><span class="o">&gt;=</span><span class="mi">6</span><span class="p">:</span>
+				<span class="n">executable</span><span class="o">=</span><span class="s1">&#39;issm_dakota.exe&#39;</span>
+		<span class="k">if</span> <span class="n">isoceancoupling</span><span class="p">:</span>
+			<span class="n">executable</span><span class="o">=</span><span class="s1">&#39;issm_ocean.exe&#39;</span>
+
+		<span class="c1">#write queuing script </span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">ispc</span><span class="p">():</span>
+
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.queue&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#!/bin/sh</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">isvalgrind</span><span class="p">:</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">:</span> 
+					<span class="k">if</span> <span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_HAVE_MPI_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+						<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mpiexec -np </span><span class="si">%i</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="k">if</span> <span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_HAVE_MPI_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+						<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mpiexec -np </span><span class="si">%i</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> 2&gt; </span><span class="si">%s</span><span class="s1">.errlog &gt;</span><span class="si">%s</span><span class="s1">.outlog &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+					<span class="k">else</span><span class="p">:</span>
+						<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> 2&gt; </span><span class="si">%s</span><span class="s1">.errlog &gt;</span><span class="si">%s</span><span class="s1">.outlog &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="k">elif</span> <span class="n">isgprof</span><span class="p">:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> gprof </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> gmon.out &gt; </span><span class="si">%s</span><span class="s1">.performance&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="c1">#Add --gen-suppressions=all to get suppression lines</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;LD_PRELOAD=</span><span class="si">%s</span><span class="s1"> </span><span class="se">\\\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">valgrindlib</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_HAVE_MPI_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mpiexec -np </span><span class="si">%i</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> --leak-check=full --suppressions=</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> 2&gt; </span><span class="si">%s</span><span class="s1">.errlog &gt;</span><span class="si">%s</span><span class="s1">.outlog &#39;</span> <span class="o">%</span> \
+							<span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">valgrind</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">valgrindsup</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+				<span class="k">else</span><span class="p">:</span>	
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> --leak-check=full --suppressions=</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> 2&gt; </span><span class="si">%s</span><span class="s1">.errlog &gt;</span><span class="si">%s</span><span class="s1">.outlog &#39;</span> <span class="o">%</span> \
+							<span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">valgrind</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">valgrindsup</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">io_gather</span><span class="p">:</span>    <span class="c1">#concatenate the output files:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">cat </span><span class="si">%s</span><span class="s1">.outbin.* &gt; </span><span class="si">%s</span><span class="s1">.outbin&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+		<span class="k">else</span><span class="p">:</span>    <span class="c1"># Windows</span>
+
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.bat&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;@echo off</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&quot; </span><span class="si">%s</span><span class="s1"> &quot;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&quot; </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&quot; </span><span class="si">%s</span><span class="s1"> &quot;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&quot; </span><span class="si">%s</span><span class="s1"> 2&gt; </span><span class="si">%s</span><span class="s1">.errlog &gt;</span><span class="si">%s</span><span class="s1">.outlog&#39;</span> <span class="o">%</span> \
+					<span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+		<span class="c1">#in interactive mode, create a run file, and errlog and outlog file</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.errlog&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.outlog&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="generic.BuildKrigingQueueScript"><a class="viewcode-back" href="../../api/issm.html#issm.generic.generic.BuildKrigingQueueScript">[docs]</a>	<span class="k">def</span> <span class="nf">BuildKrigingQueueScript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">io_gather</span><span class="p">,</span><span class="n">isvalgrind</span><span class="p">,</span><span class="n">isgprof</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="c1">#write queuing script </span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">ispc</span><span class="p">():</span>
+
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.queue&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#!/bin/sh</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">isvalgrind</span><span class="p">:</span>
+				<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">:</span>
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mpiexec -np </span><span class="si">%i</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/kriging.exe </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mpiexec -np </span><span class="si">%i</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/kriging.exe </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> 2&gt; </span><span class="si">%s</span><span class="s1">.errlog &gt;</span><span class="si">%s</span><span class="s1">.outlog &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="k">elif</span> <span class="n">isgprof</span><span class="p">:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> gprof </span><span class="si">%s</span><span class="s1">/kriging.exe gmon.out &gt; </span><span class="si">%s</span><span class="s1">.performance&#39;</span> <span class="o">&amp;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="c1">#Add --gen-suppressions=all to get suppression lines</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;LD_PRELOAD=</span><span class="si">%s</span><span class="s1"> </span><span class="se">\\\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">valgrindlib</span><span class="p">)</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mpiexec -np </span><span class="si">%i</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> --leak-check=full --suppressions=</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/kriging.exe </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> 2&gt; </span><span class="si">%s</span><span class="s1">.errlog &gt;</span><span class="si">%s</span><span class="s1">.outlog &#39;</span> <span class="o">%</span> \
+					<span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">valgrind</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">valgrindsup</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">io_gather</span><span class="p">:</span>    <span class="c1">#concatenate the output files:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">cat </span><span class="si">%s</span><span class="s1">.outbin.* &gt; </span><span class="si">%s</span><span class="s1">.outbin&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+		<span class="k">else</span><span class="p">:</span>    <span class="c1"># Windows</span>
+
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.bat&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;@echo off</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+			<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">/issm.exe&quot; </span><span class="si">%s</span><span class="s1"> &quot;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&quot; </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">/issm.exe&quot; </span><span class="si">%s</span><span class="s1"> &quot;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&quot; </span><span class="si">%s</span><span class="s1"> 2&gt; </span><span class="si">%s</span><span class="s1">.errlog &gt;</span><span class="si">%s</span><span class="s1">.outlog&#39;</span> <span class="o">%</span> \
+					<span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+		<span class="c1">#in interactive mode, create a run file, and errlog and outlog file</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.errlog&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.outlog&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="generic.UploadQueueJob"><a class="viewcode-back" href="../../api/issm.html#issm.generic.generic.UploadQueueJob">[docs]</a>	<span class="k">def</span> <span class="nf">UploadQueueJob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">filelist</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="c1">#compress the files into one zip.</span>
+		<span class="n">compressstring</span><span class="o">=</span><span class="s1">&#39;tar -zcf </span><span class="si">%s</span><span class="s1">.tar.gz &#39;</span> <span class="o">%</span> <span class="n">dirname</span>
+		<span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">filelist</span><span class="p">:</span>
+			<span class="n">compressstring</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">file</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="p">:</span>
+			<span class="n">compressstring</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">%s</span><span class="s1">.errlog </span><span class="si">%s</span><span class="s1">.outlog &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">)</span>
+		<span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">compressstring</span><span class="p">,</span><span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+		<span class="nb">print</span> <span class="s1">&#39;uploading input file and queueing script&#39;</span>
+		<span class="n">issmscpout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,[</span><span class="n">dirname</span><span class="o">+</span><span class="s1">&#39;.tar.gz&#39;</span><span class="p">])</span></div>
+
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="generic.LaunchQueueJob"><a class="viewcode-back" href="../../api/issm.html#issm.generic.generic.LaunchQueueJob">[docs]</a>	<span class="k">def</span> <span class="nf">LaunchQueueJob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">filelist</span><span class="p">,</span><span class="n">restart</span><span class="p">,</span><span class="n">batch</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="nb">print</span> <span class="s1">&#39;launching solution sequence on remote cluster&#39;</span>
+		<span class="k">if</span> <span class="n">restart</span><span class="p">:</span>
+			<span class="n">launchcommand</span><span class="o">=</span><span class="s1">&#39;cd </span><span class="si">%s</span><span class="s1"> &amp;&amp; cd </span><span class="si">%s</span><span class="s1"> chmod 777 </span><span class="si">%s</span><span class="s1">.queue &amp;&amp; ./</span><span class="si">%s</span><span class="s1">.queue&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">batch</span><span class="p">:</span>
+				<span class="n">launchcommand</span><span class="o">=</span><span class="s1">&#39;cd </span><span class="si">%s</span><span class="s1"> &amp;&amp; rm -rf ./</span><span class="si">%s</span><span class="s1"> &amp;&amp; mkdir </span><span class="si">%s</span><span class="s1"> &amp;&amp; cd </span><span class="si">%s</span><span class="s1"> &amp;&amp; mv ../</span><span class="si">%s</span><span class="s1">.tar.gz ./ &amp;&amp; tar -zxf </span><span class="si">%s</span><span class="s1">.tar.gz&#39;</span> <span class="o">%</span> \
+						<span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">launchcommand</span><span class="o">=</span><span class="s1">&#39;cd </span><span class="si">%s</span><span class="s1"> &amp;&amp; rm -rf ./</span><span class="si">%s</span><span class="s1"> &amp;&amp; mkdir </span><span class="si">%s</span><span class="s1"> &amp;&amp; cd </span><span class="si">%s</span><span class="s1"> &amp;&amp; mv ../</span><span class="si">%s</span><span class="s1">.tar.gz ./ &amp;&amp; tar -zxf </span><span class="si">%s</span><span class="s1">.tar.gz  &amp;&amp; chmod 777 </span><span class="si">%s</span><span class="s1">.queue &amp;&amp; ./</span><span class="si">%s</span><span class="s1">.queue&#39;</span> <span class="o">%</span> \
+					<span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">modelname</span><span class="p">)</span>
+		<span class="n">issmssh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span><span class="n">launchcommand</span><span class="p">)</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="generic.Download"><a class="viewcode-back" href="../../api/issm.html#issm.generic.generic.Download">[docs]</a>	<span class="k">def</span> <span class="nf">Download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">filelist</span><span class="p">):</span>     <span class="c1"># {{{</span>
+
+		<span class="k">if</span> <span class="n">m</span><span class="o">.</span><span class="n">ispc</span><span class="p">():</span>
+			<span class="c1">#do nothing</span>
+			<span class="k">return</span>
+
+		<span class="c1">#copy files from cluster to current directory</span>
+		<span class="n">directory</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">)</span>
+		<span class="n">issmscpin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span><span class="n">directory</span><span class="p">,</span><span class="n">filelist</span><span class="p">)</span></div></div>
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

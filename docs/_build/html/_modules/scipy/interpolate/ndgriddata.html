@@ -1,0 +1,436 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scipy.interpolate.ndgriddata &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>scipy.interpolate.ndgriddata</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for scipy.interpolate.ndgriddata</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Convenience interface to N-D interpolation</span>
+
+<span class="sd">.. versionadded:: 0.9</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span><span class="p">,</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">.interpnd</span> <span class="k">import</span> <span class="n">LinearNDInterpolator</span><span class="p">,</span> <span class="n">NDInterpolatorBase</span><span class="p">,</span> \
+     <span class="n">CloughTocher2DInterpolator</span><span class="p">,</span> <span class="n">_ndim_coords_from_arrays</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="k">import</span> <span class="n">cKDTree</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;griddata&#39;</span><span class="p">,</span> <span class="s1">&#39;NearestNDInterpolator&#39;</span><span class="p">,</span> <span class="s1">&#39;LinearNDInterpolator&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;CloughTocher2DInterpolator&#39;</span><span class="p">]</span>
+
+<span class="c1">#------------------------------------------------------------------------------</span>
+<span class="c1"># Nearest-neighbour interpolation</span>
+<span class="c1">#------------------------------------------------------------------------------</span>
+
+
+<span class="k">class</span> <span class="nc">NearestNDInterpolator</span><span class="p">(</span><span class="n">NDInterpolatorBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    NearestNDInterpolator(x, y)</span>
+
+<span class="sd">    Nearest-neighbour interpolation in N dimensions.</span>
+
+<span class="sd">    .. versionadded:: 0.9</span>
+
+<span class="sd">    Methods</span>
+<span class="sd">    -------</span>
+<span class="sd">    __call__</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : (Npoints, Ndims) ndarray of floats</span>
+<span class="sd">        Data point coordinates.</span>
+<span class="sd">    y : (Npoints,) ndarray of float or complex</span>
+<span class="sd">        Data values.</span>
+<span class="sd">    rescale : boolean, optional</span>
+<span class="sd">        Rescale points to unit cube before performing interpolation.</span>
+<span class="sd">        This is useful if some of the input dimensions have</span>
+<span class="sd">        incommensurable units and differ by many orders of magnitude.</span>
+
+<span class="sd">        .. versionadded:: 0.14.0</span>
+<span class="sd">    tree_options : dict, optional</span>
+<span class="sd">        Options passed to the underlying ``cKDTree``.</span>
+
+<span class="sd">        .. versionadded:: 0.17.0</span>
+
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Uses ``scipy.spatial.cKDTree``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tree_options</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">NDInterpolatorBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">,</span>
+                                    <span class="n">need_contiguous</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                    <span class="n">need_values</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">tree_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tree_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">cKDTree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="o">**</span><span class="n">tree_options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">y</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Evaluate interpolator at given points.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        xi : ndarray of float, shape (..., ndim)</span>
+<span class="sd">            Points where to interpolate data at.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xi</span> <span class="o">=</span> <span class="n">_ndim_coords_from_arrays</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">ndim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">xi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_call_shape</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+        <span class="n">xi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale_x</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+        <span class="n">dist</span><span class="p">,</span> <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+
+<span class="c1">#------------------------------------------------------------------------------</span>
+<span class="c1"># Convenience interface function</span>
+<span class="c1">#------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="griddata"><a class="viewcode-back" href="../../../api/issm.html#issm.griddata">[docs]</a><span class="k">def</span> <span class="nf">griddata</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+             <span class="n">rescale</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Interpolate unstructured D-dimensional data.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    points : ndarray of floats, shape (n, D)</span>
+<span class="sd">        Data point coordinates. Can either be an array of</span>
+<span class="sd">        shape (n, D), or a tuple of `ndim` arrays.</span>
+<span class="sd">    values : ndarray of float or complex, shape (n,)</span>
+<span class="sd">        Data values.</span>
+<span class="sd">    xi : 2-D ndarray of float or tuple of 1-D array, shape (M, D)</span>
+<span class="sd">        Points at which to interpolate data.</span>
+<span class="sd">    method : {&#39;linear&#39;, &#39;nearest&#39;, &#39;cubic&#39;}, optional</span>
+<span class="sd">        Method of interpolation. One of</span>
+
+<span class="sd">        ``nearest``</span>
+<span class="sd">          return the value at the data point closest to</span>
+<span class="sd">          the point of interpolation.  See `NearestNDInterpolator` for</span>
+<span class="sd">          more details.</span>
+
+<span class="sd">        ``linear``</span>
+<span class="sd">          tesselate the input point set to n-dimensional</span>
+<span class="sd">          simplices, and interpolate linearly on each simplex.  See</span>
+<span class="sd">          `LinearNDInterpolator` for more details.</span>
+
+<span class="sd">        ``cubic`` (1-D)</span>
+<span class="sd">          return the value determined from a cubic</span>
+<span class="sd">          spline.</span>
+
+<span class="sd">        ``cubic`` (2-D)</span>
+<span class="sd">          return the value determined from a</span>
+<span class="sd">          piecewise cubic, continuously differentiable (C1), and</span>
+<span class="sd">          approximately curvature-minimizing polynomial surface. See</span>
+<span class="sd">          `CloughTocher2DInterpolator` for more details.</span>
+<span class="sd">    fill_value : float, optional</span>
+<span class="sd">        Value used to fill in for requested points outside of the</span>
+<span class="sd">        convex hull of the input points.  If not provided, then the</span>
+<span class="sd">        default is ``nan``. This option has no effect for the</span>
+<span class="sd">        &#39;nearest&#39; method.</span>
+<span class="sd">    rescale : bool, optional</span>
+<span class="sd">        Rescale points to unit cube before performing interpolation.</span>
+<span class="sd">        This is useful if some of the input dimensions have</span>
+<span class="sd">        incommensurable units and differ by many orders of magnitude.</span>
+
+<span class="sd">        .. versionadded:: 0.14.0</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+<span class="sd">    .. versionadded:: 0.9</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    Suppose we want to interpolate the 2-D function</span>
+
+<span class="sd">    &gt;&gt;&gt; def func(x, y):</span>
+<span class="sd">    ...     return x*(1-x)*np.cos(4*np.pi*x) * np.sin(4*np.pi*y**2)**2</span>
+
+<span class="sd">    on a grid in [0, 1]x[0, 1]</span>
+
+<span class="sd">    &gt;&gt;&gt; grid_x, grid_y = np.mgrid[0:1:100j, 0:1:200j]</span>
+
+<span class="sd">    but we only know its values at 1000 data points:</span>
+
+<span class="sd">    &gt;&gt;&gt; points = np.random.rand(1000, 2)</span>
+<span class="sd">    &gt;&gt;&gt; values = func(points[:,0], points[:,1])</span>
+
+<span class="sd">    This can be done with `griddata` -- below we try out all of the</span>
+<span class="sd">    interpolation methods:</span>
+
+<span class="sd">    &gt;&gt;&gt; from scipy.interpolate import griddata</span>
+<span class="sd">    &gt;&gt;&gt; grid_z0 = griddata(points, values, (grid_x, grid_y), method=&#39;nearest&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; grid_z1 = griddata(points, values, (grid_x, grid_y), method=&#39;linear&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; grid_z2 = griddata(points, values, (grid_x, grid_y), method=&#39;cubic&#39;)</span>
+
+<span class="sd">    One can see that the exact result is reproduced by all of the</span>
+<span class="sd">    methods to some degree, but for this smooth function the piecewise</span>
+<span class="sd">    cubic interpolant gives the best results:</span>
+
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; plt.subplot(221)</span>
+<span class="sd">    &gt;&gt;&gt; plt.imshow(func(grid_x, grid_y).T, extent=(0,1,0,1), origin=&#39;lower&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(points[:,0], points[:,1], &#39;k.&#39;, ms=1)</span>
+<span class="sd">    &gt;&gt;&gt; plt.title(&#39;Original&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; plt.subplot(222)</span>
+<span class="sd">    &gt;&gt;&gt; plt.imshow(grid_z0.T, extent=(0,1,0,1), origin=&#39;lower&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; plt.title(&#39;Nearest&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; plt.subplot(223)</span>
+<span class="sd">    &gt;&gt;&gt; plt.imshow(grid_z1.T, extent=(0,1,0,1), origin=&#39;lower&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; plt.title(&#39;Linear&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; plt.subplot(224)</span>
+<span class="sd">    &gt;&gt;&gt; plt.imshow(grid_z2.T, extent=(0,1,0,1), origin=&#39;lower&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; plt.title(&#39;Cubic&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; plt.gcf().set_size_inches(6, 6)</span>
+<span class="sd">    &gt;&gt;&gt; plt.show()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">points</span> <span class="o">=</span> <span class="n">_ndim_coords_from_arrays</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">points</span><span class="o">.</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">ndim</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">ndim</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ndim</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;cubic&#39;</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">.interpolate</span> <span class="k">import</span> <span class="n">interp1d</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">xi</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;invalid number of dimensions in xi&quot;</span><span class="p">)</span>
+            <span class="n">xi</span><span class="p">,</span> <span class="o">=</span> <span class="n">xi</span>
+        <span class="c1"># Sort points/values together, necessary as input for interp1d</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+        <span class="n">points</span> <span class="o">=</span> <span class="n">points</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;nearest&#39;</span><span class="p">:</span>
+            <span class="n">fill_value</span> <span class="o">=</span> <span class="s1">&#39;extrapolate&#39;</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                      <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ip</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;nearest&#39;</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">NearestNDInterpolator</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ip</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">LinearNDInterpolator</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+                                  <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ip</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;cubic&#39;</span> <span class="ow">and</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">CloughTocher2DInterpolator</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+                                        <span class="n">rescale</span><span class="o">=</span><span class="n">rescale</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ip</span><span class="p">(</span><span class="n">xi</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown interpolation method </span><span class="si">%r</span><span class="s2"> for &quot;</span>
+                         <span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> dimensional data&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">ndim</span><span class="p">))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

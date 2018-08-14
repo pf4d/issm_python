@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.ll2xy &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.ll2xy</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.ll2xy</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span>  <span class="nn">np</span> 
+
+<div class="viewcode-block" id="ll2xy"><a class="viewcode-back" href="../../api/issm.html#issm.ll2xy.ll2xy">[docs]</a><span class="k">def</span> <span class="nf">ll2xy</span><span class="p">(</span><span class="n">lat</span><span class="p">,</span><span class="n">lon</span><span class="p">,</span><span class="n">sgn</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">central_meridian</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">standard_parallel</span><span class="o">=</span><span class="mi">71</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	LL2XY - converts lat lon to polar stereographic</span>
+
+<span class="sd">   Converts from geodetic latitude and longitude to Polar </span>
+<span class="sd">   Stereographic (X,Y) coordinates for the polar regions.</span>
+<span class="sd">   Author: Michael P. Schodlok, December 2003 (map2ll)</span>
+
+<span class="sd">   Usage:</span>
+<span class="sd">      x,y = ll2xy(lat,lon,sgn)</span>
+<span class="sd">      x,y = ll2xy(lat,lon,sgn,central_meridian,standard_parallel)</span>
+
+<span class="sd">      - sgn = Sign of latitude +1 : north latitude (default is mer=45 lat=70)</span>
+<span class="sd">                               -1 : south latitude (default is mer=0  lat=71)</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="k">assert</span> <span class="n">sgn</span><span class="o">==</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">sgn</span><span class="o">==-</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;error: sgn should be either +1 or -1&#39;</span>
+
+	<span class="c1">#Get central_meridian and standard_parallel depending on hemisphere</span>
+	<span class="k">if</span> <span class="n">sgn</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+		<span class="n">delta</span> <span class="o">=</span> <span class="mi">45</span>
+		<span class="n">slat</span> <span class="o">=</span> <span class="mi">70</span>
+		<span class="nb">print</span> <span class="s1">&#39;		ll2xy: creating coordinates in north polar stereographic (Std Latitude: 70N Meridian: 45)&#39;</span>
+	<span class="k">else</span><span class="p">:</span> 
+		<span class="n">delta</span> <span class="o">=</span> <span class="n">central_meridian</span>
+		<span class="n">slat</span> <span class="o">=</span> <span class="n">standard_parallel</span>
+		<span class="nb">print</span> <span class="s1">&#39;		ll2xy: creating coordinates in south polar stereographic (Std Latitude: 71S Meridian: 0)&#39;</span>
+	
+	<span class="c1"># Conversion constant from degrees to radians</span>
+	<span class="n">cde</span> <span class="o">=</span> <span class="mf">57.29577951</span>
+	<span class="c1"># Radius of the earth in meters</span>
+	<span class="n">re</span> <span class="o">=</span> <span class="mf">6378.273</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span>
+	<span class="c1"># Eccentricity of the Hughes ellipsoid squared</span>
+	<span class="n">ex2</span> <span class="o">=</span> <span class="o">.</span><span class="mi">006693883</span>
+	<span class="c1"># Eccentricity of the Hughes ellipsoid</span>
+	<span class="n">ex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ex2</span><span class="p">)</span>
+	
+	<span class="n">latitude</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.</span>
+	<span class="n">longitude</span> <span class="o">=</span> <span class="p">(</span><span class="n">lon</span> <span class="o">+</span> <span class="n">delta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.</span>
+	
+	<span class="c1"># compute X and Y in grid coordinates.</span>
+	<span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="o">-</span><span class="n">latitude</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="p">((</span><span class="mi">1</span><span class="o">-</span><span class="n">ex</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">latitude</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">ex</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">latitude</span><span class="p">)))</span><span class="o">**</span><span class="p">(</span><span class="n">ex</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+	
+	<span class="k">if</span> <span class="p">(</span><span class="mi">90</span> <span class="o">-</span> <span class="n">slat</span><span class="p">)</span> <span class="o">&lt;</span>  <span class="mf">1.e-5</span><span class="p">:</span>
+		<span class="n">rho</span> <span class="o">=</span> <span class="mf">2.</span><span class="o">*</span><span class="n">re</span><span class="o">*</span><span class="n">T</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="mf">1.</span><span class="o">+</span><span class="n">ex</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">ex</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">ex</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">ex</span><span class="p">))</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">sl</span>  <span class="o">=</span> <span class="n">slat</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">180.</span>
+		<span class="n">tc</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">4.</span><span class="o">-</span><span class="n">sl</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="mf">1.</span><span class="o">-</span><span class="n">ex</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">sl</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">ex</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">sl</span><span class="p">)))</span><span class="o">**</span><span class="p">(</span><span class="n">ex</span><span class="o">/</span><span class="mf">2.</span><span class="p">)</span>
+		<span class="n">mc</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">sl</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span><span class="o">-</span><span class="n">ex2</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">sl</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+		<span class="n">rho</span> <span class="o">=</span> <span class="n">re</span><span class="o">*</span><span class="n">mc</span><span class="o">*</span><span class="n">T</span><span class="o">/</span><span class="n">tc</span>
+	
+	<span class="n">y</span> <span class="o">=</span> <span class="o">-</span><span class="n">rho</span> <span class="o">*</span> <span class="n">sgn</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">sgn</span><span class="o">*</span><span class="n">longitude</span><span class="p">)</span>
+	<span class="n">x</span> <span class="o">=</span>  <span class="n">rho</span> <span class="o">*</span> <span class="n">sgn</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">sgn</span><span class="o">*</span><span class="n">longitude</span><span class="p">)</span>
+
+	<span class="n">cnt1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">latitude</span><span class="o">&gt;=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mf">2.</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	
+	<span class="k">if</span> <span class="n">cnt1</span><span class="p">:</span>
+		<span class="n">x</span><span class="p">[</span><span class="n">cnt1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+		<span class="n">y</span><span class="p">[</span><span class="n">cnt1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+	<span class="k">return</span> <span class="n">x</span><span class="p">,</span><span class="n">y</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

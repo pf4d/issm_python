@@ -1,0 +1,268 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.writejsfile &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.writejsfile</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.writejsfile</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">writejsfield</span> <span class="k">import</span> <span class="n">writejsfield</span>
+<div class="viewcode-block" id="writejsfile"><a class="viewcode-back" href="../../api/issm.html#issm.writejsfile.writejsfile">[docs]</a><span class="k">def</span> <span class="nf">writejsfile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">model</span><span class="p">,</span><span class="n">keyname</span><span class="p">):</span>
+<span class="c1">#WRITEJSFILE - write model file to javascript database</span>
+<span class="c1">#</span>
+<span class="c1">#   Usage:</span>
+<span class="c1">#      writejsfile(filename,model,keyname)</span>
+<span class="c1">#</span>
+
+	<span class="n">nods</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+	<span class="n">nel</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+	<span class="n">nx</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">contourx1</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>	
+	<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;model = </span><span class="si">{}</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;model[&quot;title&quot;]=&quot;</span><span class="si">{0}</span><span class="s1">&quot;;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">title</span><span class="p">))</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;model[&quot;initialZoomFactor&quot;]=</span><span class="si">{0}</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">initialZoomFactor</span><span class="p">))</span>
+	<span class="c1">#write index:</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;!-- model[&quot;index&quot;]{{{--&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;model[&quot;index&quot;]=[&#39;</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nel</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{0}</span><span class="s1">, </span><span class="si">{1}</span><span class="s1">, </span><span class="si">{2}</span><span class="s1">],&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{0}</span><span class="s1">, </span><span class="si">{1}</span><span class="s1">, </span><span class="si">{2}</span><span class="s1">]];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]))</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;!--}}}--&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;writing model coordinates&#39;</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;x&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">nods</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;y&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">nods</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;z&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">z</span><span class="p">,</span><span class="n">nods</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;surface&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span><span class="n">nods</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;contourx1&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">contourx1</span><span class="p">,</span><span class="n">nx</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;contoury1&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">contoury1</span><span class="p">,</span><span class="n">nx</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;contourz1&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">contourz1</span><span class="p">,</span><span class="n">nx</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;contourx2&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">contourx2</span><span class="p">,</span><span class="n">nx</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;contoury2&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">contoury2</span><span class="p">,</span><span class="n">nx</span><span class="p">)</span>
+	<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;model[&quot;contourz2&quot;]&#39;</span><span class="p">,</span><span class="n">model</span><span class="o">.</span><span class="n">contourz2</span><span class="p">,</span><span class="n">nx</span><span class="p">)</span>
+
+	<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;writing results&#39;</span><span class="p">)</span>
+	<span class="n">results</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">results</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;results=</span><span class="si">{}</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)):</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;result=</span><span class="si">{}</span><span class="s1">;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="n">writejsfield</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;result[&quot;data&quot;]&#39;</span><span class="p">,</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">,</span><span class="n">nods</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;!--{{{--&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;result[&quot;caxis&quot;]=[</span><span class="si">{0}</span><span class="s1">,</span><span class="si">{1}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">caxis</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">caxis</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;result[&quot;label&quot;]=&quot;</span><span class="si">{0}</span><span class="s1">&quot;;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">label</span><span class="p">))</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;result[&quot;shortlabel&quot;]=&quot;</span><span class="si">{0}</span><span class="s1">&quot;;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">shortlabel</span><span class="p">))</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;result[&quot;unit&quot;]=&quot;</span><span class="si">{0}</span><span class="s1">&quot;;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span><span class="p">))</span>
+		<span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">)</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;result[&quot;time_range&quot;]=[</span><span class="si">{0}</span><span class="s1">,</span><span class="si">{1}</span><span class="s1">];</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">time_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">results</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">time_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;results[&quot;</span><span class="si">{0}</span><span class="s1">&quot;]=result;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;!--}}}--&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;model.results=results;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;models[&quot;</span><span class="si">{0}</span><span class="s1">&quot;]=model;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">keyname</span><span class="p">))</span>
+
+	<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

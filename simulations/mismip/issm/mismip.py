@@ -23,26 +23,15 @@ Variable 'md' shelved.
 
 
 from netCDF4    import Dataset
-from fenics_viz import *
+from fenics_viz import print_text, plot_variable
 import issm         as im
 import numpy        as np
 import os
 
 # directories for saving data :
-mdl_odr = 'HO'
-#name    = 'zero_stress'
-#name    = 'no_slip'
-#name    = 'zero_velocity'
-#name    = 'marine_bc'
-#name    = 'marine_bc_dt_1_y'
-#name    = 'marine_bc_subelement'
-#name    = 'shelf_bc_subelement'
-#name    = 'shelf_bc_subelement_slip'
-#name    = 'shelf_bc_subelement_slip_fric_1e3'
-#name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront_dx_5000'
-#name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront_dx_10000_entire_wall_slip'
-#name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront_dx_10000_cfl_entire_slip'
-name    = 'shelf_bc_subelement_slip_fric_1e4_iceFront_dx_10000_wall_slip_dt_0.1'
+mdl_odr  = 'HO'
+lat_slip = True
+name     = 'lateral_slip'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
@@ -54,7 +43,7 @@ d       = os.path.dirname(out_dir)
 if not os.path.exists(d):
   os.makedirs(d)
 
-# ISMIP HOM A experiment :
+# MISMIP+ experiment :
 md = im.model()
 md.miscellaneous.name = name
 
@@ -78,7 +67,7 @@ wc     =  24000.0     # [m] half width of the trough
 zd     = -720.0       # [m] maximum depth of the bedrock topography
 thklim =  10.0        # [m] thickness limit
 rhow   =  1028.0      # [kg m^-3] density of seawater
-rhoi   =  910.0       # [kg m^-3] density of glacier ice
+rhoi   =  918.0       # [kg m^-3] density of glacier ice
 g      =  9.81        # [m s^2] gravitational acceleration
 spy    =  31556926.0  # [s a^-1] seconds per year
 Hini   =  100.0       # [m] initial ice thickness
@@ -86,13 +75,14 @@ Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
 A      =  2e-17       # [Pa^{-n} s^{-1}] flow 
 beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
-p      =  1.0         # [--] Paterson friction exponent one
+p      =  3.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
-tf     =  20000.0       # [a] final time
-dt     =  0.1         # [a] time step
-dt_sav =  10.0         # [a] time interval to save data
+tf     =  20000.0     # [a] final time
+dt     =  1           # [a] time step
+dt_sav =  10.0        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
+num_p  =  2           # [--] number of processor cores to use
 
 # create an empty rectangular mesh :
 #md     = triangle(md, './exp/MismipDomain.exp', 10000)
@@ -176,7 +166,7 @@ md.friction.p                =  p * e_ones
 md.friction.q                =  q * e_ones
 md.friction.coefficient      = beta * v_ones
 floating_v = np.where(md.mask.groundedice_levelset < 0)[0]
-md.friction.coefficient[floating_v] = 0
+#md.friction.coefficient[floating_v] = 0
 
 md.materials.rheology_B      = Bf * v_ones
 md.materials.rheology_n      =  n * e_ones
@@ -189,30 +179,37 @@ md.basalforcings.floatingice_melting_rate = 0.0 * v_ones
 
 # Set the default boundary conditions for an ice-sheet :
 md = im.SetMarineIceSheetBC(md, './exp/mismip_front.exp')
-#md = im.SetIceShelfBC(md)
+#md = im.SetIceShelfBC(md, './exp/mismip_front.exp')
 
 #md.stressbalance.referential              = np.nan * A_ones
 #md.stressbalance.loadingforce             = np.nan * b_ones
 
-# upper side wall :
-pos_u  = np.where(md.mesh.y > np.max(md.mesh.y) - 0.1)[0]
-md.stressbalance.spcvx[pos_u] = np.nan
-md.stressbalance.spcvy[pos_u] = 0.0
-md.stressbalance.spcvz[pos_u] = np.nan
-
-# lower side wall :
-pos_l  = np.where(md.mesh.y < 0.1)[0]
-md.stressbalance.spcvx[pos_l] = np.nan
-md.stressbalance.spcvy[pos_l] = 0.0
-md.stressbalance.spcvz[pos_l] = np.nan
+# apply lateral slip on north, south, and west boundaries :
+if lat_slip:  slip = np.nan
+else:         slip = 0.0
 
 # inflow boundary condition :
-pos2  = np.where(md.mesh.x < 0.1)[0]
-md.stressbalance.spcvx[pos2] = 0.0
-md.stressbalance.spcvy[pos2] = np.nan
-md.stressbalance.spcvz[pos2] = np.nan
+pos_w  = np.where(md.mesh.x < 0.1)[0]
+md.stressbalance.spcvx[pos_w] = 0.0
+md.stressbalance.spcvy[pos_w] = slip
+md.stressbalance.spcvz[pos_w] = slip
 
-#md.smb.mass_balance          = adot * v_ones
+# north wall :
+pos_n  = np.where(md.mesh.y > np.max(md.mesh.y) - 0.1)[0]
+md.stressbalance.spcvx[pos_n] = slip 
+md.stressbalance.spcvy[pos_n] = 0.0
+md.stressbalance.spcvz[pos_n] = slip
+
+# south wall :
+pos_s  = np.where(md.mesh.y < 0.1)[0]
+md.stressbalance.spcvx[pos_s] = slip
+md.stressbalance.spcvy[pos_s] = 0.0
+md.stressbalance.spcvz[pos_s] = slip
+
+# go back and ensure that the west corners have zero x-component velocity :
+md.stressbalance.spcvx[pos_w] = 0.0
+
+md.smb.mass_balance          = adot * v_ones
 #md.thermal.spctemperature    = np.nan * v_ones
 
 #md.groundingline.migration              = 'SoftMigration'
@@ -257,9 +254,9 @@ md.extrude(6, 1.0)
 md = im.setflowequation(md, mdl_odr, 'all')
 md.flowequation.fe_HO = 'P1'
 
-# set no-slip basal velocity BC :
-# FIXME: if you do not call ``md.extrude()`` before, ``md.mesh.vertexonbase``
-#        does not exist.
+## set no-slip basal velocity BC :
+## FIXME: if you do not call ``md.extrude()`` before, ``md.mesh.vertexonbase``
+##        does not exist.
 #basal_v                         = md.mesh.vertexonbase
 #md.stressbalance.spcvx[basal_v] = 0.0
 #md.stressbalance.spcvy[basal_v] = 0.0
@@ -274,18 +271,18 @@ im.savevars(out_dir + 'mismip_init.md', 'md', md)
 # solve :
 print_text('::: issm -- solving :::', 'red')
 
-# initialize the velocity for the CFL condition:
-md.cluster = im.generic('name', im.gethostname(), 'np', 2)
-md.verbose = im.verbose('solution', True, 'convergence', True)
-md         = im.solve(md, 'Stressbalance')
-
-md.initialization.vx  = md.results.StressbalanceSolution.Vx
-md.initialization.vy  = md.results.StressbalanceSolution.Vy
-md.initialization.vz  = md.results.StressbalanceSolution.Vz
-md.initialization.vel = md.results.StressbalanceSolution.Vel
+## initialize the velocity for the CFL condition:
+#md.cluster = im.generic('name', im.gethostname(), 'np', 2)
+#md.verbose = im.verbose('solution', True, 'convergence', True)
+#md         = im.solve(md, 'Stressbalance')
+#
+#md.initialization.vx  = md.results.StressbalanceSolution.Vx
+#md.initialization.vy  = md.results.StressbalanceSolution.Vy
+#md.initialization.vz  = md.results.StressbalanceSolution.Vz
+#md.initialization.vel = md.results.StressbalanceSolution.Vel
 
 # solve the transient :
-md.cluster = im.generic('name', im.gethostname(), 'np', 2)
+md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Transient')
 
@@ -294,6 +291,9 @@ md         = im.solve(md, 'Transient')
 # FIXME: the savevars method will work for small problems, but fails without 
 #        error for large ones.
 im.savevars(out_dir + name + '.md', 'md', md)
+
+var_dict  = {'md.results.TransientSolution' : md.results.TransientSolution}
+im.savevars(out_dir + name + '.shelve', var_dict)
 
 
 

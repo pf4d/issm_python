@@ -26,7 +26,7 @@ dmg.data['U_ob'] = U_ob
 
 #===============================================================================
 # form field from which to refine :
-dmg.rescale_field('U_ob', 'ref', umin=5000.0, umax=500000.0, inverse=True)
+dmg.rescale_field('U_ob', 'ref', umin=1000.0, umax=300000.0, inverse=True)
 
 # eliminate just the edge of the mask so that we can properly interpolate
 # the geometry to the terminus :
@@ -73,7 +73,7 @@ m.eliminate_intersections(dist=200)              # eliminate interscting lines
 m.check_dist()                                   # remove points too close
 m.write_gmsh_contour(boundary_extend=False)      # create a .geo contour file
 m.plot_contour()                                 # plot the contour
-m.extrude(h=100000, n_layers=5)                 # vertically extrude
+m.extrude(h=100000, n_layers=20)                 # vertically extrude
 m.close_file()                                   # close the files
 
 

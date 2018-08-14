@@ -1,0 +1,403 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.mesh3dsurface &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.mesh3dsurface</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.mesh3dsurface</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">issm.MatlabFuncs</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">issm.model</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">issm.fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">issm.checkfield</span> <span class="k">import</span> <span class="n">checkfield</span>
+<span class="kn">from</span> <span class="nn">issm.WriteData</span> <span class="k">import</span> <span class="n">WriteData</span>
+
+<div class="viewcode-block" id="mesh3dsurface"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface">[docs]</a><span class="k">class</span> <span class="nc">mesh3dsurface</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="c1">#MESH3DSURFACE class definition</span>
+<span class="c1">#</span>
+<span class="c1">#   Usage:</span>
+<span class="c1">#      mesh3dsurface=mesh3dsurface();</span>
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">x</span>                           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">y</span>                           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">z</span>                           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">elements</span>                    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">numberofelements</span>            <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">numberofvertices</span>            <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">numberofedges</span>               <span class="o">=</span> <span class="mi">0</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">lat</span>                         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">long</span>                        <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">r</span>                           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">vertexonboundary</span>            <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">edges</span>                       <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">segments</span>                    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">segmentmarkers</span>              <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">vertexconnectivity</span>          <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">elementconnectivity</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">average_vertex_connectivity</span> <span class="o">=</span> <span class="mi">0</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">extractedvertices</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">extractedelements</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+		
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">setdefaultparameters</span><span class="p">()</span>
+		<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">=</span><span class="n">mesh3dsurface</span><span class="p">()</span>
+			<span class="n">arg</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+			<span class="n">fields</span><span class="o">=</span><span class="n">fieldnames</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)):</span>
+				<span class="n">field</span><span class="o">=</span><span class="n">fields</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+				<span class="k">if</span> <span class="n">ismember</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="n">properties</span><span class="p">(</span><span class="s1">&#39;mesh3dsurface&#39;</span><span class="p">)):</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">=</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;constructor not supported&#39;</span><span class="p">)</span>	
+
+	<span class="c1"># }}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="n">string</span><span class="o">=</span><span class="s1">&#39;   2D tria Mesh (horizontal):&#39;</span>
+		
+		<span class="n">string</span><span class="o">+=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">      Elements and vertices:&#39;</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;numberofelements&#39;</span><span class="p">,</span><span class="s1">&#39;number of elements&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;numberofvertices&#39;</span><span class="p">,</span><span class="s1">&#39;number of vertices&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;elements&#39;</span><span class="p">,</span><span class="s1">&#39;vertex indices of the mesh elements&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;vertices x coordinate [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;vertices y coordinate [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;vertices z coordinate [m]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span><span class="s1">&#39;vertices latitude [degrees]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;long&#39;</span><span class="p">,</span><span class="s1">&#39;vertices longitude [degrees]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="s1">&#39;vertices radius [m]&#39;</span><span class="p">))</span>
+		
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;edges&#39;</span><span class="p">,</span><span class="s1">&#39;edges of the 2d mesh (vertex1 vertex2 element1 element2)&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;numberofedges&#39;</span><span class="p">,</span><span class="s1">&#39;number of edges of the 2d mesh&#39;</span><span class="p">))</span>
+
+		<span class="n">string</span><span class="o">+=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">      Properties:&#39;</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vertexonboundary&#39;</span><span class="p">,</span><span class="s1">&#39;vertices on the boundary of the domain flag list&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;segments&#39;</span><span class="p">,</span><span class="s1">&#39;edges on domain boundary (vertex1 vertex2 element)&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;segmentmarkers&#39;</span><span class="p">,</span><span class="s1">&#39;number associated to each segment&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;vertexconnectivity&#39;</span><span class="p">,</span><span class="s1">&#39;list of vertices connected to vertex_i&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;elementconnectivity&#39;</span><span class="p">,</span><span class="s1">&#39;list of vertices connected to element_i&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;average_vertex_connectivity&#39;</span><span class="p">,</span><span class="s1">&#39;average number of vertices connected to one vertex&#39;</span><span class="p">))</span>
+
+		<span class="n">string</span><span class="o">+=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">      Extracted model():&#39;</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;extractedvertices&#39;</span><span class="p">,</span><span class="s1">&#39;vertices extracted from the model()&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;extractedelements&#39;</span><span class="p">,</span><span class="s1">&#39;elements extracted from the model()&#39;</span><span class="p">))</span> 
+		
+		<span class="k">return</span> <span class="n">string</span>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="mesh3dsurface.loadobj"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface.loadobj">[docs]</a>	<span class="k">def</span> <span class="nf">loadobj</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="c1"># This def is directly called by matlab when a model() selfect is</span>
+		<span class="c1"># loaded. Update old properties here</span>
+
+		<span class="c1">#2014 Oct. 1st</span>
+		<span class="k">if</span> <span class="n">isstruct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+			<span class="n">oldself</span><span class="o">=</span><span class="bp">self</span>
+			<span class="c1">#Assign property values from struct</span>
+			<span class="bp">self</span><span class="o">=</span><span class="n">structtoobj</span><span class="p">(</span><span class="n">mesh3dsurface</span><span class="p">(),</span><span class="n">oldself</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">isfield</span><span class="p">(</span><span class="n">oldself</span><span class="p">,</span><span class="s1">&#39;hemisphere&#39;</span><span class="p">):</span>
+				<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;md.mesh.hemisphere has been automatically converted to EPSG code&#39;</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">strcmpi</span><span class="p">(</span><span class="n">oldself</span><span class="o">.</span><span class="n">hemisphere</span><span class="p">,</span><span class="s1">&#39;n&#39;</span><span class="p">):</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">epsg</span><span class="o">=</span><span class="mi">3413</span>
+				<span class="k">else</span><span class="p">:</span>
+					<span class="bp">self</span><span class="o">.</span><span class="n">epsg</span><span class="o">=</span><span class="mi">3031</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="mesh3dsurface.setdefaultparameters"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface.setdefaultparameters">[docs]</a>	<span class="k">def</span> <span class="nf">setdefaultparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+
+		<span class="c1">#the connectivity is the averaged number of nodes linked to a</span>
+		<span class="c1">#given node through an edge. This connectivity is used to initially</span>
+		<span class="c1">#allocate memory to the stiffness matrix. A value of 16 seems to</span>
+		<span class="c1">#give a good memory/time ration. This value can be checked in</span>
+		<span class="c1">#trunk/test/Miscellaneous/runme.m</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">average_vertex_connectivity</span><span class="o">=</span><span class="mi">25</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="mesh3dsurface.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span> <span class="c1"># {{{</span>
+
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.x&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.y&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.z&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.lat&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.long&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.r&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.elements&#39;</span><span class="p">,</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;values&#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.elements&#39;</span><span class="p">,</span><span class="s1">&#39;size&#39;</span><span class="p">,[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">flat</span><span class="p">))):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkmessage</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;orphan nodes have been found. Check the mesh outline&#39;</span><span class="p">)</span>
+		
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.numberofelements&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.numberofvertices&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;mesh.average_vertex_connectivity&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s1">&#39;&quot;mesh.average_vertex_connectivity&quot; should be at least 9 in 2d&#39;</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="p">(</span><span class="n">solution</span><span class="o">==</span><span class="s1">&#39;ThermalSolution&#39;</span><span class="p">):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkmessage</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;thermal not supported for 2d mesh&#39;</span><span class="p">);</span>
+			
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="mesh3dsurface.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.mesh.domain_type&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;Domain&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">domaintype</span><span class="p">(),</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;String&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.mesh.domain_dimension&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dimension</span><span class="p">(),</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.mesh.elementtype&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">elementtype</span><span class="p">(),</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;String&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;lat&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;long&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.mesh.z&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">),</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;elements&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;numberofelements&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;numberofvertices&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;average_vertex_connectivity&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;vertexonboundary&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="mesh3dsurface.domaintype"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface.domaintype">[docs]</a>	<span class="k">def</span> <span class="nf">domaintype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="k">return</span> <span class="s1">&#39;3Dsurface&#39;</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="mesh3dsurface.dimension"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface.dimension">[docs]</a>	<span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="k">return</span> <span class="mi">2</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="mesh3dsurface.elementtype"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface.elementtype">[docs]</a>	<span class="k">def</span> <span class="nf">elementtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="k">return</span> <span class="s1">&#39;Tria&#39;</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="mesh3dsurface.processmesh"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface.processmesh">[docs]</a>	<span class="k">def</span> <span class="nf">processmesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">options</span><span class="p">):</span> <span class="c1"># {{{</span>
+	
+		<span class="n">isplanet</span> <span class="o">=</span> <span class="mi">1</span>
+		<span class="n">is2d</span>     <span class="o">=</span> <span class="mi">0</span>
+
+		<span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements</span>
+		<span class="n">x</span>        <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span>
+		<span class="n">y</span>        <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span>
+		<span class="n">z</span>        <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z</span>
+		<span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">is2d</span><span class="p">,</span> <span class="n">isplanet</span><span class="p">]</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="mesh3dsurface.savemodeljs"><a class="viewcode-back" href="../../api/issm.html#issm.mesh3dsurface.mesh3dsurface.savemodeljs">[docs]</a>	<span class="k">def</span> <span class="nf">savemodeljs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fid</span><span class="p">,</span><span class="n">modelname</span><span class="p">):</span> <span class="c1"># {{{</span>
+	
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#s.mesh=new mesh3dsurface()</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">modelname</span><span class="p">)</span>
+		<span class="n">writejs1Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.x&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+		<span class="n">writejs1Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.y&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+		<span class="n">writejs1Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.z&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">z</span><span class="p">)</span>
+		<span class="n">writejs2Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.elements&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+		<span class="n">writejsdouble</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.numberofelements&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">)</span>
+		<span class="n">writejsdouble</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.numberofvertices&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)</span>
+		<span class="n">writejsdouble</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.numberofedges&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">numberofedges</span><span class="p">)</span>
+		<span class="n">writejs1Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.lat&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">)</span>
+		<span class="n">writejs1Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.long&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">long</span><span class="p">)</span>
+		<span class="n">writejs1Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.r&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">)</span>
+		<span class="n">writejs1Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.vertexonboundary&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">vertexonboundary</span><span class="p">)</span>
+		<span class="n">writejs2Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.edges&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+		<span class="n">writejs2Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.segments&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">segments</span><span class="p">)</span>
+		<span class="n">writejs2Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.segmentmarkers&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">segmentmarkers</span><span class="p">)</span>
+		<span class="n">writejs2Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.vertexconnectivity&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">vertexconnectivity</span><span class="p">)</span>
+		<span class="n">writejs2Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.elementconnectivity&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">elementconnectivity</span><span class="p">)</span>
+		<span class="n">writejsdouble</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.average_vertex_connectivity&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">average_vertex_connectivity</span><span class="p">)</span>
+		<span class="n">writejs1Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.extractedvertices&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">extractedvertices</span><span class="p">)</span>
+		<span class="n">writejs1Darray</span><span class="p">(</span><span class="n">fid</span><span class="p">,[</span><span class="n">modelname</span><span class="p">,</span> <span class="s1">&#39;.mesh.extractedelements&#39;</span><span class="p">],</span><span class="bp">self</span><span class="o">.</span><span class="n">extractedelements</span><span class="p">)</span></div></div>
+
+	<span class="c1"># }}}</span>
+	
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,406 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.checkfield &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.checkfield</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.checkfield</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">issm.pairoptions</span> <span class="k">import</span> <span class="n">pairoptions</span>
+<span class="kn">import</span> <span class="nn">issm.MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+
+<div class="viewcode-block" id="checkfield"><a class="viewcode-back" href="../../api/issm.html#issm.checkfield.checkfield">[docs]</a><span class="k">def</span> <span class="nf">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	CHECKFIELD - check field consistency</span>
+
+<span class="sd">	   Used to check model consistency.,</span>
+<span class="sd">	   Requires: </span>
+<span class="sd">	   &#39;field&#39; or &#39;fieldname&#39; option. If &#39;fieldname&#39; is provided, it will retrieve it from the model md. (md.(fieldname)) </span>
+<span class="sd">             If &#39;field&#39; is provided, it will assume the argument following &#39;field&#39; is a numeric array.</span>
+
+<span class="sd">	   Available options:</span>
+<span class="sd">	      - NaN: 1 if check that there is no NaN</span>
+<span class="sd">	      - size: [lines cols], NaN for non checked dimensions</span>
+<span class="sd">	      - &gt;:  greater than provided value</span>
+<span class="sd">	      - &gt;=: greater or equal to provided value</span>
+<span class="sd">	      - &lt;:  smallerthan provided value</span>
+<span class="sd">	      - &lt;=: smaller or equal to provided value</span>
+<span class="sd">	      - &lt; vec:  smallerthan provided values on each vertex</span>
+<span class="sd">	      - timeseries: 1 if check time series consistency (size and time)</span>
+<span class="sd">	      - values: cell of strings or vector of acceptable values</span>
+<span class="sd">	      - numel: list of acceptable number of elements</span>
+<span class="sd">	      - cell: 1 if check that is cell</span>
+<span class="sd">	      - empty: 1 if check that non empty</span>
+<span class="sd">	      - message: overloaded error message</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      md = checkfield(md,fieldname,options);</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#get options</span>
+	<span class="n">options</span><span class="o">=</span><span class="n">pairoptions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+	<span class="c1">#get field from model</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;field&#39;</span><span class="p">):</span>
+		<span class="n">field</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;field&#39;</span><span class="p">)</span>
+		<span class="n">fieldname</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;no fieldname&#39;</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">fieldname</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;fieldname&#39;</span><span class="p">)</span> 
+		<span class="n">exec</span><span class="p">(</span><span class="s2">&quot;field=md.</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fieldname</span><span class="p">))</span>
+
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+		<span class="n">field</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">field</span><span class="p">])</span>
+
+	<span class="c1">#check empty</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;empty&#39;</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; is empty&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+
+	<span class="c1">#Check size</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;size&#39;</span><span class="p">):</span>
+		<span class="n">fieldsize</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;size&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fieldsize</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+				<span class="k">pass</span>
+			<span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">field</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">)</span><span class="o">==</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+					<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s2">&quot;field </span><span class="si">{}</span><span class="s2"> size should be </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">try</span><span class="p">:</span>
+					 <span class="n">exec</span><span class="p">(</span><span class="s2">&quot;md.</span><span class="si">{}</span><span class="s2">=field[:,0]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fieldname</span><span class="p">))</span>
+					 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> had a bad dimension, we fixed it but you should check it&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fieldname</span><span class="p">))</span>
+				<span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+					<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s2">&quot;field </span><span class="si">{}</span><span class="s2"> should have </span><span class="si">{}</span><span class="s2"> dimension&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">fieldsize</span><span class="p">))))</span>
+		<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">fieldsize</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+			<span class="k">if</span>   <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">==</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+					<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have </span><span class="si">%d</span><span class="s2"> columns&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+			<span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+				<span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+					<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have </span><span class="si">%d</span><span class="s2"> lines&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+			<span class="k">elif</span> <span class="n">fieldsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+				<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+					<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; size should be </span><span class="si">%d</span><span class="s2"> x </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">==</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+					<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; size should be </span><span class="si">%d</span><span class="s2"> x </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fieldsize</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+	
+	<span class="c1">#Check numel</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;numel&#39;</span><span class="p">):</span>
+		<span class="n">fieldnumel</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;numel&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fieldnumel</span><span class="p">:</span>
+			<span class="k">if</span>   <span class="nb">len</span><span class="p">(</span><span class="n">fieldnumel</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; size should be </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldnumel</span><span class="p">)))</span>
+			<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">fieldnumel</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; size should be </span><span class="si">%d</span><span class="s2"> or </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldnumel</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fieldnumel</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; size should be </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldnumel</span><span class="p">)))</span>
+
+	<span class="c1">#check NaN</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">field</span><span class="p">)):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;NaN values found in field &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+
+	<span class="c1">#check Inf</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">field</span><span class="p">)):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;Inf values found in field &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+
+	<span class="c1">#check cell</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;cell&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,(</span><span class="nb">tuple</span><span class="p">,</span><span class="nb">list</span><span class="p">,</span><span class="nb">dict</span><span class="p">)):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should be a cell&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+
+	<span class="c1">#check values</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">):</span>
+		<span class="n">fieldvalues</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;values&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="kc">False</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">ismember</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="n">fieldvalues</span><span class="p">):</span>
+			<span class="k">if</span>   <span class="nb">len</span><span class="p">(</span><span class="n">fieldvalues</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; value should be &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span>  <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldvalues</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+			<span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">fieldvalues</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; values should be &#39;</span><span class="si">%s</span><span class="s2">&#39; or &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span>  <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldvalues</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">fieldvalues</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have values in </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">fieldvalues</span><span class="p">)))</span>
+
+	<span class="c1">#check greater</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">):</span>
+		<span class="n">lowerbound</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;&gt;=&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">field</span><span class="o">&lt;</span><span class="n">lowerbound</span><span class="p">):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have values above </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">lowerbound</span><span class="p">)))</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">):</span>
+		<span class="n">lowerbound</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;&gt;&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">field</span><span class="o">&lt;=</span><span class="n">lowerbound</span><span class="p">):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have values above </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">lowerbound</span><span class="p">)))</span>
+
+	<span class="c1">#check smaller</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">):</span>
+		<span class="n">upperbound</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">field</span><span class="o">&gt;</span><span class="n">upperbound</span><span class="p">):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have values below </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">upperbound</span><span class="p">)))</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span><span class="p">):</span>
+		<span class="n">upperbound</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;&lt;&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">field</span><span class="o">&gt;=</span><span class="n">upperbound</span><span class="p">):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have values below </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">upperbound</span><span class="p">)))</span>
+
+	<span class="c1">#check file</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;file&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s2">&quot;file provided in &#39;</span><span class="si">%s</span><span class="s2">&#39;: &#39;</span><span class="si">%s</span><span class="s2">&#39; does not exist&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fieldname</span><span class="p">,</span><span class="n">field</span><span class="p">))</span>
+
+	<span class="c1">#Check row of strings</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="s1">&#39;stringrow&#39;</span><span class="p">):</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="nb">list</span><span class="p">):</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should be a list&quot;</span> <span class="o">%</span><span class="n">fieldname</span><span class="p">))</span>
+
+	<span class="c1">#Check forcings (size and times)</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;timeseries&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+		<span class="k">if</span>   <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">field</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have only one column as there are md.mesh.numberofvertices lines&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+		<span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:])):</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; columns should be sorted chronologically&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+			<span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:]):</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+					<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; columns must not contain duplicate timesteps&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have md.mesh.numberofvertices or md.mesh.numberofvertices+1 lines&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+
+	<span class="c1">#Check single value forcings (size and times)</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;singletimeseries&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,:])):</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+						<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; columns should be sorted chronologically&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+			<span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">field</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:]):</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+						<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; columns must not contain duplicate timesteps&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+		<span class="k">else</span><span class="p">:</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">,</span>\
+				<span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; should have 2 lines&quot;</span> <span class="o">%</span> <span class="n">fieldname</span><span class="p">))</span>
+
+	<span class="k">return</span> <span class="n">md</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

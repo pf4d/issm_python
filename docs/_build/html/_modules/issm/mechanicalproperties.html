@@ -1,0 +1,371 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.mechanicalproperties &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.mechanicalproperties</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.mechanicalproperties</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span>  <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">issm.GetNodalFunctionsCoeff</span> <span class="k">import</span> <span class="n">GetNodalFunctionsCoeff</span>
+<span class="kn">from</span> <span class="nn">issm.results</span> <span class="k">import</span> <span class="n">results</span>
+<span class="kn">from</span> <span class="nn">issm.averaging</span> <span class="k">import</span> <span class="n">averaging</span>
+
+<div class="viewcode-block" id="mechanicalproperties"><a class="viewcode-back" href="../../api/issm.html#issm.mechanicalproperties.mechanicalproperties">[docs]</a><span class="k">def</span> <span class="nf">mechanicalproperties</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">vx</span><span class="p">,</span><span class="n">vy</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	MECHANICALPROPERTIES - compute stress and strain rate for a goven velocity</span>
+<span class="sd">	</span>
+<span class="sd">   this routine computes the components of the stress tensor</span>
+<span class="sd">   strain rate tensor and their respective principal directions.</span>
+<span class="sd">   the results are in the model md: md.results</span>
+<span class="sd">	</span>
+<span class="sd">   Usage:</span>
+<span class="sd">      md=mechanicalproperties(md,vx,vy)</span>
+<span class="sd">	</span>
+<span class="sd">   Example:</span>
+<span class="sd">      md=mechanicalproperties(md,md.initialization.vx,md.initialization.vy)</span>
+<span class="sd">      md=mechanicalproperties(md,md.inversion.vx_obs,md.inversion.vy_obs)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#some checks</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">vx</span><span class="p">)</span><span class="o">!=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">vy</span><span class="p">)</span><span class="o">!=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;the input velocity should be of size &#39;</span> <span class="o">+</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)</span>
+	
+	<span class="c1">#if md.mesh.dimension!=2:</span>
+	<span class="c1">#	raise StandardError(&#39;only 2D model supported currently&#39;)</span>
+
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">flowequation</span><span class="o">.</span><span class="n">element_equation</span><span class="o">!=</span><span class="mi">2</span><span class="p">):</span>
+		<span class="nb">print</span> <span class="s1">&#39;Warning: the model has some non SSA elements. These will be treated like SSA elements&#39;</span>
+
+        <span class="c1">#unpack kwargs</span>
+	<span class="k">if</span> <span class="s1">&#39;damage&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> 
+	    <span class="n">damage</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;damage&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">damage</span><span class="p">)</span><span class="o">!=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;if damage is supplied it should be of size &#39;</span> <span class="o">+</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">damage</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">damage</span><span class="o">=</span><span class="n">damage</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">damage</span><span class="o">=</span><span class="kc">None</span>
+
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">vx</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+		<span class="n">vx</span><span class="o">=</span><span class="n">vx</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">vy</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+		<span class="n">vy</span><span class="o">=</span><span class="n">vy</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	
+	<span class="c1">#initialization</span>
+	<span class="n">numberofelements</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span>
+	<span class="n">numberofvertices</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span>
+	<span class="n">index</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span>
+	<span class="n">summation</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">]])</span>
+	<span class="n">directionsstress</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberofelements</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+	<span class="n">directionsstrain</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberofelements</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+	<span class="n">valuesstress</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberofelements</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+	<span class="n">valuesstrain</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberofelements</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+	
+	<span class="c1">#compute nodal functions coefficients N(x,y)=alpha x + beta y +gamma</span>
+	<span class="n">alpha</span><span class="p">,</span><span class="n">beta</span><span class="o">=</span><span class="n">GetNodalFunctionsCoeff</span><span class="p">(</span><span class="n">index</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+	
+	<span class="c1">#compute shear</span>
+	<span class="n">vxlist</span><span class="o">=</span><span class="n">vx</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span>
+	<span class="n">vylist</span><span class="o">=</span><span class="n">vy</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span>
+	<span class="n">ux</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="n">vxlist</span><span class="o">*</span><span class="n">alpha</span><span class="p">),</span><span class="n">summation</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	<span class="n">uy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="n">vxlist</span><span class="o">*</span><span class="n">beta</span><span class="p">),</span><span class="n">summation</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	<span class="n">vx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="n">vylist</span><span class="o">*</span><span class="n">alpha</span><span class="p">),</span><span class="n">summation</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	<span class="n">vy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">((</span><span class="n">vylist</span><span class="o">*</span><span class="n">beta</span><span class="p">),</span><span class="n">summation</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	<span class="n">uyvx</span><span class="o">=</span><span class="p">(</span><span class="n">vx</span><span class="o">+</span><span class="n">uy</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span>
+	<span class="c1">#clear vxlist vylist</span>
+	
+	<span class="c1">#compute viscosity</span>
+	<span class="n">nu</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">numberofelements</span><span class="p">,))</span>
+	<span class="n">B_bar</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rheology_B</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">summation</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	<span class="n">power</span><span class="o">=</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rheology_n</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rheology_n</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	<span class="n">second_inv</span><span class="o">=</span><span class="p">(</span><span class="n">ux</span><span class="o">**</span><span class="mf">2.</span><span class="o">+</span><span class="n">vy</span><span class="o">**</span><span class="mf">2.</span><span class="o">+</span><span class="p">((</span><span class="n">uy</span><span class="o">+</span><span class="n">vx</span><span class="p">)</span><span class="o">**</span><span class="mf">2.</span><span class="p">)</span><span class="o">/</span><span class="mf">4.</span><span class="o">+</span><span class="n">ux</span><span class="o">*</span><span class="n">vy</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	
+	<span class="c1">#some corrections</span>
+	<span class="n">location</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">second_inv</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span><span class="n">power</span><span class="o">!=</span><span class="mi">0</span><span class="p">))</span>
+	<span class="n">nu</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">=</span><span class="mi">10</span><span class="o">^</span><span class="mi">18</span> 	<span class="c1">#arbitrary maximum viscosity to apply where there is no effective shear</span>
+	
+	<span class="k">if</span> <span class="s1">&#39;matice&#39;</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="vm">__module__</span><span class="p">:</span>
+		<span class="n">location</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">second_inv</span><span class="p">)</span>
+		<span class="n">nu</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">=</span><span class="n">B_bar</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">second_inv</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">**</span><span class="n">power</span><span class="p">[</span><span class="n">location</span><span class="p">])</span>
+		<span class="n">location</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">second_inv</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span><span class="n">power</span><span class="o">==</span><span class="mi">0</span><span class="p">))</span>
+		<span class="n">nu</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">=</span><span class="n">B_bar</span><span class="p">[</span><span class="n">location</span><span class="p">]</span>
+		<span class="n">location</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">second_inv</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span><span class="n">power</span><span class="o">!=</span><span class="mi">0</span><span class="p">))</span>
+		<span class="n">nu</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">=</span><span class="mi">10</span><span class="o">^</span><span class="mi">18</span>
+	<span class="k">elif</span> <span class="s1">&#39;matdamageice&#39;</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="vm">__module__</span> <span class="ow">and</span> <span class="n">damage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+		<span class="nb">print</span> <span class="s1">&#39;computing damage-dependent properties!&#39;</span>
+		<span class="n">Zinv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">damage</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">summation</span><span class="o">/</span><span class="mf">3.</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+		<span class="n">location</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">second_inv</span><span class="p">)</span>
+		<span class="n">nu</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">=</span><span class="n">Zinv</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">*</span><span class="n">B_bar</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">second_inv</span><span class="p">[</span><span class="n">location</span><span class="p">],</span><span class="n">power</span><span class="p">[</span><span class="n">location</span><span class="p">])</span>
+		<span class="n">location</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">second_inv</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span><span class="n">power</span><span class="o">==</span><span class="mi">0</span><span class="p">))</span>
+		<span class="n">nu</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">=</span><span class="n">Zinv</span><span class="p">[</span><span class="n">location</span><span class="p">]</span><span class="o">*</span><span class="n">B_bar</span><span class="p">[</span><span class="n">location</span><span class="p">]</span>
+		<span class="c1">#clear Zinv</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="n">StandardError</span><span class="p">(</span><span class="s1">&#39;class of md.materials (&#39;</span> <span class="o">+</span> <span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="vm">__module__</span> <span class="o">+</span> <span class="s1">&#39;) not recognized or not supported&#39;</span><span class="p">)</span>
+	
+	<span class="c1">#compute stress</span>
+	<span class="n">tau_xx</span><span class="o">=</span><span class="n">nu</span><span class="o">*</span><span class="n">ux</span>
+	<span class="n">tau_yy</span><span class="o">=</span><span class="n">nu</span><span class="o">*</span><span class="n">vy</span>
+	<span class="n">tau_xy</span><span class="o">=</span><span class="n">nu</span><span class="o">*</span><span class="n">uyvx</span>
+	
+	<span class="c1">#compute principal properties of stress</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">numberofelements</span><span class="p">):</span>
+	
+		<span class="c1">#compute stress and strainrate matrices</span>
+		<span class="n">stress</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="p">[</span><span class="n">tau_xx</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tau_xy</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="p">[</span><span class="n">tau_xy</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tau_yy</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="p">])</span>
+		<span class="n">strain</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> <span class="p">[</span><span class="n">ux</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">uyvx</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span> <span class="p">[</span><span class="n">uyvx</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">vy</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="p">])</span>
+	
+		<span class="c1">#eigenvalues and vectors for stress</span>
+		<span class="n">value</span><span class="p">,</span><span class="n">directions</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">stress</span><span class="p">);</span>
+		<span class="n">idx</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># sort in descending algebraic (not absolute) order</span>
+		<span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+		<span class="n">directions</span><span class="o">=</span><span class="n">directions</span><span class="p">[:,</span><span class="n">idx</span><span class="p">]</span>
+		<span class="n">valuesstress</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+		<span class="n">directionsstress</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span><span class="n">directions</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+		<span class="c1">#eigenvalues and vectors for strain</span>
+		<span class="n">value</span><span class="p">,</span><span class="n">directions</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">strain</span><span class="p">);</span>
+		<span class="n">idx</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># sort in descending order</span>
+		<span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+		<span class="n">directions</span><span class="o">=</span><span class="n">directions</span><span class="p">[:,</span><span class="n">idx</span><span class="p">]</span>
+		<span class="n">valuesstrain</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span><span class="p">[</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+		<span class="n">directionsstrain</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span><span class="n">directions</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+	<span class="c1">##plug onto the model</span>
+	<span class="c1">##NB: Matlab sorts the eigen value in increasing order, we want the reverse</span>
+	<span class="n">stress</span><span class="o">=</span><span class="n">results</span><span class="p">()</span>
+	<span class="n">stress</span><span class="o">.</span><span class="n">xx</span><span class="o">=</span><span class="n">tau_xx</span>
+	<span class="n">stress</span><span class="o">.</span><span class="n">yy</span><span class="o">=</span><span class="n">tau_yy</span>
+	<span class="n">stress</span><span class="o">.</span><span class="n">xy</span><span class="o">=</span><span class="n">tau_xy</span>
+	<span class="n">stress</span><span class="o">.</span><span class="n">principalvalue1</span><span class="o">=</span><span class="n">valuesstress</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">stress</span><span class="o">.</span><span class="n">principalaxis1</span><span class="o">=</span><span class="n">directionsstress</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+	<span class="n">stress</span><span class="o">.</span><span class="n">principalvalue2</span><span class="o">=</span><span class="n">valuesstress</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+	<span class="n">stress</span><span class="o">.</span><span class="n">principalaxis2</span><span class="o">=</span><span class="n">directionsstress</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+	<span class="n">stress</span><span class="o">.</span><span class="n">effectivevalue</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">stress</span><span class="o">.</span><span class="n">xx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">stress</span><span class="o">.</span><span class="n">yy</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">2.</span><span class="o">*</span><span class="n">stress</span><span class="o">.</span><span class="n">xy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">stress</span><span class="o">=</span><span class="n">stress</span>
+	
+	<span class="n">strainrate</span><span class="o">=</span><span class="n">results</span><span class="p">()</span>
+	<span class="n">strainrate</span><span class="o">.</span><span class="n">xx</span><span class="o">=</span><span class="n">ux</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span> <span class="c1">#strain rate in 1/a instead of 1/s</span>
+	<span class="n">strainrate</span><span class="o">.</span><span class="n">yy</span><span class="o">=</span><span class="n">vy</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span> 
+	<span class="n">strainrate</span><span class="o">.</span><span class="n">xy</span><span class="o">=</span><span class="n">uyvx</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span> 
+	<span class="n">strainrate</span><span class="o">.</span><span class="n">principalvalue1</span><span class="o">=</span><span class="n">valuesstrain</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span> 
+	<span class="n">strainrate</span><span class="o">.</span><span class="n">principalaxis1</span><span class="o">=</span><span class="n">directionsstrain</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+	<span class="n">strainrate</span><span class="o">.</span><span class="n">principalvalue2</span><span class="o">=</span><span class="n">valuesstrain</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span> 
+	<span class="n">strainrate</span><span class="o">.</span><span class="n">principalaxis2</span><span class="o">=</span><span class="n">directionsstrain</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+	<span class="n">strainrate</span><span class="o">.</span><span class="n">effectivevalue</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">strainrate</span><span class="o">.</span><span class="n">xx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">strainrate</span><span class="o">.</span><span class="n">yy</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">2.</span><span class="o">*</span><span class="n">strainrate</span><span class="o">.</span><span class="n">xy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">strainrate</span><span class="o">=</span><span class="n">strainrate</span>
+	
+	<span class="n">deviatoricstress</span><span class="o">=</span><span class="n">results</span><span class="p">()</span>
+	<span class="n">deviatoricstress</span><span class="o">.</span><span class="n">xx</span><span class="o">=</span><span class="n">tau_xx</span>
+	<span class="n">deviatoricstress</span><span class="o">.</span><span class="n">yy</span><span class="o">=</span><span class="n">tau_yy</span>
+	<span class="n">deviatoricstress</span><span class="o">.</span><span class="n">xy</span><span class="o">=</span><span class="n">tau_xy</span>
+	<span class="n">deviatoricstress</span><span class="o">.</span><span class="n">principalvalue1</span><span class="o">=</span><span class="n">valuesstress</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">deviatoricstress</span><span class="o">.</span><span class="n">principalaxis1</span><span class="o">=</span><span class="n">directionsstress</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+	<span class="n">deviatoricstress</span><span class="o">.</span><span class="n">principalvalue2</span><span class="o">=</span><span class="n">valuesstress</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>
+	<span class="n">deviatoricstress</span><span class="o">.</span><span class="n">principalaxis2</span><span class="o">=</span><span class="n">directionsstress</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+	<span class="n">deviatoricstress</span><span class="o">.</span><span class="n">effectivevalue</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">stress</span><span class="o">.</span><span class="n">xx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">stress</span><span class="o">.</span><span class="n">yy</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="mf">2.</span><span class="o">*</span><span class="n">stress</span><span class="o">.</span><span class="n">xy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">deviatoricstress</span><span class="o">=</span><span class="n">deviatoricstress</span>
+
+	<span class="k">return</span> <span class="n">md</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

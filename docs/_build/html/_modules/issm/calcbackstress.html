@@ -1,0 +1,277 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.calcbackstress &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.calcbackstress</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.calcbackstress</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span>  <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">issm.averaging</span> <span class="k">import</span> <span class="n">averaging</span>
+<span class="kn">from</span> <span class="nn">issm.thomasparams</span> <span class="k">import</span> <span class="n">thomasparams</span>
+
+<div class="viewcode-block" id="calcbackstress"><a class="viewcode-back" href="../../api/issm.html#issm.calcbackstress.calcbackstress">[docs]</a><span class="k">def</span> <span class="nf">calcbackstress</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	Compute ice shelf backstress.</span>
+
+<span class="sd">	This routine computes backstress based on the analytical formalism of</span>
+<span class="sd">	Thomas (1973) and Borstad et al. (2013, The Cryosphere) based on the</span>
+<span class="sd">	ice rigidity, thickness, the densities of ice and seawater, and</span>
+<span class="sd">	(optionally) damage.  Strain rates must also be included, either from</span>
+<span class="sd">	observed or modeled velocities. </span>
+<span class="sd">	</span>
+<span class="sd">	Available options:</span>
+<span class="sd">		- &#39;smoothing&#39;	: the amount of smoothing to be applied to the strain rate data.</span>
+<span class="sd">								Type &#39;help averaging&#39; for more information on its</span>
+<span class="sd">								usage. Defaults to 0.</span>
+<span class="sd">		- &#39;coordsys&#39;	: coordinate system for calculating the strain rate</span>
+<span class="sd">							components. Must be one of: </span>
+<span class="sd">				&#39;longitudinal&#39;: x axis aligned along a flowline at every point (default)</span>
+<span class="sd">				&#39;principal&#39;: x axis aligned along maximum principal strain rate</span>
+<span class="sd">					at every point</span>
+<span class="sd">				&#39;xy&#39;: x and y axes same as in polar stereographic projection </span>
+
+<span class="sd">   Return values:</span>
+<span class="sd">		&#39;backstress&#39; is the inferred backstress based on the analytical</span>
+<span class="sd">		solution for ice shelf creep</span>
+
+<span class="sd">   Usage:</span>
+<span class="sd">      backstress=calcbackstress(md,options)</span>
+
+<span class="sd">   Example:</span>
+<span class="sd">      backstress=calcbackstress(md,&#39;smoothing&#39;,2,&#39;coordsys&#39;,&#39;longitudinal&#39;)</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="c1"># unpack kwargs</span>
+	<span class="n">smoothing</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;smoothing&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+	<span class="k">if</span> <span class="s1">&#39;smoothing&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;smoothing&#39;</span><span class="p">]</span>
+	<span class="n">coordsys</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;coordsys&#39;</span><span class="p">,</span><span class="s1">&#39;longitudinal&#39;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="s1">&#39;coordsys&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;coordsys&#39;</span><span class="p">]</span>
+	<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;error, unexpected or misspelled kwargs&#39;</span>
+
+	<span class="c1"># some checks</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="p">,</span><span class="s1">&#39;strainrate&#39;</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="n">StandardError</span><span class="p">(</span><span class="s1">&#39;md.results.strainrate not present.  Calculate using md=mechanicalproperties(md,vx,vy)&#39;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;2d&#39;</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="n">StandardError</span><span class="p">(</span><span class="s1">&#39;only 2d (planview) model supported currently&#39;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">flowequation</span><span class="o">.</span><span class="n">element_equation</span><span class="o">!=</span><span class="mi">2</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="n">StandardError</span><span class="p">(</span><span class="s1">&#39;Warning: the model has some non-SSA elements.  These will be treated like SSA elements&#39;</span><span class="p">)</span>
+
+	<span class="n">T</span><span class="o">=</span><span class="mf">0.5</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rho_ice</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">g</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rho_ice</span><span class="o">/</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rho_water</span><span class="p">)</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">thickness</span>
+	<span class="n">n</span><span class="o">=</span><span class="n">averaging</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rheology_n</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+	<span class="n">B</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rheology_B</span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">damage</span><span class="o">.</span><span class="n">isdamage</span><span class="p">:</span>
+		<span class="n">D</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">damage</span><span class="o">.</span><span class="n">D</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">D</span><span class="o">=</span><span class="mf">0.</span>
+	
+	<span class="n">a0</span><span class="p">,</span><span class="n">b0</span><span class="p">,</span><span class="n">theta0</span><span class="p">,</span><span class="n">ex0</span><span class="o">=</span><span class="n">thomasparams</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">eq</span><span class="o">=</span><span class="s1">&#39;Thomas&#39;</span><span class="p">,</span><span class="n">smoothing</span><span class="o">=</span><span class="n">smoothing</span><span class="p">,</span><span class="n">coordsys</span><span class="o">=</span><span class="n">coordsys</span><span class="p">)</span>
+	
+	<span class="c1"># analytical backstress solution</span>
+	<span class="n">backstress</span><span class="o">=</span><span class="n">T</span><span class="o">-</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="n">D</span><span class="p">)</span><span class="o">*</span><span class="n">B</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">ex0</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">+</span><span class="n">a0</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">ex0</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="n">n</span><span class="p">)</span><span class="o">/</span><span class="p">((</span><span class="mi">1</span><span class="o">+</span><span class="n">a0</span><span class="o">+</span><span class="n">a0</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">b0</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="p">((</span><span class="n">n</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span><span class="o">/</span><span class="n">n</span><span class="p">))</span>
+	<span class="n">backstress</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">backstress</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)]</span><span class="o">=</span><span class="mi">0</span>
+
+	<span class="k">return</span> <span class="n">backstress</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

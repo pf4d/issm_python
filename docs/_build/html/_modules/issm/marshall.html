@@ -1,0 +1,259 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.marshall &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.marshall</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.marshall</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">WriteData</span> <span class="k">import</span> <span class="n">WriteData</span>
+
+<div class="viewcode-block" id="marshall"><a class="viewcode-back" href="../../api/issm.html#issm.marshall.marshall">[docs]</a><span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="n">md</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	MARSHALL - outputs a compatible binary file from @model md, for certain solution type.</span>
+
+<span class="sd">	   The routine creates a compatible binary file from @model md</span>
+<span class="sd">	   This binary file will be used for parallel runs in JPL-package</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      marshall(md)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="nb">print</span> <span class="s2">&quot;marshalling file &#39;</span><span class="si">%s</span><span class="s2">.bin&#39;.&quot;</span> <span class="o">%</span> <span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span>
+
+	<span class="c1">#open file for binary writing</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;.bin&#39;</span><span class="p">,</span><span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+	<span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;marshall error message: could not open &#39;</span><span class="si">%s</span><span class="s2">.bin&#39; file for binary writing.&quot;</span> <span class="o">%</span> <span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+	<span class="c1">#Go through all model fields: check that it is a class and call checkconsistency</span>
+	<span class="n">fields</span><span class="o">=</span><span class="nb">vars</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+
+<span class="c1">#	for field in fields.iterkeys():</span>
+	<span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">properties</span><span class="p">():</span>
+
+		<span class="c1">#Some properties do not need to be marshalled</span>
+		<span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">,</span><span class="s1">&#39;radaroverlay&#39;</span><span class="p">,</span><span class="s1">&#39;toolkits&#39;</span><span class="p">,</span><span class="s1">&#39;cluster&#39;</span><span class="p">,</span><span class="s1">&#39;private&#39;</span><span class="p">]:</span>
+			<span class="k">continue</span>
+
+		<span class="c1">#Check that current field is an object</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">field</span><span class="p">),</span><span class="s1">&#39;marshall&#39;</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;field &#39;</span><span class="si">%s</span><span class="s2">&#39; is not an object.&quot;</span> <span class="o">%</span> <span class="n">field</span><span class="p">)</span>
+
+		<span class="c1">#Marshall current object</span>
+		<span class="c1">#print &quot;marshalling %s ...&quot; % field</span>
+		<span class="n">exec</span><span class="p">(</span><span class="s2">&quot;md.</span><span class="si">{}</span><span class="s2">.marshall(&#39;md.</span><span class="si">{}</span><span class="s2">&#39;,md,fid)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">,</span><span class="n">field</span><span class="p">))</span>
+
+	<span class="c1">#Last, write &quot;md.EOF&quot; to make sure that the binary file is not corrupt</span>
+	<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="s1">&#39;XXX&#39;</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.EOF&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">);</span>
+
+	<span class="c1">#close file</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	<span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;marshall error message: could not close file &#39;</span><span class="si">%s</span><span class="s2">.bin&#39;.&quot;</span> <span class="o">%</span> <span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

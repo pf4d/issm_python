@@ -1,0 +1,351 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.thermal &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.thermal</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.thermal</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span>  <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">project3d</span> <span class="k">import</span> <span class="n">project3d</span>
+<span class="kn">from</span> <span class="nn">fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">checkfield</span> <span class="k">import</span> <span class="n">checkfield</span>
+<span class="kn">from</span> <span class="nn">WriteData</span> <span class="k">import</span> <span class="n">WriteData</span>
+
+<div class="viewcode-block" id="thermal"><a class="viewcode-back" href="../../api/issm.html#issm.thermal.thermal">[docs]</a><span class="k">class</span> <span class="nc">thermal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	THERMAL class definition</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      thermal=thermal();</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">spctemperature</span>    <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">penalty_threshold</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">stabilization</span>     <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">reltol</span>            <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span>           <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">penalty_lock</span>      <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">penalty_factor</span>    <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">isenthalpy</span>        <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">isdynamicbasalspc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fe</span>                <span class="o">=</span> <span class="s1">&#39;P1&#39;</span><span class="p">;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span> <span class="o">=</span> <span class="p">[]</span>
+
+		<span class="c1">#set defaults</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">setdefaultparameters</span><span class="p">()</span>
+
+		<span class="c1">#}}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="n">string</span><span class="o">=</span><span class="s1">&#39;   Thermal solution parameters:&#39;</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;spctemperature&#39;</span><span class="p">,</span><span class="s1">&#39;temperature constraints (NaN means no constraint) [K]&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;stabilization&#39;</span><span class="p">,</span><span class="s1">&#39;0: no, 1: artificial_diffusivity, 2: SUPG&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;maxiter&#39;</span><span class="p">,</span><span class="s1">&#39;maximum number of non linear iterations&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;reltol&#39;</span><span class="p">,</span><span class="s1">&#39;relative tolerance criterion&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;penalty_lock&#39;</span><span class="p">,</span><span class="s1">&#39;stabilize unstable thermal constraints that keep zigzagging after n iteration (default is 0, no stabilization)&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;penalty_threshold&#39;</span><span class="p">,</span><span class="s1">&#39;threshold to declare convergence of thermal solution (default is 0)&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;isenthalpy&#39;</span><span class="p">,</span><span class="s1">&#39;use an enthalpy formulation to include temperate ice (default is 0)&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;isdynamicbasalspc&#39;</span><span class="p">,</span><span class="s1">&#39;enable dynamic setting of basal forcing. required for enthalpy formulation (default is 0)&#39;</span><span class="p">))</span>
+		<span class="n">string</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;additional outputs requested&#39;</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">string</span>
+		<span class="c1">#}}}</span>
+<div class="viewcode-block" id="thermal.extrude"><a class="viewcode-back" href="../../api/issm.html#issm.thermal.thermal.extrude">[docs]</a>	<span class="k">def</span> <span class="nf">extrude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">spctemperature</span><span class="o">=</span><span class="n">project3d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;vector&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">spctemperature</span><span class="p">,</span><span class="s1">&#39;type&#39;</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">,</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberoflayers</span><span class="p">,</span><span class="s1">&#39;padding&#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">==</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">spctemperature</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">))</span>
+			<span class="n">pos</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonsurface</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">spctemperature</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">temperature</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span>    <span class="c1">#impose observed temperature on surface</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="thermal.defaultoutputs"><a class="viewcode-back" href="../../api/issm.html#issm.thermal.thermal.defaultoutputs">[docs]</a>	<span class="k">def</span> <span class="nf">defaultoutputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">):</span> <span class="c1"># {{{</span>
+
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isenthalpy</span><span class="p">:</span>
+			<span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Enthalpy&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;Waterfraction&#39;</span><span class="p">,</span><span class="s1">&#39;Watercolumn&#39;</span><span class="p">,</span><span class="s1">&#39;BasalforcingsGroundediceMeltingRate&#39;</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">return</span> <span class="p">[</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;BasalforcingsGroundediceMeltingRate&#39;</span><span class="p">]</span></div>
+
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="thermal.setdefaultparameters"><a class="viewcode-back" href="../../api/issm.html#issm.thermal.thermal.setdefaultparameters">[docs]</a>	<span class="k">def</span> <span class="nf">setdefaultparameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># {{{</span>
+		
+		<span class="c1">#Number of unstable constraints acceptable</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">penalty_threshold</span><span class="o">=</span><span class="mi">0</span>
+
+		<span class="c1">#Type of stabilization used</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">stabilization</span><span class="o">=</span><span class="mi">1</span>
+
+		<span class="c1">#Relative tolerance for the enthalpy convergence</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">reltol</span><span class="o">=</span><span class="mf">0.01</span>
+
+		<span class="c1">#Maximum number of iterations</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">maxiter</span><span class="o">=</span><span class="mi">100</span>
+
+		<span class="c1">#factor used to compute the values of the penalties: kappa=max(stiffness matrix)*10^penalty_factor</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">penalty_factor</span><span class="o">=</span><span class="mi">3</span>
+
+		<span class="c1">#Should we use cold ice (default) or enthalpy formulation</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">isenthalpy</span><span class="o">=</span><span class="mi">0</span>
+
+		<span class="c1">#will basal boundary conditions be set dynamically</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">isdynamicbasalspc</span><span class="o">=</span><span class="mi">0</span>
+
+		<span class="c1">#Finite element interpolation</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">fe</span><span class="o">=</span><span class="s1">&#39;P1&#39;</span>
+
+		<span class="c1">#default output</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+
+	<span class="c1">#}}}</span>
+<div class="viewcode-block" id="thermal.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.thermal.thermal.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+		<span class="c1">#Early return</span>
+		<span class="k">if</span> <span class="p">(</span><span class="s1">&#39;ThermalAnalysis&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">analyses</span> <span class="ow">and</span> <span class="s1">&#39;EnthalpyAnalysis&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">analyses</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">solution</span><span class="o">==</span><span class="s1">&#39;TransientSolution&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">md</span><span class="o">.</span><span class="n">transient</span><span class="o">.</span><span class="n">isthermal</span><span class="p">):</span>
+			<span class="k">return</span> <span class="n">md</span>
+
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thermal.stabilization&#39;</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;values&#39;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thermal.spctemperature&#39;</span><span class="p">,</span><span class="s1">&#39;Inf&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;timeseries&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thermal.requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;stringrow&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+		<span class="k">if</span> <span class="s1">&#39;EnthalpyAnalysis&#39;</span> <span class="ow">in</span> <span class="n">analyses</span> <span class="ow">and</span> <span class="n">md</span><span class="o">.</span><span class="n">thermal</span><span class="o">.</span><span class="n">isenthalpy</span> <span class="ow">and</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="p">()</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+			<span class="n">pos</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">thermal</span><span class="o">.</span><span class="n">spctemperature</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">]))</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="n">spccol</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">thermal</span><span class="o">.</span><span class="n">spctemperature</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+			<span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+				<span class="n">spccol</span><span class="o">=</span><span class="mi">1</span>
+			<span class="n">replicate</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">surface</span><span class="o">-</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">z</span><span class="p">,(</span><span class="n">spccol</span><span class="p">))</span>
+			<span class="n">control</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">meltingpoint</span><span class="o">-</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">beta</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rho_ice</span><span class="o">*</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">g</span><span class="o">*</span><span class="n">replicate</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thermal.spctemperature&#39;</span><span class="p">,</span><span class="s1">&#39;field&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">thermal</span><span class="o">.</span><span class="n">spctemperature</span><span class="p">[</span><span class="n">pos</span><span class="p">],</span><span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span><span class="n">control</span><span class="p">[</span><span class="n">pos</span><span class="p">],</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s2">&quot;spctemperature should be below the adjusted melting point&quot;</span><span class="p">)</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thermal.isenthalpy&#39;</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;values&#39;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thermal.isdynamicbasalspc&#39;</span><span class="p">,</span><span class="s1">&#39;numel&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;values&#39;</span><span class="p">,[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]);</span>
+			<span class="k">if</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">thermal</span><span class="o">.</span><span class="n">isenthalpy</span><span class="p">):</span>
+				<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">reltol</span><span class="p">):</span>
+					<span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s2">&quot;for a steadystate computation, thermal.reltol (relative convergence criterion) must be defined!&quot;</span><span class="p">)</span>
+				<span class="n">md</span> <span class="o">=</span> <span class="n">checkfield</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;thermal.reltol&#39;</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span><span class="mf">0.</span><span class="p">,</span><span class="s1">&#39;message&#39;</span><span class="p">,</span><span class="s2">&quot;reltol must be larger than zero&quot;</span><span class="p">);</span>
+
+
+		<span class="k">return</span> <span class="n">md</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="thermal.marshall"><a class="viewcode-back" href="../../api/issm.html#issm.thermal.thermal.marshall">[docs]</a>	<span class="k">def</span> <span class="nf">marshall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">fid</span><span class="p">):</span>    <span class="c1"># {{{</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;spctemperature&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;DoubleMat&#39;</span><span class="p">,</span><span class="s1">&#39;mattype&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;timeserieslength&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="s1">&#39;yts&#39;</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;penalty_threshold&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;stabilization&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;reltol&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;maxiter&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;penalty_lock&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Integer&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;penalty_factor&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Double&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;isenthalpy&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">)</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;fe&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;String&#39;</span><span class="p">);</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;object&#39;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;fieldname&#39;</span><span class="p">,</span><span class="s1">&#39;isdynamicbasalspc&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;Boolean&#39;</span><span class="p">);</span>
+
+		<span class="c1">#process requested outputs</span>
+		<span class="n">outputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">requested_outputs</span>
+		<span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span><span class="p">]</span>
+		<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+			<span class="n">outputscopy</span><span class="o">=</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultoutputs</span><span class="p">(</span><span class="n">md</span><span class="p">)</span><span class="o">+</span><span class="n">outputs</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">:]</span>
+			<span class="n">outputs</span>    <span class="o">=</span><span class="n">outputscopy</span>
+		<span class="n">WriteData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">prefix</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">outputs</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;md.thermal.requested_outputs&#39;</span><span class="p">,</span><span class="s1">&#39;format&#39;</span><span class="p">,</span><span class="s1">&#39;StringArray&#39;</span><span class="p">)</span></div></div>
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

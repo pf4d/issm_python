@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.expdisp &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.expdisp</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.expdisp</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">issm.expread</span> <span class="k">import</span> <span class="n">expread</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span>  <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="k">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">matplotlib.patches</span> <span class="k">as</span> <span class="nn">patches</span>
+
+<div class="viewcode-block" id="expdisp"><a class="viewcode-back" href="../../api/issm.html#issm.expdisp.expdisp">[docs]</a><span class="k">def</span> <span class="nf">expdisp</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span><span class="n">options</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    plot the contents of a domain outline file</span>
+
+<span class="sd">    This routine reads in an exp file and plots all of the x,y points/lines/patches</span>
+
+<span class="sd">    &#39;ax&#39; is a handle to the current plot axes, onto which we want to plot</span>
+
+<span class="sd">    Usage:</span>
+<span class="sd">        expdisp(ax,options)</span>
+
+<span class="sd">    List of options passable to plotmodel:</span>
+<span class="sd">        &#39;expdisp&#39;      : path (or list of paths) to the exp file to be plotted</span>
+<span class="sd">        &#39;explinewidth&#39; : linewidth</span>
+<span class="sd">        &#39;explinestyle&#39; : matplotlib linestyle string</span>
+<span class="sd">        &#39;explinecolor&#39; : matplotlib color string</span>
+<span class="sd">        &#39;expfill&#39;      : (True/False) fill a closed contour</span>
+<span class="sd">        &#39;expfillcolor&#39; : Color for a filled contour, only used if expfill is True</span>
+<span class="sd">        &#39;expfillalpha&#39; : alpha transparency for filled contour</span>
+
+<span class="sd">    All options should be passed as lists of length len(number of exp files passed)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">filenames</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;expdisp&#39;</span><span class="p">)</span>
+    <span class="n">linewidth</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;explinewidth&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">))</span>
+    <span class="n">linestyle</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;explinestyle&#39;</span><span class="p">,[</span><span class="s1">&#39;-&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">))</span>
+    <span class="n">linecolor</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;explinecolor&#39;</span><span class="p">,[</span><span class="s1">&#39;k&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">))</span>
+    <span class="n">fill</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;expfill&#39;</span><span class="p">,[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">))</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;expfillalpha&#39;</span><span class="p">,[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">))</span>
+    <span class="n">facecolor</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;expfillcolor&#39;</span><span class="p">,[</span><span class="s1">&#39;r&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">))</span>
+    <span class="n">unitmultiplier</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)):</span>
+	<span class="n">linestylei</span><span class="o">=</span><span class="n">linestyle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">linecolori</span><span class="o">=</span><span class="n">linecolor</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">linewidthi</span><span class="o">=</span><span class="n">linewidth</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">alphai</span><span class="o">=</span><span class="n">alpha</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">facecolori</span><span class="o">=</span><span class="n">facecolor</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+	<span class="n">filenamei</span><span class="o">=</span><span class="n">filenames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">filli</span><span class="o">=</span><span class="n">fill</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">domain</span><span class="o">=</span><span class="n">expread</span><span class="p">(</span><span class="n">filenamei</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">domain</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">domain</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;nods&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">domain</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">unitmultiplier</span><span class="p">,</span><span class="n">domain</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">unitmultiplier</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">,</span><span class="n">mec</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">mfc</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">ms</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">filli</span><span class="p">:</span>
+                <span class="n">verts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">domain</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">],</span><span class="n">domain</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]))</span>
+                <span class="n">codes</span><span class="o">=</span><span class="p">[</span><span class="n">Path</span><span class="o">.</span><span class="n">MOVETO</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">Path</span><span class="o">.</span><span class="n">LINETO</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">domain</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">])</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">Path</span><span class="o">.</span><span class="n">CLOSEPOLY</span><span class="p">]</span>
+                <span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">verts</span><span class="p">,</span> <span class="n">codes</span><span class="p">)</span>
+                <span class="n">patch</span><span class="o">=</span><span class="n">patches</span><span class="o">.</span><span class="n">PathPatch</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">facecolor</span><span class="o">=</span><span class="n">facecolori</span><span class="p">,</span><span class="n">edgecolor</span><span class="o">=</span><span class="n">linecolori</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="n">alphai</span><span class="p">,</span>
+                        <span class="n">lw</span><span class="o">=</span><span class="n">linewidthi</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">patch</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">domain</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="c1"># since expread returns a string representation of the arrays</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">domain</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">unitmultiplier</span><span class="p">,</span><span class="n">y</span><span class="o">*</span><span class="n">unitmultiplier</span><span class="p">,</span><span class="n">ls</span><span class="o">=</span><span class="n">linestylei</span><span class="p">,</span><span class="n">lw</span><span class="o">=</span><span class="n">linewidthi</span><span class="p">,</span><span class="n">c</span><span class="o">=</span><span class="n">linecolori</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,466 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.parseresultsfromdisk &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.parseresultsfromdisk</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.parseresultsfromdisk</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">issm.results</span> <span class="k">as</span> <span class="nn">resultsclass</span>
+
+<div class="viewcode-block" id="parseresultsfromdisk"><a class="viewcode-back" href="../../api/issm.html#issm.parseresultsfromdisk.parseresultsfromdisk">[docs]</a><span class="k">def</span> <span class="nf">parseresultsfromdisk</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">filename</span><span class="p">,</span><span class="n">iosplit</span><span class="p">):</span>
+	<span class="k">if</span> <span class="n">iosplit</span><span class="p">:</span>
+		<span class="n">saveres</span><span class="o">=</span><span class="n">parseresultsfromdiskiosplit</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">saveres</span><span class="o">=</span><span class="n">parseresultsfromdiskioserial</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">saveres</span></div>
+
+<div class="viewcode-block" id="parseresultsfromdiskioserial"><a class="viewcode-back" href="../../api/issm.html#issm.parseresultsfromdisk.parseresultsfromdiskioserial">[docs]</a><span class="k">def</span> <span class="nf">parseresultsfromdiskioserial</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>    <span class="c1"># {{{</span>
+	<span class="c1">#Open file</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+	<span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;loadresultsfromdisk error message: could not open &#39;</span><span class="si">%s</span><span class="s2">&#39; for binary reading.&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+	<span class="c1">#initialize results: </span>
+	<span class="n">saveres</span><span class="o">=</span><span class="p">[]</span>
+
+	<span class="c1">#Read fields until the end of the file.</span>
+	<span class="n">loadres</span><span class="o">=</span><span class="n">ReadData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">md</span><span class="p">)</span>
+
+	<span class="n">counter</span><span class="o">=</span><span class="mi">0</span>
+	<span class="n">check_nomoresteps</span><span class="o">=</span><span class="mi">0</span>
+	<span class="n">step</span><span class="o">=</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span>
+
+	<span class="k">while</span> <span class="n">loadres</span><span class="p">:</span>
+		<span class="c1">#check that the new result does not add a step, which would be an error: </span>
+		<span class="k">if</span> <span class="n">check_nomoresteps</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">:</span>
+				<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;parsing results for a steady-state core, which incorporates transient results!&quot;</span><span class="p">)</span>
+
+		<span class="c1">#Check step, increase counter if this is a new step</span>
+		<span class="k">if</span><span class="p">(</span><span class="n">step</span><span class="o">!=</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">):</span>
+			<span class="n">counter</span> <span class="o">=</span> <span class="n">counter</span> <span class="o">+</span> <span class="mi">1</span>
+			<span class="n">step</span>    <span class="o">=</span> <span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span>
+
+		<span class="c1">#Add result</span>
+		<span class="k">if</span> <span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+			<span class="c1">#if we have a step = 0, this is a steady state solution, don&#39;t expect more steps. </span>
+			<span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+			<span class="n">check_nomoresteps</span><span class="o">=</span><span class="mi">1</span>
+		<span class="k">elif</span> <span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">index</span> <span class="o">=</span> <span class="n">counter</span><span class="p">;</span>
+		
+		<span class="k">if</span> <span class="n">index</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">saveres</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">saveres</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+				<span class="n">saveres</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+			<span class="n">saveres</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resultsclass</span><span class="p">())</span>
+		<span class="k">elif</span> <span class="n">saveres</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+			<span class="n">saveres</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">=</span><span class="n">resultsclass</span><span class="p">()</span>
+			
+		<span class="c1">#Get time and step</span>
+		<span class="k">if</span> <span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mf">9999.</span><span class="p">:</span>
+			<span class="n">saveres</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="o">-</span><span class="mf">9999.</span><span class="p">:</span>
+			<span class="n">saveres</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span>
+
+		<span class="c1">#Add result</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="n">index</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;fieldname&#39;</span><span class="p">]]</span><span class="o">=</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span>
+
+		<span class="c1">#read next result</span>
+		<span class="n">loadres</span><span class="o">=</span><span class="n">ReadData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">md</span><span class="p">)</span>
+
+	<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+	<span class="k">return</span> <span class="n">saveres</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="parseresultsfromdiskiosplit"><a class="viewcode-back" href="../../api/issm.html#issm.parseresultsfromdisk.parseresultsfromdiskiosplit">[docs]</a><span class="k">def</span> <span class="nf">parseresultsfromdiskiosplit</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>    <span class="c1"># {{{</span>
+
+	<span class="c1">#Open file</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+	<span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;loadresultsfromdisk error message: could not open &#39;</span><span class="si">%s</span><span class="s2">&#39; for binary reading.&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+	<span class="n">saveres</span><span class="o">=</span><span class="p">[]</span>
+
+	<span class="c1">#if we have done split I/O, ie, we have results that are fragmented across patches, </span>
+	<span class="c1">#do a first pass, and figure out the structure of results</span>
+	<span class="n">loadres</span><span class="o">=</span><span class="n">ReadDataDimensions</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+	<span class="k">while</span> <span class="n">loadres</span><span class="p">:</span>
+
+		<span class="c1">#Get time and step</span>
+		<span class="k">if</span> <span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">saveres</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">saveres</span><span class="p">),</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+				<span class="n">saveres</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+			<span class="n">saveres</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resultsclass</span><span class="p">())</span>
+		<span class="nb">setattr</span><span class="p">(</span><span class="n">saveres</span><span class="p">[</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;step&#39;</span><span class="p">,</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">])</span>
+		<span class="nb">setattr</span><span class="p">(</span><span class="n">saveres</span><span class="p">[</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;time&#39;</span><span class="p">,</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">])</span> 
+
+		<span class="c1">#Add result</span>
+		<span class="nb">setattr</span><span class="p">(</span><span class="n">saveres</span><span class="p">[</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;fieldname&#39;</span><span class="p">],</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">))</span>
+
+		<span class="c1">#read next result</span>
+		<span class="n">loadres</span><span class="o">=</span><span class="n">ReadDataDimensions</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+
+	<span class="c1">#do a second pass, and figure out the size of the patches</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>    <span class="c1">#rewind</span>
+	<span class="n">loadres</span><span class="o">=</span><span class="n">ReadDataDimensions</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+	<span class="k">while</span> <span class="n">loadres</span><span class="p">:</span>
+
+		<span class="c1">#read next result</span>
+		<span class="n">loadres</span><span class="o">=</span><span class="n">ReadDataDimensions</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+
+	<span class="c1">#third pass, this time to read the real information</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>    <span class="c1">#rewind</span>
+	<span class="n">loadres</span><span class="o">=</span><span class="n">ReadData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">md</span><span class="p">)</span>
+	<span class="k">while</span> <span class="n">loadres</span><span class="p">:</span>
+
+		<span class="c1">#Get time and step</span>
+		<span class="k">if</span> <span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">saveres</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">saveres</span><span class="p">),</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+				<span class="n">saveres</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+			<span class="n">saveres</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveresclass</span><span class="o">.</span><span class="n">saveres</span><span class="p">())</span>
+		<span class="nb">setattr</span><span class="p">(</span><span class="n">saveres</span><span class="p">[</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;step&#39;</span><span class="p">,</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">])</span>
+		<span class="nb">setattr</span><span class="p">(</span><span class="n">saveres</span><span class="p">[</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="s1">&#39;time&#39;</span><span class="p">,</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">])</span> 
+
+		<span class="c1">#Add result</span>
+		<span class="nb">setattr</span><span class="p">(</span><span class="n">saveres</span><span class="p">[</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;fieldname&#39;</span><span class="p">],</span><span class="n">loadres</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">])</span>
+
+		<span class="c1">#read next result</span>
+		<span class="n">loadres</span><span class="o">=</span><span class="n">ReadData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">md</span><span class="p">)</span>
+
+	<span class="c1">#close file</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+	<span class="k">return</span> <span class="n">saveres</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="ReadData"><a class="viewcode-back" href="../../api/issm.html#issm.parseresultsfromdisk.ReadData">[docs]</a><span class="k">def</span> <span class="nf">ReadData</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">md</span><span class="p">):</span>    <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	READDATA - ...</span>
+<span class="sd">	 </span>
+<span class="sd">	    Usage:</span>
+<span class="sd">	       field=ReadData(fid,md)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#read field</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">length</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+
+		<span class="n">fieldname</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">length</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">))[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">time</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">step</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+
+		<span class="nb">type</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">M</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">if</span>   <span class="nb">type</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">field</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">d&#39;</span> <span class="o">%</span> <span class="n">M</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">M</span><span class="o">*</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">))),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="nb">type</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+			<span class="n">field</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">M</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">M</span><span class="p">))[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="k">elif</span> <span class="nb">type</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+			<span class="n">N</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1">#			field=transpose(fread(fid,[N M],&#39;double&#39;));</span>
+			<span class="n">field</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+				<span class="n">field</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">d&#39;</span> <span class="o">%</span> <span class="n">N</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)))</span>
+		<span class="k">elif</span> <span class="nb">type</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span>
+			<span class="n">N</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+<span class="c1">#			field=transpose(fread(fid,[N M],&#39;int&#39;));</span>
+			<span class="n">field</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="n">N</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">M</span><span class="p">):</span>
+				<span class="n">field</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%i</span><span class="s1">i&#39;</span> <span class="o">%</span> <span class="n">N</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;cannot read data of type </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">)</span>
+
+		<span class="c1">#Process units here FIXME: this should not be done here!</span>
+		<span class="n">yts</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span>
+		<span class="k">if</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;BalancethicknessThickeningRate&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;Time&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">/</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;HydrologyWaterVx&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;HydrologyWaterVy&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;Vx&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;Vy&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;Vz&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;Vel&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;BasalforcingsGroundediceMeltingRate&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;TotalFloatingBmb&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">/</span><span class="mf">10.</span><span class="o">**</span><span class="mf">12.</span><span class="o">*</span><span class="n">yts</span> <span class="c1">#(GigaTon/year)</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;TotalGroundedBmb&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">/</span><span class="mf">10.</span><span class="o">**</span><span class="mf">12.</span><span class="o">*</span><span class="n">yts</span> <span class="c1">#(GigaTon/year)</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;TotalSmb&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">/</span><span class="mf">10.</span><span class="o">**</span><span class="mf">12.</span><span class="o">*</span><span class="n">yts</span> <span class="c1">#(GigaTon/year)</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;SmbMassBalance&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+		<span class="k">elif</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;CalvingCalvingrate&#39;</span><span class="p">:</span>
+			<span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">*</span><span class="n">yts</span>
+
+		<span class="n">saveres</span><span class="o">=</span><span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="s1">&#39;fieldname&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">fieldname</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">time</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">step</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">field</span>
+
+	<span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="n">saveres</span><span class="o">=</span><span class="kc">None</span>
+
+	<span class="k">return</span> <span class="n">saveres</span></div>
+	<span class="c1"># }}}</span>
+<div class="viewcode-block" id="ReadDataDimensions"><a class="viewcode-back" href="../../api/issm.html#issm.parseresultsfromdisk.ReadDataDimensions">[docs]</a><span class="k">def</span> <span class="nf">ReadDataDimensions</span><span class="p">(</span><span class="n">fid</span><span class="p">):</span>    <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	READDATADIMENSIONS - read data dimensions, step and time, but not the data itself.</span>
+<span class="sd">	 </span>
+<span class="sd">	    Usage:</span>
+<span class="sd">	       field=ReadDataDimensions(fid)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#read field</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="n">length</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+
+		<span class="n">fieldname</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">length</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">))[</span><span class="mi">0</span><span class="p">][:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">time</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">step</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+
+		<span class="nb">type</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">M</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">N</span><span class="o">=</span><span class="mi">1</span>    <span class="c1">#default</span>
+		<span class="k">if</span>   <span class="nb">type</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">M</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="nb">type</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">M</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="nb">type</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+			<span class="n">N</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">N</span><span class="o">*</span><span class="n">M</span><span class="o">*</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;cannot read data of type </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">)</span>
+
+		<span class="n">saveres</span><span class="o">=</span><span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="s1">&#39;fieldname&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">fieldname</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">time</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">step</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="s1">&#39;M&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">M</span>
+		<span class="n">saveres</span><span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">N</span>
+
+	<span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="n">saveres</span><span class="o">=</span><span class="kc">None</span>
+
+	<span class="k">return</span> <span class="n">saveres</span></div>
+	<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

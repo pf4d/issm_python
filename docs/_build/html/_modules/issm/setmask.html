@@ -1,0 +1,283 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.setmask &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.setmask</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.setmask</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">model</span> <span class="k">import</span> <span class="n">model</span>
+<span class="kn">from</span> <span class="nn">FlagElements</span> <span class="k">import</span> <span class="n">FlagElements</span>
+<span class="kn">import</span> <span class="nn">pairoptions</span>
+<span class="kn">from</span> <span class="nn">ContourToMesh</span> <span class="k">import</span> <span class="n">ContourToMesh</span>
+
+<div class="viewcode-block" id="setmask"><a class="viewcode-back" href="../../api/issm.html#issm.setmask.setmask">[docs]</a><span class="k">def</span> <span class="nf">setmask</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">floatingicename</span><span class="p">,</span> <span class="n">groundedicename</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	SETMASK - establish boundaries between grounded and floating ice.</span>
+
+<span class="sd">	   By default, ice is considered grounded. The contour floatingicename defines nodes </span>
+<span class="sd">	   for which ice is floating. The contour groundedicename defines nodes inside an floatingice, </span>
+<span class="sd">	   that are grounded (ie: ice rises, islands, etc ...)</span>
+<span class="sd">	   All input files are in the Argus format (extension .exp).</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      md=setmask(md,floatingicename,groundedicename)</span>
+
+<span class="sd">	   Examples:</span>
+<span class="sd">	      md=setmask(md,&#39;all&#39;,&#39;&#39;);</span>
+<span class="sd">	      md=setmask(md,&#39;Iceshelves.exp&#39;,&#39;Islands.exp&#39;);</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1">#some checks on list of arguments</span>
+	<span class="nb">print</span> <span class="nb">type</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">model</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;setmask error message&quot;</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">%</span><span class="mi">2</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;odd number of arguments provided in setmask&quot;</span><span class="p">)</span>
+
+	<span class="c1">#process options</span>
+	<span class="n">options</span><span class="o">=</span><span class="n">pairoptions</span><span class="o">.</span><span class="n">pairoptions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+	<span class="c1">#Get assigned fields</span>
+	<span class="n">x</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span>
+	<span class="n">y</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span>
+	<span class="n">elements</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span>
+
+	<span class="c1">#Assign elementonfloatingice, elementongroundedice, vertexongroundedice and vertexonfloatingice. Only change at your own peril! This is synchronized heavily with the GroundingLineMigration module. {{{</span>
+	<span class="n">elementonfloatingice</span> <span class="o">=</span> <span class="n">FlagElements</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">floatingicename</span><span class="p">)</span>
+	<span class="n">elementongroundedice</span> <span class="o">=</span> <span class="n">FlagElements</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">groundedicename</span><span class="p">)</span> 
+
+	<span class="c1">#Because groundedice nodes and elements can be included into an floatingice, we need to update. Remember, all the previous </span>
+	<span class="c1">#arrays come from domain outlines that can intersect one another: </span>
+
+	<span class="n">elementonfloatingice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">elementonfloatingice</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">elementongroundedice</span><span class="p">))</span>
+	<span class="n">elementongroundedice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">elementonfloatingice</span><span class="p">)</span>
+
+	<span class="c1">#the order here is important. we choose vertexongroundedice as default on the grounding line.</span>
+	<span class="n">vertexonfloatingice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+	<span class="n">vertexongroundedice</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,</span><span class="s1">&#39;bool&#39;</span><span class="p">)</span>
+	<span class="n">vertexongroundedice</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">elementongroundedice</span><span class="p">),:]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+	<span class="n">vertexonfloatingice</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">vertexongroundedice</span><span class="p">))]</span><span class="o">=</span><span class="kc">True</span>
+	<span class="c1">#}}}</span>
+
+	<span class="c1">#level sets</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">groundedice_levelset</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">groundedice_levelset</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">elementongroundedice</span><span class="p">),:]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mf">1.</span>
+
+	<span class="k">if</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)):</span>
+		<span class="n">md</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">ice_levelset</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)</span>
+		<span class="n">icedomainfile</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;icedomain&#39;</span><span class="p">,</span><span class="s1">&#39;none&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">icedomainfile</span><span class="p">):</span>
+			<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;setmask error message: ice domain file &#39;</span><span class="si">%s</span><span class="s2">&#39; not found.&quot;</span> <span class="o">%</span> <span class="n">icedomainfile</span><span class="p">)</span>
+		<span class="c1">#use contourtomesh to set ice values inside ice domain</span>
+		<span class="n">vertexinsideicedomain</span><span class="p">,</span><span class="n">elementinsideicedomain</span><span class="o">=</span><span class="n">ContourToMesh</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">icedomainfile</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">md</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">ice_levelset</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">vertexinsideicedomain</span><span class="p">)[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">md</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">ice_levelset</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)</span>
+
+	<span class="k">return</span> <span class="n">md</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

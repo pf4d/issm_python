@@ -1,0 +1,361 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.solve &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.solve</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.solve</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">issm.pairoptions</span> <span class="k">import</span> <span class="n">pairoptions</span>
+<span class="kn">from</span> <span class="nn">issm.ismodelselfconsistent</span> <span class="k">import</span> <span class="n">ismodelselfconsistent</span>
+<span class="kn">from</span> <span class="nn">issm.marshall</span> <span class="k">import</span> <span class="n">marshall</span>
+<span class="kn">from</span> <span class="nn">issm.waitonlock</span> <span class="k">import</span> <span class="n">waitonlock</span>
+<span class="kn">from</span> <span class="nn">issm.loadresultsfromcluster</span> <span class="k">import</span> <span class="n">loadresultsfromcluster</span>
+
+<div class="viewcode-block" id="solve"><a class="viewcode-back" href="../../api/issm.html#issm.solve.solve">[docs]</a><span class="k">def</span> <span class="nf">solve</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">solutionstring</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	SOLVE - apply solution sequence for this model</span>
+<span class="sd"> </span>
+<span class="sd">	   Usage:</span>
+<span class="sd">	      md=solve(md,solutionstring,varargin)</span>
+<span class="sd">	      where varargin is a list of paired arguments of string OR enums</span>
+<span class="sd"> </span>
+<span class="sd">		solution types available comprise:</span>
+<span class="sd">		 - &#39;Stressbalance&#39;    or &#39;sb&#39;</span>
+<span class="sd">		 - &#39;Masstransport&#39;    or &#39;mt&#39;</span>
+<span class="sd">		 - &#39;Thermal&#39;          or &#39;th&#39;</span>
+<span class="sd">		 - &#39;Steadystate&#39;      or &#39;ss&#39;</span>
+<span class="sd">		 - &#39;Transient&#39;        or &#39;tr&#39;</span>
+<span class="sd">		 - &#39;Balancethickness&#39; or &#39;mc&#39;</span>
+<span class="sd">		 - &#39;Balancevelocity&#39;  or &#39;bv&#39;</span>
+<span class="sd">		 - &#39;BedSlope&#39;         or &#39;bsl&#39;</span>
+<span class="sd">		 - &#39;SurfaceSlope&#39;     or &#39;ssl&#39;</span>
+<span class="sd">		 - &#39;Hydrology&#39;        or &#39;hy&#39;</span>
+<span class="sd">		 - &#39;DamageEvolution&#39;  or &#39;da&#39;</span>
+<span class="sd">		 - &#39;Gia&#39;              or &#39;gia&#39;</span>
+<span class="sd">		 - &#39;Sealevelrise&#39;     or &#39;slr&#39;</span>
+
+<span class="sd">	   extra options:</span>
+<span class="sd">        - loadonly : does not solve. only load results</span>
+<span class="sd">		  - checkconsistency : &#39;yes&#39; or &#39;no&#39; (default is &#39;yes&#39;), ensures checks on consistency of model</span>
+<span class="sd">		  - restart: &#39;directory name (relative to the execution directory) where the restart file is located.</span>
+<span class="sd"> </span>
+<span class="sd">	   Examples:</span>
+<span class="sd">	      md=solve(md,&#39;Stressbalance&#39;);</span>
+<span class="sd">         md=solve(md,&#39;sb&#39;);</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#recover and process solve options</span>
+	<span class="k">if</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;sb&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;stressbalance&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;StressbalanceSolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;mt&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;masstransport&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;MasstransportSolution&#39;</span><span class="p">;</span>	
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;th&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;thermal&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;ThermalSolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;st&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;steadystate&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;SteadystateSolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;tr&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;transient&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;TransientSolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;mc&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;balancethickness&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;BalancethicknessSolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;bv&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;balancevelocity&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;BalancevelocitySolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;bsl&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;bedslope&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;BedSlopeSolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;ssl&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;surfaceslope&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;SurfaceSlopeSolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;hy&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;hydrology&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;HydrologySolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;da&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;damageevolution&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;DamageEvolutionSolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;gia&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;gia&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;GiaSolution&#39;</span><span class="p">;</span>
+	<span class="k">elif</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;slr&#39;</span> <span class="ow">or</span> <span class="n">solutionstring</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;sealevelrise&#39;</span><span class="p">:</span>
+		<span class="n">solutionstring</span> <span class="o">=</span> <span class="s1">&#39;SealevelriseSolution&#39;</span><span class="p">;</span>
+	<span class="k">else</span><span class="p">:</span> 	
+		<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;solutionstring &#39;</span><span class="si">%s</span><span class="s2">&#39; not supported!&quot;</span> <span class="o">%</span> <span class="n">solutionstring</span><span class="p">)</span>
+	<span class="n">options</span><span class="o">=</span><span class="n">pairoptions</span><span class="p">(</span><span class="s1">&#39;solutionstring&#39;</span><span class="p">,</span><span class="n">solutionstring</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+	<span class="c1">#recover some fields</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">private</span><span class="o">.</span><span class="n">solution</span><span class="o">=</span><span class="n">solutionstring</span>
+	<span class="n">cluster</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">cluster</span> 
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;batch&#39;</span><span class="p">,</span><span class="s1">&#39;no&#39;</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;yes&#39;</span><span class="p">:</span>
+		<span class="n">batch</span><span class="o">=</span><span class="mi">1</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">batch</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span>
+
+	<span class="c1">#check model consistency</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;checkconsistency&#39;</span><span class="p">,</span><span class="s1">&#39;yes&#39;</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;yes&#39;</span><span class="p">:</span>
+		<span class="nb">print</span> <span class="s2">&quot;checking model consistency&quot;</span>
+		<span class="n">ismodelselfconsistent</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+
+	<span class="c1">#First, build a runtime name that is unique</span>
+	<span class="n">restart</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;restart&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">restart</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+		<span class="k">pass</span> <span class="c1">#do nothing</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">restart</span><span class="p">:</span>
+			<span class="n">md</span><span class="o">.</span><span class="n">private</span><span class="o">.</span><span class="n">runtimename</span><span class="o">=</span><span class="n">restart</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;runtimename&#39;</span><span class="p">,</span><span class="kc">True</span><span class="p">):</span>
+				<span class="n">c</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+				<span class="n">md</span><span class="o">.</span><span class="n">private</span><span class="o">.</span><span class="n">runtimename</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">-</span><span class="si">%02i</span><span class="s2">-</span><span class="si">%02i</span><span class="s2">-</span><span class="si">%04i</span><span class="s2">-</span><span class="si">%02i</span><span class="s2">-</span><span class="si">%02i</span><span class="s2">-</span><span class="si">%02i</span><span class="s2">-</span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">month</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">day</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">year</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span><span class="n">c</span><span class="o">.</span><span class="n">second</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">md</span><span class="o">.</span><span class="n">private</span><span class="o">.</span><span class="n">runtimename</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span> 
+
+	<span class="c1">#if running qmu analysis, some preprocessing of dakota files using models</span>
+	<span class="c1">#fields needs to be carried out. </span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">isdakota</span><span class="p">:</span>
+		<span class="n">md</span><span class="o">=</span><span class="n">preqmu</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">options</span><span class="p">)</span>
+
+	<span class="c1">#Do we load results only?</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;loadonly&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">):</span>
+		<span class="n">md</span><span class="o">=</span><span class="n">loadresultsfromcluster</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+		<span class="k">return</span> <span class="n">md</span>
+
+
+	<span class="c1">#Write all input files</span>
+	<span class="n">marshall</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>                                           <span class="c1"># bin file</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">toolkits</span><span class="o">.</span><span class="n">ToolkitsFile</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;.toolkits&#39;</span><span class="p">)</span>    <span class="c1"># toolkits file</span>
+	<span class="n">cluster</span><span class="o">.</span><span class="n">BuildQueueScript</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">private</span><span class="o">.</span><span class="n">runtimename</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">private</span><span class="o">.</span><span class="n">solution</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">io_gather</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">debug</span><span class="o">.</span><span class="n">valgrind</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">debug</span><span class="o">.</span><span class="n">gprof</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">isdakota</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">transient</span><span class="o">.</span><span class="n">isoceancoupling</span><span class="p">)</span>    <span class="c1"># queue file</span>
+
+	<span class="c1">#Stop here if batch mode</span>
+	<span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">getfieldvalue</span><span class="p">(</span><span class="s1">&#39;batch&#39;</span><span class="p">,</span><span class="s1">&#39;no&#39;</span><span class="p">)</span><span class="o">==</span><span class="s1">&#39;yes&#39;</span><span class="p">:</span>
+		<span class="nb">print</span> <span class="s1">&#39;batch mode requested: not launching job interactively&#39;</span>
+		<span class="nb">print</span> <span class="s1">&#39;launch solution sequence on remote cluster by hand&#39;</span>
+		<span class="k">return</span> <span class="n">md</span>
+
+	<span class="c1">#Upload all required files: </span>
+	<span class="n">modelname</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span>
+	<span class="n">filelist</span>  <span class="o">=</span> <span class="p">[</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.bin &#39;</span><span class="p">,</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.toolkits &#39;</span><span class="p">,</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.queue &#39;</span><span class="p">]</span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">isdakota</span><span class="p">:</span>
+		<span class="n">filelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.qmu.in&#39;</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">restart</span><span class="p">:</span>
+		<span class="n">cluster</span><span class="o">.</span><span class="n">UploadQueueJob</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">private</span><span class="o">.</span><span class="n">runtimename</span><span class="p">,</span><span class="n">filelist</span><span class="p">)</span>
+	
+	<span class="c1">#Launch job</span>
+	<span class="n">cluster</span><span class="o">.</span><span class="n">LaunchQueueJob</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">private</span><span class="o">.</span><span class="n">runtimename</span><span class="p">,</span><span class="n">filelist</span><span class="p">,</span><span class="n">restart</span><span class="p">,</span><span class="n">batch</span><span class="p">)</span>
+
+	<span class="c1">#wait on lock</span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">waitonlock</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+		<span class="c1">#we wait for the done file</span>
+		<span class="n">islock</span><span class="o">=</span><span class="n">waitonlock</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">islock</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>    <span class="c1">#no results to be loaded</span>
+			<span class="nb">print</span> <span class="s1">&#39;The results must be loaded manually with md=loadresultsfromcluster(md).&#39;</span>
+		<span class="k">else</span><span class="p">:</span>            <span class="c1">#load results</span>
+			<span class="nb">print</span> <span class="s1">&#39;loading results from cluster&#39;</span>
+			<span class="n">md</span><span class="o">=</span><span class="n">loadresultsfromcluster</span><span class="p">(</span><span class="n">md</span><span class="p">)</span>
+
+	<span class="c1">#post processes qmu results if necessary</span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">qmu</span><span class="o">.</span><span class="n">isdakota</span><span class="p">:</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">strncmpi</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;keep&#39;</span><span class="p">],</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+			<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="s1">&#39;qmu&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()))</span>
+
+	<span class="k">return</span> <span class="n">md</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

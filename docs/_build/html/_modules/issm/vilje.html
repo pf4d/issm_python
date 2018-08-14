@@ -1,0 +1,362 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.vilje &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.vilje</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.vilje</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">fielddisplay</span> <span class="k">import</span> <span class="n">fielddisplay</span>
+<span class="kn">from</span> <span class="nn">pairoptions</span> <span class="k">import</span> <span class="n">pairoptions</span>
+<span class="kn">from</span> <span class="nn">issmssh</span> <span class="k">import</span> <span class="n">issmssh</span>
+<span class="kn">from</span> <span class="nn">issmscpin</span> <span class="k">import</span> <span class="n">issmscpin</span>
+<span class="kn">from</span> <span class="nn">issmscpout</span> <span class="k">import</span> <span class="n">issmscpout</span>
+<span class="kn">from</span> <span class="nn">QueueRequirements</span> <span class="k">import</span> <span class="n">QueueRequirements</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="k">try</span><span class="p">:</span>
+	<span class="kn">from</span> <span class="nn">vilje_settings</span> <span class="k">import</span> <span class="n">vilje_settings</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+	<span class="nb">print</span> <span class="s1">&#39;You need vilje_settings.py to proceed, check presence and sys.path&#39;</span>
+	
+<div class="viewcode-block" id="vilje"><a class="viewcode-back" href="../../api/issm.html#issm.vilje.vilje">[docs]</a><span class="k">class</span> <span class="nc">vilje</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Vilje cluster class definition</span>
+<span class="sd"> </span>
+<span class="sd">	   Usage:</span>
+<span class="sd">	      cluster=vilje();</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+		<span class="c1"># {{{</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">name</span>           <span class="o">=</span> <span class="s1">&#39;vilje&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">login</span>          <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">numnodes</span>       <span class="o">=</span> <span class="mi">2</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">cpuspernode</span>    <span class="o">=</span> <span class="mi">32</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">procspernodes</span>  <span class="o">=</span> <span class="mi">16</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">mem</span>            <span class="o">=</span> <span class="mi">28</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">queue</span>          <span class="o">=</span> <span class="s1">&#39;workq&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">time</span>           <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="mi">60</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">codepath</span>       <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span>  <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">interactive</span>    <span class="o">=</span> <span class="mi">0</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">port</span>           <span class="o">=</span> <span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">accountname</span>    <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+		<span class="c1">#use provided options to change fields</span>
+		<span class="n">options</span><span class="o">=</span><span class="n">pairoptions</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+		<span class="c1">#initialize cluster using user settings if provided</span>
+		<span class="bp">self</span><span class="o">=</span><span class="n">vilje_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="c1">#OK get other fields</span>
+		<span class="bp">self</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">AssignObjectFields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">numnodes</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">procspernodes</span>		
+		<span class="c1"># }}}</span>
+	<span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="c1"># {{{</span>
+		<span class="c1">#  display the object</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;class vilje object:&quot;</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="s1">&#39;name of the cluster&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;login&#39;</span><span class="p">,</span><span class="s1">&#39;login&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;numnodes&#39;</span><span class="p">,</span><span class="s1">&#39;number of nodes&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;cpuspernode&#39;</span><span class="p">,</span><span class="s1">&#39;number of nodes per CPUs (32)&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;procspernodes&#39;</span><span class="p">,</span><span class="s1">&#39;number of mpi procs per nodes&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;mem&#39;</span><span class="p">,</span><span class="s1">&#39;node memory&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;queue&#39;</span><span class="p">,</span><span class="s1">&#39;name of the queue (test is an option, workq the default)&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;time&#39;</span><span class="p">,</span><span class="s1">&#39;walltime requested in minutes&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;codepath&#39;</span><span class="p">,</span><span class="s1">&#39;code path on the cluster&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;executionpath&#39;</span><span class="p">,</span><span class="s1">&#39;execution path on the cluster&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;interactive&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
+		<span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="n">fielddisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;accountname&#39;</span><span class="p">,</span><span class="s1">&#39;your cluster account&#39;</span><span class="p">))</span>
+		<span class="k">return</span> <span class="n">s</span>
+                <span class="c1"># }}}</span>
+<div class="viewcode-block" id="vilje.checkconsistency"><a class="viewcode-back" href="../../api/issm.html#issm.vilje.vilje.checkconsistency">[docs]</a>	<span class="k">def</span> <span class="nf">checkconsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">md</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">analyses</span><span class="p">):</span>
+		<span class="c1"># {{{</span>
+                <span class="c1">#Queue dictionarry  gives queu name as key and max walltime and cpus as var</span>
+		<span class="n">queuedict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;workq&#39;</span><span class="p">:[</span><span class="mi">5</span><span class="o">*</span><span class="mi">24</span><span class="o">*</span><span class="mi">60</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span>
+								 <span class="s1">&#39;test&#39;</span><span class="p">:[</span><span class="mi">30</span><span class="p">,</span><span class="mi">4</span><span class="p">]}</span>
+		<span class="n">QueueRequirements</span><span class="p">(</span><span class="n">queuedict</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+
+		<span class="c1">#Miscelaneous</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s1">&#39;login empty&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s1">&#39;codepath empty&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s1">&#39;executionpath empty&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interactive</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">md</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">checkmessage</span><span class="p">(</span><span class="s1">&#39;interactive mode not implemented&#39;</span><span class="p">)</span>
+		<span class="k">return</span> <span class="bp">self</span></div>
+                <span class="c1"># }}}</span>
+<div class="viewcode-block" id="vilje.BuildQueueScript"><a class="viewcode-back" href="../../api/issm.html#issm.vilje.vilje.BuildQueueScript">[docs]</a>	<span class="k">def</span> <span class="nf">BuildQueueScript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">solution</span><span class="p">,</span><span class="n">io_gather</span><span class="p">,</span><span class="n">isvalgrind</span><span class="p">,</span><span class="n">isgprof</span><span class="p">,</span><span class="n">isdakota</span><span class="p">,</span><span class="n">isoceancoupling</span><span class="p">):</span>
+		<span class="c1"># {{{</span>
+
+		<span class="n">executable</span><span class="o">=</span><span class="s1">&#39;issm.exe&#39;</span>
+		<span class="k">if</span> <span class="n">isdakota</span><span class="p">:</span>
+			<span class="n">version</span><span class="o">=</span><span class="n">IssmConfig</span><span class="p">(</span><span class="s1">&#39;_DAKOTA_VERSION_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+			<span class="n">version</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
+			<span class="k">if</span> <span class="n">version</span><span class="o">&gt;=</span><span class="mi">6</span><span class="p">:</span>
+				<span class="n">executable</span><span class="o">=</span><span class="s1">&#39;issm_dakota.exe&#39;</span>
+		<span class="k">if</span> <span class="n">isoceancoupling</span><span class="p">:</span>
+			<span class="n">executable</span><span class="o">=</span><span class="s1">&#39;issm_ocean.exe&#39;</span>
+
+		<span class="c1">#write queuing script </span>
+		<span class="n">shortname</span><span class="o">=</span><span class="n">modelname</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">min</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">modelname</span><span class="p">))]</span>
+		<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">modelname</span><span class="o">+</span><span class="s1">&#39;.queue&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#PBS -S /bin/bash</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#PBS -N </span><span class="si">%s</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">shortname</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#PBS -q </span><span class="si">%s</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">queue</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#PBS -l select=</span><span class="si">%i</span><span class="s1">:ncpus=</span><span class="si">%i</span><span class="s1">:mpiprocs=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">numnodes</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">cpuspernode</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">procspernodes</span><span class="p">))</span>
+                <span class="n">timeobj</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+                <span class="n">m</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="nb">divmod</span><span class="p">(</span><span class="n">timeobj</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">(),</span> <span class="mi">60</span><span class="p">)</span>
+                <span class="n">h</span><span class="p">,</span><span class="n">m</span><span class="o">=</span><span class="nb">divmod</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+                <span class="n">timestring</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%02d</span><span class="s2">:</span><span class="si">%02d</span><span class="s2">:</span><span class="si">%02d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#PBS -l walltime=</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">timestring</span><span class="p">)</span> <span class="c1">#walltime is hh:mm:ss</span>
+		<span class="c1">#fid.write(&#39;#PBS -l mem=%igb\n&#39; % self.mem)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#PBS -A </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">accountname</span><span class="p">)</span> 
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#PBS -o </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.outlog </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;#PBS -e </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.errlog </span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;export ISSM_DIR=&quot;</span><span class="si">%s</span><span class="s1">/../&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;module load intelcomp/17.0.0</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> 
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;module load mpt/2.14</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;module load petsc/3.7.4d</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;module load parmetis/4.0.3</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> 
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;module load mumps/5.0.2</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;cd </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="se">\n\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">))</span>
+		<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;mpiexec_mpt -np </span><span class="si">%i</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">np</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">codepath</span><span class="p">,</span><span class="n">executable</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">solution</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">))</span>
+                <span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+		<span class="c1"># }}}</span>
+<div class="viewcode-block" id="vilje.UploadQueueJob"><a class="viewcode-back" href="../../api/issm.html#issm.vilje.vilje.UploadQueueJob">[docs]</a>	<span class="k">def</span> <span class="nf">UploadQueueJob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">filelist</span><span class="p">):</span>
+		<span class="c1"># {{{</span>
+		<span class="c1">#compress the files into one zip.</span>
+		<span class="n">compressstring</span><span class="o">=</span><span class="s1">&#39;tar -zcf </span><span class="si">%s</span><span class="s1">.tar.gz &#39;</span> <span class="o">%</span> <span class="n">dirname</span>
+		<span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">filelist</span><span class="p">:</span>
+			<span class="n">compressstring</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">file</span>
+		<span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">compressstring</span><span class="p">,</span><span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+		<span class="nb">print</span> <span class="s1">&#39;uploading input file and queueing script&#39;</span>
+		<span class="n">issmscpout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,[</span><span class="n">dirname</span><span class="o">+</span><span class="s1">&#39;.tar.gz&#39;</span><span class="p">])</span></div>
+
+		<span class="c1"># }}}</span>
+<div class="viewcode-block" id="vilje.LaunchQueueJob"><a class="viewcode-back" href="../../api/issm.html#issm.vilje.vilje.LaunchQueueJob">[docs]</a>	<span class="k">def</span> <span class="nf">LaunchQueueJob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">modelname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">filelist</span><span class="p">,</span><span class="n">restart</span><span class="p">,</span><span class="n">batch</span><span class="p">):</span>
+		<span class="c1"># {{{</span>
+
+		<span class="nb">print</span> <span class="s1">&#39;launching solution sequence on remote cluster&#39;</span>
+		<span class="k">if</span> <span class="n">restart</span><span class="p">:</span>
+			<span class="n">launchcommand</span><span class="o">=</span><span class="s1">&#39;cd </span><span class="si">%s</span><span class="s1"> &amp;&amp; cd </span><span class="si">%s</span><span class="s1"> &amp;&amp; qsub </span><span class="si">%s</span><span class="s1">.queue&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">launchcommand</span><span class="o">=</span><span class="s1">&#39;cd </span><span class="si">%s</span><span class="s1"> &amp;&amp; rm -rf ./</span><span class="si">%s</span><span class="s1"> &amp;&amp; mkdir </span><span class="si">%s</span><span class="s1"> &amp;&amp; cd </span><span class="si">%s</span><span class="s1"> &amp;&amp; mv ../</span><span class="si">%s</span><span class="s1">.tar.gz ./ &amp;&amp; tar -zxf </span><span class="si">%s</span><span class="s1">.tar.gz  &amp;&amp; qsub </span><span class="si">%s</span><span class="s1">.queue&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">modelname</span><span class="p">)</span>
+		<span class="n">issmssh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span><span class="n">launchcommand</span><span class="p">)</span></div>
+
+		<span class="c1"># }}}</span>
+<div class="viewcode-block" id="vilje.Download"><a class="viewcode-back" href="../../api/issm.html#issm.vilje.vilje.Download">[docs]</a>	<span class="k">def</span> <span class="nf">Download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dirname</span><span class="p">,</span><span class="n">filelist</span><span class="p">):</span>
+		<span class="c1"># {{{</span>
+
+		<span class="c1">#copy files from cluster to current directory</span>
+		<span class="n">directory</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">executionpath</span><span class="p">,</span><span class="n">dirname</span><span class="p">)</span>
+		<span class="n">issmscpin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">login</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span><span class="n">directory</span><span class="p">,</span><span class="n">filelist</span><span class="p">)</span></div></div>
+                <span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

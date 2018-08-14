@@ -1,0 +1,548 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>MISMIP+ &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="issm package" href="api/issm.html" />
+    <link rel="prev" title="ISMIP-HOM" href="ismip_hom.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">MISMIP+</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#set-up-the-model">Set up the model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#solve-the-momentum-balance">Solve the momentum balance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#plot-the-results">Plot the results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>MISMIP+</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/mismip_plus.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="mismip">
+<h1>MISMIP+<a class="headerlink" href="#mismip" title="Permalink to this headline">¶</a></h1>
+<p>This page describes another example that does not require any external data; the “<a class="reference external" href="http://www.climate-cryosphere.org/activities/targeted/153-misomip/1412-mismip-plus">3rd Marine Ice Sheet Model Intercomparison Project</a>”.</p>
+<div class="section" id="set-up-the-model">
+<h2>Set up the model<a class="headerlink" href="#set-up-the-model" title="Permalink to this headline">¶</a></h2>
+<p>First, import all the packages we will need:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">issm</span>         <span class="k">as</span> <span class="nn">im</span>
+<span class="kn">import</span> <span class="nn">numpy</span>        <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>Next, create some variables to use later on which set the physics and output directories to save too:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># directories for saving data :</span>
+<span class="n">mdl_odr</span>  <span class="o">=</span> <span class="s1">&#39;HO&#39;</span> <span class="c1">#&#39;FS&#39;                # [H]igher [O]rder momentum</span>
+<span class="n">lat_slip</span> <span class="o">=</span> <span class="kc">True</span>                      <span class="c1"># let the velocity slip on the edges</span>
+<span class="n">name</span>     <span class="o">=</span> <span class="s1">&#39;lateral_slip&#39;</span>            <span class="c1"># the name of the simulation</span>
+
+<span class="k">if</span> <span class="n">mdl_odr</span> <span class="o">==</span> <span class="s1">&#39;HO&#39;</span><span class="p">:</span> <span class="n">mdl_pfx</span> <span class="o">=</span> <span class="s1">&#39;BP&#39;</span>
+<span class="k">else</span><span class="p">:</span>               <span class="n">mdl_pfx</span> <span class="o">=</span> <span class="n">mdl_odr</span>
+<span class="n">plt_dir</span> <span class="o">=</span> <span class="s1">&#39;./images/&#39;</span> <span class="o">+</span> <span class="n">mdl_pfx</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>  <span class="c1"># directory for images</span>
+<span class="n">out_dir</span> <span class="o">=</span> <span class="s1">&#39;./results/&#39;</span> <span class="o">+</span> <span class="n">mdl_pfx</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>              <span class="c1"># directory for data</span>
+
+<span class="c1"># create the output directory if it does not exist :</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">d</span>       <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">out_dir</span><span class="p">)</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+  <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Next, create an empty <a class="reference internal" href="api/issm.html#issm.model.model" title="issm.model.model"><code class="xref py py-class docutils literal notranslate"><span class="pre">model</span></code></a> instance and name the simulation:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+<span class="n">md</span><span class="o">.</span><span class="n">miscellaneous</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+</pre></div>
+</div>
+<p>The input variables are provided by <a class="reference internal" href="#asay-davis-2016" id="id1">[asay-davis_2016]</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Lx</span>     <span class="o">=</span>  <span class="mf">640000.0</span>    <span class="c1"># [m] domain length (along ice flow)</span>
+<span class="n">Ly</span>     <span class="o">=</span>  <span class="mf">80000.0</span>     <span class="c1"># [m] domain width (across ice flow)</span>
+<span class="n">dx</span>     <span class="o">=</span>  <span class="mf">10000.0</span>     <span class="c1"># [m] element diameter</span>
+<span class="n">nx</span>     <span class="o">=</span>  <span class="nb">int</span><span class="p">(</span><span class="n">Lx</span><span class="o">/</span><span class="n">dx</span><span class="p">)</span>  <span class="c1"># [--] number of x-coordinate divisions</span>
+<span class="n">ny</span>     <span class="o">=</span>  <span class="nb">int</span><span class="p">(</span><span class="n">Ly</span><span class="o">/</span><span class="n">dx</span><span class="p">)</span>  <span class="c1"># [--] number of y-coordinate divisions</span>
+<span class="n">B0</span>     <span class="o">=</span> <span class="o">-</span><span class="mf">150.0</span>       <span class="c1"># [m] bedrock topography at x = 0</span>
+<span class="n">B2</span>     <span class="o">=</span> <span class="o">-</span><span class="mf">728.8</span>       <span class="c1"># [m] second bedrock topography coefficient</span>
+<span class="n">B4</span>     <span class="o">=</span>  <span class="mf">343.91</span>      <span class="c1"># [m] third bedrock topography coefficient</span>
+<span class="n">B6</span>     <span class="o">=</span> <span class="o">-</span><span class="mf">50.57</span>       <span class="c1"># [m] second bedrock topography coefficient</span>
+<span class="n">xbar</span>   <span class="o">=</span>  <span class="mf">300000.0</span>    <span class="c1"># [m] characteristic along-flow length scale of bedrock</span>
+<span class="n">fc</span>     <span class="o">=</span>  <span class="mf">4000.0</span>      <span class="c1"># [m] characteristic width of channel walls</span>
+<span class="n">dc</span>     <span class="o">=</span>  <span class="mf">500.0</span>       <span class="c1"># [m] depth of the trough compared to its walls</span>
+<span class="n">wc</span>     <span class="o">=</span>  <span class="mf">24000.0</span>     <span class="c1"># [m] half width of the trough</span>
+<span class="n">zd</span>     <span class="o">=</span> <span class="o">-</span><span class="mf">720.0</span>       <span class="c1"># [m] maximum depth of the bedrock topography</span>
+<span class="n">thklim</span> <span class="o">=</span>  <span class="mf">10.0</span>        <span class="c1"># [m] thickness limit</span>
+<span class="n">rhow</span>   <span class="o">=</span>  <span class="mf">1028.0</span>      <span class="c1"># [kg m^-3] density of seawater</span>
+<span class="n">rhoi</span>   <span class="o">=</span>  <span class="mf">918.0</span>       <span class="c1"># [kg m^-3] density of glacier ice</span>
+<span class="n">g</span>      <span class="o">=</span>  <span class="mf">9.81</span>        <span class="c1"># [m s^2] gravitational acceleration</span>
+<span class="n">spy</span>    <span class="o">=</span>  <span class="mf">31556926.0</span>  <span class="c1"># [s a^-1] seconds per year</span>
+<span class="n">Hini</span>   <span class="o">=</span>  <span class="mf">100.0</span>       <span class="c1"># [m] initial ice thickness</span>
+<span class="n">Tm</span>     <span class="o">=</span>  <span class="mf">273.15</span>      <span class="c1"># [K] melting temperature of ice</span>
+<span class="n">n</span>      <span class="o">=</span>  <span class="mf">3.0</span>         <span class="c1"># [--] Glen&#39;s exponent</span>
+<span class="n">A</span>      <span class="o">=</span>  <span class="mf">2e-17</span>       <span class="c1"># [Pa^{-n} s^{-1}] flow</span>
+<span class="n">beta</span>   <span class="o">=</span>  <span class="mf">1e4</span>         <span class="c1"># [Pa m^{-1/n} a^{-1/n}] friction coefficient</span>
+<span class="n">p</span>      <span class="o">=</span>  <span class="mf">3.0</span>         <span class="c1"># [--] Paterson friction exponent one</span>
+<span class="n">q</span>      <span class="o">=</span>  <span class="mf">0.0</span>         <span class="c1"># [--] Paterson friction exponent two</span>
+<span class="n">adot</span>   <span class="o">=</span>  <span class="mf">0.3</span>         <span class="c1"># [m a^{-a}] surface-mass balance</span>
+<span class="n">tf</span>     <span class="o">=</span>  <span class="mf">20000.0</span>     <span class="c1"># [a] final time</span>
+<span class="n">dt</span>     <span class="o">=</span>  <span class="mi">1</span>           <span class="c1"># [a] time step</span>
+<span class="n">dt_sav</span> <span class="o">=</span>  <span class="mf">10.0</span>        <span class="c1"># [a] time interval to save data</span>
+<span class="n">cfl</span>    <span class="o">=</span>  <span class="mf">0.5</span>         <span class="c1"># [--] CFL coefficient</span>
+<span class="n">num_p</span>  <span class="o">=</span>  <span class="mi">2</span>           <span class="c1"># [--] number of processor cores to use</span>
+</pre></div>
+</div>
+<p>Next, we make a simple three-dimensional box mesh with <code class="docutils literal notranslate"><span class="pre">nx</span></code> cells in the <span class="math notranslate nohighlight">\(x\)</span> direction and <code class="docutils literal notranslate"><span class="pre">ny</span></code> cells in the <span class="math notranslate nohighlight">\(y\)</span> directions over a width of <code class="docutils literal notranslate"><span class="pre">Lx</span></code> and height <code class="docutils literal notranslate"><span class="pre">Ly</span></code> using <a class="reference internal" href="api/issm.html#issm.squaremesh.squaremesh" title="issm.squaremesh.squaremesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">squaremesh</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span>     <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">squaremesh</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let the entire domain be defined over grounded ice with <a class="reference internal" href="api/issm.html#issm.setmask.setmask" title="issm.setmask.setmask"><code class="xref py py-class docutils literal notranslate"><span class="pre">setmask</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span>     <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">setmask</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It will be helpful for the rest of the script to set up the element-wise multiplicative identities now:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># rank-zero tensor vertex ones vector :</span>
+<span class="n">v_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)</span>
+
+<span class="c1"># rank-zero tensor element ones vector :</span>
+<span class="n">e_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">)</span>
+
+<span class="c1"># rank-two tensor ones vector :</span>
+<span class="n">A_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+<span class="c1"># rank-one tensor ones vector :</span>
+<span class="n">b_ones</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>The MISMIP+ geometry are specified by <a class="reference internal" href="#gudmundsson-2012" id="id2">[gudmundsson_2012]</a> and defined by Equations (1)–(4) of <a class="reference internal" href="#asay-davis-2016" id="id3">[asay-davis_2016]</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># the ice thickness is initialized as constant :</span>
+<span class="n">H</span>      <span class="o">=</span> <span class="n">Hini</span> <span class="o">*</span> <span class="n">v_ones</span>
+
+<span class="c1"># eq&#39;n (3)</span>
+<span class="n">xt</span>     <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span> <span class="o">/</span> <span class="n">xbar</span>
+
+<span class="c1"># eq&#39;n (2) :</span>
+<span class="n">Bx</span>     <span class="o">=</span> <span class="n">B0</span> <span class="o">+</span> <span class="n">B2</span><span class="o">*</span><span class="n">xt</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">B4</span><span class="o">*</span><span class="n">xt</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="n">B6</span><span class="o">*</span><span class="n">xt</span><span class="o">**</span><span class="mi">6</span>
+
+<span class="c1"># eq&#39;n (4) :</span>
+<span class="n">By</span>     <span class="o">=</span> <span class="o">+</span> <span class="n">dc</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">Ly</span><span class="o">/</span><span class="mi">2</span> <span class="o">-</span> <span class="n">wc</span><span class="p">)</span> <span class="o">/</span> <span class="n">fc</span><span class="p">))</span> \
+         <span class="o">+</span> <span class="n">dc</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">Ly</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">wc</span><span class="p">)</span> <span class="o">/</span> <span class="n">fc</span><span class="p">))</span>
+
+<span class="c1"># lower topography (eq&#39;n 1) :</span>
+<span class="n">zb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">Bx</span> <span class="o">+</span> <span class="n">By</span><span class="p">,</span> <span class="n">zd</span><span class="o">*</span><span class="n">v_ones</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The bottom of the ice sheet is calculated by adjusting the upper-surface height <span class="math notranslate nohighlight">\(S\)</span> to the height it would be if it were floating:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># upper surface which does not take into account flotation :</span>
+<span class="n">S</span>  <span class="o">=</span> <span class="n">zb</span> <span class="o">+</span> <span class="n">H</span>
+
+<span class="c1"># grounded ice level-set flotation :</span>
+<span class="n">ls</span> <span class="o">=</span> <span class="n">H</span> <span class="o">+</span> <span class="n">rhow</span> <span class="o">/</span> <span class="n">rhoi</span> <span class="o">*</span> <span class="n">zb</span>
+
+<span class="c1"># get indicies of grounded (gnd) and floating (flt) ice :</span>
+<span class="n">gnd</span> <span class="o">=</span> <span class="n">ls</span> <span class="o">&gt;</span>  <span class="mi">0</span>
+<span class="n">flt</span> <span class="o">=</span> <span class="n">ls</span> <span class="o">&lt;=</span> <span class="mi">0</span>
+
+<span class="c1"># correct upper surface to be in equilibrium with the flotation height :</span>
+<span class="n">S</span><span class="p">[</span><span class="n">flt</span><span class="p">]</span> <span class="o">=</span> <span class="n">H</span><span class="p">[</span><span class="n">flt</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">rhoi</span> <span class="o">/</span> <span class="n">rhow</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>then the lower surface is adjusted to remain at the desired thickness:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># lower surface :</span>
+<span class="n">B</span> <span class="o">=</span> <span class="n">S</span> <span class="o">-</span> <span class="n">H</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>Finally, the ice sheet mask is given by simply converting the boolean NumPy array <code class="docutils literal notranslate"><span class="pre">gnd</span></code> to an array of integers required by <code class="docutils literal notranslate"><span class="pre">issm</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># ice is grounded where mask == 1 :</span>
+<span class="n">mask</span> <span class="o">=</span> <span class="n">gnd</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We will need to define the rheological parameter <span class="math notranslate nohighlight">\(B\)</span>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Bf</span>  <span class="o">=</span>  <span class="p">(</span><span class="n">A</span> <span class="o">/</span> <span class="n">spy</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">n</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The material parameters may be changed to match those of the ISMIP HOM experiment by changing either the <a class="reference internal" href="api/issm.html#issm.model.model" title="issm.model.model"><code class="xref py py-class docutils literal notranslate"><span class="pre">model</span></code></a>’s <a class="reference internal" href="api/issm.html#issm.constants.constants" title="issm.constants.constants"><code class="xref py py-class docutils literal notranslate"><span class="pre">constants</span></code></a> or material properties <a class="reference internal" href="api/issm.html#issm.matice.matice" title="issm.matice.matice"><code class="xref py py-class docutils literal notranslate"><span class="pre">matice</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rho_ice</span>         <span class="o">=</span> <span class="n">rhoi</span>
+<span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rho_water</span>       <span class="o">=</span> <span class="n">rhow</span>
+<span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">g</span>               <span class="o">=</span> <span class="n">g</span>
+<span class="n">md</span><span class="o">.</span><span class="n">constants</span><span class="o">.</span><span class="n">yts</span>             <span class="o">=</span> <span class="n">spy</span>
+</pre></div>
+</div>
+<p>The geometry and ice masks are initialized from the above arrays as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">surface</span>          <span class="o">=</span> <span class="n">S</span>
+<span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">base</span>             <span class="o">=</span> <span class="n">B</span>
+<span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">thickness</span>        <span class="o">=</span> <span class="n">H</span>
+<span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">bed</span>              <span class="o">=</span> <span class="n">zb</span>
+<span class="n">md</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">groundedice_levelset</span> <span class="o">=</span> <span class="n">mask</span>              <span class="c1"># ice is grounded where == 1</span>
+<span class="n">md</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">ice_levelset</span>         <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">v_ones</span>       <span class="c1"># ice is present when negative</span>
+</pre></div>
+</div>
+<p>Basal-sliding friction is initialized using the <a class="reference internal" href="api/issm.html#issm.friction.friction" title="issm.friction.friction"><code class="xref py py-class docutils literal notranslate"><span class="pre">friction</span></code></a> coefficient:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">p</span>                <span class="o">=</span>  <span class="n">p</span> <span class="o">*</span> <span class="n">e_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">q</span>                <span class="o">=</span>  <span class="n">q</span> <span class="o">*</span> <span class="n">e_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">friction</span><span class="o">.</span><span class="n">coefficient</span>      <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">v_ones</span>
+</pre></div>
+</div>
+<p>The rheology parameters are also set within the material properties <a class="reference internal" href="api/issm.html#issm.matice.matice" title="issm.matice.matice"><code class="xref py py-class docutils literal notranslate"><span class="pre">matice</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rheology_B</span>      <span class="o">=</span> <span class="n">Bf</span> <span class="o">*</span> <span class="n">v_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rheology_n</span>      <span class="o">=</span>  <span class="n">n</span> <span class="o">*</span> <span class="n">e_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">materials</span><span class="o">.</span><span class="n">rheology_law</span>    <span class="o">=</span> <span class="s2">&quot;None&quot;</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="api/issm.html#issm.basalforcings.basalforcings" title="issm.basalforcings.basalforcings"><code class="xref py py-class docutils literal notranslate"><span class="pre">basalforcings</span></code></a> are initialized with no basal meting to begin:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">basalforcings</span><span class="o">.</span><span class="n">geothermalflux</span>           <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">v_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">basalforcings</span><span class="o">.</span><span class="n">groundedice_melting_rate</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">v_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">basalforcings</span><span class="o">.</span><span class="n">floatingice_melting_rate</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">v_ones</span>
+</pre></div>
+</div>
+<p>Next, configure the model for “marine-ice-sheet” boundary conditions via <a class="reference internal" href="api/issm.html#issm.SetMarineIceSheetBC.SetMarineIceSheetBC" title="issm.SetMarineIceSheetBC.SetMarineIceSheetBC"><code class="xref py py-class docutils literal notranslate"><span class="pre">SetMarineIceSheetBC</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set the default boundary conditions for an ice-sheet :</span>
+<span class="n">md</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">SetMarineIceSheetBC</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="s1">&#39;./exp/mismip_front.exp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In order to apply lateral slip along the North, South, and West boundaries, we have to manually deterimine the nodal indicies of the <span class="math notranslate nohighlight">\(x\)</span>-component of velocity <code class="docutils literal notranslate"><span class="pre">spcvx</span></code>, <span class="math notranslate nohighlight">\(y\)</span>-component of velocity <code class="docutils literal notranslate"><span class="pre">spcvy</span></code>, and <span class="math notranslate nohighlight">\(z\)</span>-component of velocity <code class="docutils literal notranslate"><span class="pre">spcvz</span></code> within the <a class="reference internal" href="api/issm.html#issm.stressbalance.stressbalance" title="issm.stressbalance.stressbalance"><code class="xref py py-class docutils literal notranslate"><span class="pre">stressbalance</span></code></a> class and set them to <code class="docutils literal notranslate"><span class="pre">np.nan</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># apply lateral slip on north, south, and west boundaries :</span>
+<span class="k">if</span> <span class="n">lat_slip</span><span class="p">:</span>  <span class="n">slip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+<span class="k">else</span><span class="p">:</span>         <span class="n">slip</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<span class="c1"># inflow boundary condition :</span>
+<span class="n">pos_w</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvx</span><span class="p">[</span><span class="n">pos_w</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvy</span><span class="p">[</span><span class="n">pos_w</span><span class="p">]</span> <span class="o">=</span> <span class="n">slip</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvz</span><span class="p">[</span><span class="n">pos_w</span><span class="p">]</span> <span class="o">=</span> <span class="n">slip</span>
+
+<span class="c1"># north wall :</span>
+<span class="n">pos_n</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvx</span><span class="p">[</span><span class="n">pos_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">slip</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvy</span><span class="p">[</span><span class="n">pos_n</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvz</span><span class="p">[</span><span class="n">pos_n</span><span class="p">]</span> <span class="o">=</span> <span class="n">slip</span>
+
+<span class="c1"># south wall :</span>
+<span class="n">pos_s</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvx</span><span class="p">[</span><span class="n">pos_s</span><span class="p">]</span> <span class="o">=</span> <span class="n">slip</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvy</span><span class="p">[</span><span class="n">pos_s</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvz</span><span class="p">[</span><span class="n">pos_s</span><span class="p">]</span> <span class="o">=</span> <span class="n">slip</span>
+
+<span class="c1"># go back and ensure that the west corners have zero x-component velocity :</span>
+<span class="n">md</span><span class="o">.</span><span class="n">stressbalance</span><span class="o">.</span><span class="n">spcvx</span><span class="p">[</span><span class="n">pos_w</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+</pre></div>
+</div>
+<p>Note above that if <code class="docutils literal notranslate"><span class="pre">lat_slip</span></code> had been specified as <code class="docutils literal notranslate"><span class="pre">False</span></code> at the beginning of our script, no-slip boundary conditions would have been applied.
+The upper-surface mass balance <span class="math notranslate nohighlight">\(\mathring{S}\)</span> is initialized:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">smb</span><span class="o">.</span><span class="n">mass_balance</span>          <span class="o">=</span> <span class="n">adot</span> <span class="o">*</span> <span class="n">v_ones</span>
+</pre></div>
+</div>
+<p>Grounding-line migration is a complicated subject, and the folks at JPL/UCI have developed several different numerical schemes you may choose to use, here I chose <code class="docutils literal notranslate"><span class="pre">SubelementMigration</span></code> by setting the <code class="docutils literal notranslate"><span class="pre">migration</span></code> parameter within the <a class="reference internal" href="api/issm.html#issm.model.model" title="issm.model.model"><code class="xref py py-class docutils literal notranslate"><span class="pre">model</span></code></a>’s  <a class="reference internal" href="api/issm.html#issm.groundingline.groundingline" title="issm.groundingline.groundingline"><code class="xref py py-class docutils literal notranslate"><span class="pre">groundingline</span></code></a> class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">#md.groundingline.migration              = &#39;SoftMigration&#39;</span>
+<span class="n">md</span><span class="o">.</span><span class="n">groundingline</span><span class="o">.</span><span class="n">migration</span>              <span class="o">=</span> <span class="s1">&#39;SubelementMigration&#39;</span>
+<span class="c1">#md.groundingline.migration              = &#39;SubelementMigration2&#39;</span>
+<span class="c1">#md.groundingline.migration              = &#39;AggressiveMigration&#39;</span>
+<span class="c1">#md.groundingline.migration              = &#39;None&#39;</span>
+</pre></div>
+</div>
+<p>The free-surface parameters are set within the <a class="reference internal" href="api/issm.html#issm.model.model" title="issm.model.model"><code class="xref py py-class docutils literal notranslate"><span class="pre">model</span></code></a>’s <a class="reference internal" href="api/issm.html#issm.masstransport.masstransport" title="issm.masstransport.masstransport"><code class="xref py py-class docutils literal notranslate"><span class="pre">masstransport</span></code></a> class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">masstransport</span><span class="o">.</span><span class="n">hydrostatic_adjustment</span> <span class="o">=</span> <span class="s1">&#39;Incremental&#39;</span>
+<span class="n">md</span><span class="o">.</span><span class="n">masstransport</span><span class="o">.</span><span class="n">spcthickness</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">v_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">masstransport</span><span class="o">.</span><span class="n">stabilization</span>          <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Here, we set no constraint on the thickness by setting the <code class="docutils literal notranslate"><span class="pre">spcthickness</span></code> parameter to <code class="docutils literal notranslate"><span class="pre">np.nan</span></code> and use streamline-upwind/Petrov-Galerkin stabilization by setting <code class="docutils literal notranslate"><span class="pre">stabilization</span> <span class="pre">=</span> <span class="pre">1</span></code>.
+The numerical solver will complain if the unknowns are not initialized to something:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">vx</span>          <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">v_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">vy</span>          <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">v_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">vz</span>          <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">v_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">vel</span>         <span class="o">=</span> <span class="mf">0.0</span> <span class="o">*</span> <span class="n">v_ones</span>
+<span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">pressure</span>    <span class="o">=</span> <span class="n">rhoi</span> <span class="o">*</span> <span class="n">g</span> <span class="o">*</span> <span class="n">H</span>
+<span class="n">md</span><span class="o">.</span><span class="n">initialization</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">Tm</span> <span class="o">*</span> <span class="n">v_ones</span>
+</pre></div>
+</div>
+<p>The <a class="reference internal" href="api/issm.html#issm.transient.transient" title="issm.transient.transient"><code class="xref py py-class docutils literal notranslate"><span class="pre">transient</span></code></a> solver parameters are set as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">transient</span><span class="o">.</span><span class="n">isstressbalance</span>      <span class="o">=</span> <span class="mi">1</span>
+<span class="n">md</span><span class="o">.</span><span class="n">transient</span><span class="o">.</span><span class="n">isgroundingline</span>      <span class="o">=</span> <span class="mi">1</span>
+<span class="n">md</span><span class="o">.</span><span class="n">transient</span><span class="o">.</span><span class="n">ismasstransport</span>      <span class="o">=</span> <span class="mi">1</span>
+<span class="n">md</span><span class="o">.</span><span class="n">transient</span><span class="o">.</span><span class="n">issmb</span>                <span class="o">=</span> <span class="mi">1</span>
+<span class="n">md</span><span class="o">.</span><span class="n">transient</span><span class="o">.</span><span class="n">isthermal</span>            <span class="o">=</span> <span class="mi">0</span>
+<span class="n">md</span><span class="o">.</span><span class="n">timestepping</span><span class="o">.</span><span class="n">time_adapt</span>        <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># not adaptive time stepping</span>
+<span class="n">md</span><span class="o">.</span><span class="n">timestepping</span><span class="o">.</span><span class="n">cfl_coefficient</span>   <span class="o">=</span> <span class="n">cfl</span> <span class="c1"># used if adaptive time stepping</span>
+<span class="n">md</span><span class="o">.</span><span class="n">timestepping</span><span class="o">.</span><span class="n">time_step</span>         <span class="o">=</span> <span class="n">dt</span>
+<span class="n">md</span><span class="o">.</span><span class="n">timestepping</span><span class="o">.</span><span class="n">final_time</span>        <span class="o">=</span> <span class="n">tf</span>
+<span class="n">md</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">output_frequency</span>      <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">dt_sav</span><span class="o">/</span><span class="n">dt</span><span class="p">)</span>
+
+<span class="n">md</span><span class="o">.</span><span class="n">transient</span><span class="o">.</span><span class="n">requested_outputs</span>    <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;GroundedArea&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;FloatingArea&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;IceVolume&#39;</span><span class="p">,</span>
+                                     <span class="s1">&#39;IceVolumeAboveFloatation&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Now we will convert the two-dimensional mesh into three dimensions by extruding the mesh vertically 5 cells in the <span class="math notranslate nohighlight">\(z\)</span> direction with <a class="reference internal" href="api/issm.html#issm.model.model.extrude" title="issm.model.model.extrude"><code class="xref py py-func docutils literal notranslate"><span class="pre">extrude()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># now, extrude and set the basal boundary conditions :</span>
+<span class="n">md</span><span class="o">.</span><span class="n">extrude</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>and set the appropriate “flow equation” with <a class="reference internal" href="api/issm.html#issm.setflowequation.setflowequation" title="issm.setflowequation.setflowequation"><code class="xref py py-class docutils literal notranslate"><span class="pre">setflowequation</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># specifiy the flow equation and FE basis :</span>
+<span class="n">md</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">setflowequation</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">mdl_odr</span><span class="p">,</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span>
+<span class="n">md</span><span class="o">.</span><span class="n">flowequation</span><span class="o">.</span><span class="n">fe_HO</span> <span class="o">=</span> <span class="s1">&#39;P1&#39;</span>
+</pre></div>
+</div>
+<p>It will be necessary later to recall the initial model for plotting, so we save the model just prior to solving the transient using <a class="reference internal" href="api/issm.html#issm.savevars.savevars" title="issm.savevars.savevars"><code class="xref py py-func docutils literal notranslate"><span class="pre">savevars()</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># save the state of the model :</span>
+<span class="n">im</span><span class="o">.</span><span class="n">savevars</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">+</span> <span class="s1">&#39;mismip_init.md&#39;</span><span class="p">,</span> <span class="s1">&#39;md&#39;</span><span class="p">,</span> <span class="n">md</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="solve-the-momentum-balance">
+<h2>Solve the momentum balance<a class="headerlink" href="#solve-the-momentum-balance" title="Permalink to this headline">¶</a></h2>
+<p>Now, set up the computing environment variables using the <a class="reference internal" href="api/issm.html#issm.generic.generic" title="issm.generic.generic"><code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code></a> class, enable verbose solver output with <a class="reference internal" href="api/issm.html#issm.verbose.verbose" title="issm.verbose.verbose"><code class="xref py py-class docutils literal notranslate"><span class="pre">verbose</span></code></a>, and finally solve the system with the <a class="reference internal" href="api/issm.html#issm.solve.solve" title="issm.solve.solve"><code class="xref py py-class docutils literal notranslate"><span class="pre">solve</span></code></a> class:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">cluster</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">generic</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">gethostname</span><span class="p">(),</span> <span class="s1">&#39;np&#39;</span><span class="p">,</span> <span class="n">num_p</span><span class="p">)</span>
+<span class="n">md</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s1">&#39;solution&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;control&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;convergence&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">md</span>         <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="s1">&#39;Transient&#39;</span><span class="p">)</span>
+
+<span class="c1"># save the state of the model :</span>
+<span class="n">im</span><span class="o">.</span><span class="n">savevars</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.md&#39;</span><span class="p">,</span> <span class="s1">&#39;md&#39;</span><span class="p">,</span> <span class="n">md</span><span class="p">)</span>
+
+<span class="n">var_dict</span>  <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;md.results.TransientSolution&#39;</span> <span class="p">:</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">}</span>
+<span class="n">im</span><span class="o">.</span><span class="n">savevars</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.shelve&#39;</span><span class="p">,</span> <span class="n">var_dict</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that currently, <a class="reference internal" href="api/issm.html#issm.savevars.savevars" title="issm.savevars.savevars"><code class="xref py py-func docutils literal notranslate"><span class="pre">savevars()</span></code></a> will work for small problems, but fails without error for large amounts of data.</p>
+</div>
+<div class="section" id="plot-the-results">
+<h2>Plot the results<a class="headerlink" href="#plot-the-results" title="Permalink to this headline">¶</a></h2>
+<p>TODO: particulars need to be adjusted here.</p>
+<p>You can plot the resulting variables on the surface or the be easily like so:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span>   <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Pressure</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonbase</span><span class="p">]</span>
+<span class="n">u_x</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Vx</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonsurface</span><span class="p">]</span>
+<span class="n">u_y</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Vy</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonsurface</span><span class="p">]</span>
+<span class="n">u_z</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Vz</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonsurface</span><span class="p">]</span>
+<span class="n">u</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">u_x</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">u_y</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">u_z</span><span class="o">.</span><span class="n">flatten</span><span class="p">()])</span>
+</pre></div>
+</div>
+<p>This will produce a plot of final state of the model after <span class="math notranslate nohighlight">\(t = 20000\)</span> years like so:</p>
+<img alt="_images/z_b.jpg" src="_images/z_b.jpg" />
+<img alt="_images/H_20000.jpg" src="_images/H_20000.jpg" />
+<img alt="_images/S_20000.jpg" src="_images/S_20000.jpg" />
+<img alt="_images/mask_20000.jpg" src="_images/mask_20000.jpg" />
+<img alt="_images/U_b_20000.jpg" src="_images/U_b_20000.jpg" />
+<img alt="_images/U_s_20000.jpg" src="_images/U_s_20000.jpg" />
+</div>
+<div class="section" id="references">
+<h2>References:<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<table class="docutils citation" frame="void" id="asay-davis-2016" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label">[asay-davis_2016]</td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id3">2</a>)</em> <a class="reference external" href="https://www.geosci-model-dev.net/9/2471/2016/">https://www.geosci-model-dev.net/9/2471/2016/</a></td></tr>
+</tbody>
+</table>
+<table class="docutils citation" frame="void" id="gudmundsson-2012" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id2">[gudmundsson_2012]</a></td><td><a class="reference external" href="https://www.the-cryosphere.net/6/1497/2012/">https://www.the-cryosphere.net/6/1497/2012/</a></td></tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="api/issm.html" class="btn btn-neutral float-right" title="issm package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="ismip_hom.html" class="btn btn-neutral" title="ISMIP-HOM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

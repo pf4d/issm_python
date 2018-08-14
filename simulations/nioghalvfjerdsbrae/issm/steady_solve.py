@@ -8,6 +8,7 @@ import os, sys
 
 # directories for saving data :
 mdl_odr = 'HO'
+tmc     = False
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
@@ -24,28 +25,30 @@ if not os.path.exists(d):
 md                    = im.model()
 md.miscellaneous.name = 'Nioghalvfjerdsbrae'
 
-var_dict  = {'md.mesh'                      : md.mesh,
-             'md.inversion.vx_obs'          : md.inversion.vx_obs,
-             'md.inversion.vy_obs'          : md.inversion.vy_obs,
-             'md.inversion.vel_obs'         : md.inversion.vel_obs,
-             'md.mask.groundedice_levelset' : md.mask.groundedice_levelset,
-             'md.mask.ice_levelset'         : md.mask.ice_levelset,
-             'md.geometry.surface'          : md.geometry.surface,
-             'md.geometry.base'             : md.geometry.base,
-             'md.geometry.thickness'        : md.geometry.thickness,
-             'md.friction_coefficient'      : md.friction.coefficient}
+var_dict  = {'md.mesh'                       : md.mesh,
+             'md.inversion.vx_obs'           : md.inversion.vx_obs,
+             'md.inversion.vy_obs'           : md.inversion.vy_obs,
+             'md.inversion.vel_obs'          : md.inversion.vel_obs,
+             'md.mask.groundedice_levelset'  : md.mask.groundedice_levelset,
+             'md.mask.ice_levelset'          : md.mask.ice_levelset,
+             'md.geometry.surface'           : md.geometry.surface,
+             'md.geometry.base'              : md.geometry.base,
+             'md.geometry.thickness'         : md.geometry.thickness,
+             'md.initialization.temperature' : md.initialization.temperature,
+             'md.friction_coefficient'       : md.friction.coefficient}
 load_dict = im.loadvars(var_dir + 'issm_nio.shelve', var_dict)
 
-md.mesh                      = load_dict['md.mesh']
-md.inversion.vx_obs          = load_dict['md.inversion.vx_obs']
-md.inversion.vy_obs          = load_dict['md.inversion.vy_obs']
-md.inversion.vel_obs         = load_dict['md.inversion.vel_obs']
-md.mask.groundedice_levelset = load_dict['md.mask.groundedice_levelset']
-md.mask.ice_levelset         = load_dict['md.mask.ice_levelset']
-md.geometry.surface          = load_dict['md.geometry.surface']
-md.geometry.base             = load_dict['md.geometry.base']
-md.geometry.thickness        = load_dict['md.geometry.thickness']
-md.friction.coefficient      = load_dict['md.friction_coefficient']
+md.mesh                       = load_dict['md.mesh']
+md.inversion.vx_obs           = load_dict['md.inversion.vx_obs']
+md.inversion.vy_obs           = load_dict['md.inversion.vy_obs']
+md.inversion.vel_obs          = load_dict['md.inversion.vel_obs']
+md.mask.groundedice_levelset  = load_dict['md.mask.groundedice_levelset']
+md.mask.ice_levelset          = load_dict['md.mask.ice_levelset']
+md.geometry.surface           = load_dict['md.geometry.surface']
+md.geometry.base              = load_dict['md.geometry.base']
+md.geometry.thickness         = load_dict['md.geometry.thickness']
+md.initialization.temperature = load_dict['md.initialization.temperature']
+md.friction.coefficient       = load_dict['md.friction_coefficient']
 
 
 #===============================================================================
@@ -58,7 +61,7 @@ Hini   =  100.0       # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
 A      =  1e-16       # [Pa^{-n} s^{-1}] flow 
-beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
+beta   =  1e6         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  1.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
@@ -96,25 +99,23 @@ md.materials.rho_ice         = rhoi
 md.materials.rho_water       = rhow
 md.constants.g               = g
 md.constants.yts             = spy
-md.transient.isthermal       = 0.0
 
 #md.friction.coefficient      = beta * v_ones
 #md.friction.coefficient[flt] = 0
 md.friction.p                = p * e_ones
 md.friction.q                = q * e_ones
 
-md.materials.rheology_B      = Bf * v_ones
 md.materials.rheology_n      =  n * e_ones
-#md.materials.rheology_B      = im.paterson((Tm - 20.0) * v_ones)
-md.materials.rheology_law    = "None"
+md.materials.rheology_B      = Bf * v_ones
+#md.materials.rheology_B      = im.paterson(md.initialization.temperature)
+md.materials.rheology_law    = "Arrhenius"
 
 # initialization :
-#md.initialization.vx          = md.inversion.vx_obs * v_ones
-#md.initialization.vy          = md.inversion.vy_obs * v_ones
-#md.initialization.vz          = 0.0 * v_ones
-#md.initialization.vel         = md.inversion.vel_obs * v_ones
-#md.initialization.pressure    = rhoi * g * md.geometry.thickness
-#md.initialization.temperature = Tm * v_ones
+md.initialization.vx          = 0.0 * v_ones#md.inversion.vx_obs * v_ones
+md.initialization.vy          = 0.0 * v_ones#md.inversion.vy_obs * v_ones
+md.initialization.vz          = 0.0 * v_ones
+md.initialization.vel         = 0.0 * v_ones#md.inversion.vel_obs * v_ones
+md.initialization.pressure    = rhoi * g * md.geometry.thickness
 
 ## create placeholders :
 #md.stressbalance.spcvx       = np.nan * v_ones
@@ -126,10 +127,19 @@ md.basalforcings.floatingice_melting_rate = 0.0 * v_ones
 md.basalforcings.geothermalflux           = q_geo * v_ones
 md.stressbalance.referential              = np.nan * A_ones
 md.stressbalance.loadingforce             = np.nan * b_ones
-md.thermal.spctemperature                 = md.initialization.temperature
 md.smb.mass_balance                       = adot * v_ones
 md.masstransport.spcthickness             = np.nan * v_ones
 
+# thermal model :
+#md.initialization.temperature = Tm * v_ones
+md.initialization.waterfraction           = 0.0 * v_ones
+md.initialization.watercolumn             = 0.0 * v_ones
+md.thermal.spctemperature                 = md.initialization.temperature.copy()
+md.thermal.stabilization                  = 2 # SUPG
+md.thermal.isenthalpy                     = 1
+
+# FIXME: ``SteadySolver`` throws an error if this is not zero :
+md.timestepping.time_step                 = 0.0
 
 #===============================================================================
 # boundary conditions :
@@ -158,17 +168,18 @@ print_text('::: issm -- solving :::', 'red')
 
 md.cluster = im.generic('name', im.gethostname(), 'np', 1)
 md.verbose = im.verbose('convergence', True)
-md         = im.solve(md, 'Stressbalance')
+if tmc: md = im.solve(md, 'SteadyState')
+else:   md = im.solve(md, 'StressBalance')
 
 #===============================================================================
 # plot the results :
 print_text('::: issm -- plotting :::', 'red')
 
-p    = md.results.StressbalanceSolution.Pressure[md.mesh.vertexonbase]
-u_x  = md.results.StressbalanceSolution.Vx[md.mesh.vertexonsurface] 
-u_y  = md.results.StressbalanceSolution.Vy[md.mesh.vertexonsurface] 
-u_z  = md.results.StressbalanceSolution.Vz[md.mesh.vertexonsurface] 
-u    = np.array([u_x.flatten(), u_y.flatten(), u_z.flatten()])
+p      = md.results.StressbalanceSolution.Pressure[md.mesh.vertexonbase]
+u_x    = md.results.StressbalanceSolution.Vx[md.mesh.vertexonsurface] 
+u_y    = md.results.StressbalanceSolution.Vy[md.mesh.vertexonsurface] 
+u_z    = md.results.StressbalanceSolution.Vz[md.mesh.vertexonsurface] 
+u      = np.array([u_x.flatten(), u_y.flatten(), u_z.flatten()])
 
 # save the mesh coordinates and data for interpolation with CSLVR :
 np.savetxt(out_dir + 'x.txt',   md.mesh.x2d)
@@ -178,8 +189,9 @@ np.savetxt(out_dir + 'u_y.txt', u[1])
 np.savetxt(out_dir + 'u_z.txt', u[2])
 np.savetxt(out_dir + 'p.txt',   p)
 
-u_mag  = np.sqrt(u[0]**2 + u[1]**2 + u[2]**2 + 1e-16)
-U_lvls = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, u_mag.max()])
+u_mag     = np.sqrt(u[0]**2 + u[1]**2 + u[2]**2 + 1e-16)
+U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, 
+                      u_mag.max()])
 
 tp_kwargs     = {'linestyle'      : '-',
                  'lw'             : 1.0,
@@ -196,7 +208,7 @@ quiver_kwargs = {'pivot'          : 'middle',
                  'headaxislength' : 3.0}
 
 plot_variable(u                   = u,
-              name                = 'U',
+              name                = 'U_beta_sia_no_lvls',
               direc               = plt_dir, 
               coords              = (md.mesh.x2d, md.mesh.y2d),
               cells               = md.mesh.elements2d - 1,
@@ -228,7 +240,6 @@ plot_variable(u                   = u,
               res                 = 150,
               cb                  = True,
               cb_format           = '%g')
-
 
 
 

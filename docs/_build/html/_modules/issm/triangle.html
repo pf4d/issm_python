@@ -1,0 +1,278 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.triangle &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.triangle</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.triangle</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mesh2d</span> <span class="k">import</span> <span class="n">mesh2d</span>
+<span class="kn">from</span> <span class="nn">TriMesh</span> <span class="k">import</span> <span class="n">TriMesh</span>
+<span class="kn">from</span> <span class="nn">NodeConnectivity</span> <span class="k">import</span> <span class="n">NodeConnectivity</span>
+<span class="kn">from</span> <span class="nn">ElementConnectivity</span> <span class="k">import</span> <span class="n">ElementConnectivity</span>
+<span class="kn">import</span> <span class="nn">MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+
+<div class="viewcode-block" id="triangle"><a class="viewcode-back" href="../../api/issm.html#issm.triangle.triangle">[docs]</a><span class="k">def</span> <span class="nf">triangle</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">domainname</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	TRIANGLE - create model mesh using the triangle package</span>
+
+<span class="sd">	   This routine creates a model mesh using TriMesh and a domain outline, to within a certain resolution</span>
+<span class="sd">	   where md is a @model object, domainname is the name of an Argus domain outline file, </span>
+<span class="sd">	   and resolution is a characteristic length for the mesh (same unit as the domain outline</span>
+<span class="sd">	   unit). Riftname is an optional argument (Argus domain outline) describing rifts.</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      md=triangle(md,domainname,resolution)</span>
+<span class="sd">	   or md=triangle(md,domainname, resolution, riftname)</span>
+
+<span class="sd">	   Examples:</span>
+<span class="sd">	      md=triangle(md,&#39;DomainOutline.exp&#39;,1000);</span>
+<span class="sd">	      md=triangle(md,&#39;DomainOutline.exp&#39;,1000,&#39;Rifts.exp&#39;);</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#Figure out a characteristic area. Resolution is a node oriented concept (ex a 1000m  resolution node would </span>
+	<span class="c1">#be made of 1000*1000 area squares). </span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+		<span class="n">resolution</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">riftname</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+		<span class="n">riftname</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">resolution</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+	<span class="c1">#Check that mesh was not already run, and warn user: </span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">:</span>
+		<span class="n">choice</span> <span class="o">=</span> <span class="n">raw_input</span><span class="p">(</span><span class="s1">&#39;This model already has a mesh. Are you sure you want to go ahead? (y/n)&#39;</span><span class="p">)</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">strcmp</span><span class="p">(</span><span class="n">choice</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">):</span>
+			<span class="nb">print</span> <span class="s1">&#39;no meshing done ... exiting&#39;</span>
+			<span class="k">return</span> <span class="kc">None</span>
+
+	<span class="n">area</span> <span class="o">=</span> <span class="n">resolution</span><span class="o">**</span><span class="mi">2</span>
+
+	<span class="c1">#Check that file exist (this is a very very common mistake)</span>
+	<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">domainname</span><span class="p">):</span>
+		<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;file &#39;</span><span class="si">%s</span><span class="s2">&#39; not found&quot;</span> <span class="o">%</span> <span class="n">domainname</span><span class="p">)</span>
+
+	<span class="c1">#Mesh using TriMesh</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">=</span><span class="n">mesh2d</span><span class="p">()</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segmentmarkers</span><span class="o">=</span><span class="n">TriMesh</span><span class="p">(</span><span class="n">domainname</span><span class="p">,</span><span class="n">riftname</span><span class="p">,</span><span class="n">area</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segmentmarkers</span><span class="o">=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segmentmarkers</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+	<span class="c1">#Fill in rest of fields:</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonboundary</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">,</span><span class="nb">bool</span><span class="p">)</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonboundary</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">segments</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+	<span class="c1">#Now, build the connectivity tables for this mesh.</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexconnectivity</span> <span class="o">=</span> <span class="n">NodeConnectivity</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elementconnectivity</span> <span class="o">=</span> <span class="n">ElementConnectivity</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexconnectivity</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+	<span class="k">return</span> <span class="n">md</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

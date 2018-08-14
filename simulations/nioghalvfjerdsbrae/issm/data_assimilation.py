@@ -1,19 +1,20 @@
-from fenics_viz      import *
-import issm              as im
-import cslvr             as cs
-import numpy             as np
-import matplotlib.pyplot as plt
-import matplotlib.tri    as tri
+from   fenics_viz import print_text
+import issm           as im
+import numpy          as np
 import os, sys
 
 # directories for saving data :
 mdl_odr = 'HO'
+opt_met = 'm1qn3'#'brent'#
+cst_met = 'morlighem'#'log''l2'#'cummings'#
+
+name    = mdl_odr + '_' + cst_met + '_cost_' + opt_met
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
 var_dir = '../dump/vars/'
-plt_dir = '../dump/images/issm/' + mdl_pfx + '/'
-out_dir = '../dump/results/issm/' + mdl_pfx + '/'
+plt_dir = '../dump/images/issm/' + mdl_pfx + '/' + opt_met + '/'
+out_dir = '../dump/results/issm/' + mdl_pfx + '/' + opt_met + '/'
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(out_dir)
@@ -22,7 +23,7 @@ if not os.path.exists(d):
 
 # load the model mesh created by gen_nio_mesh.py :
 md                    = im.model()
-md.miscellaneous.name = 'Nioghalvfjerdsbrae'
+md.miscellaneous.name = name
 
 var_dict  = {'md.mesh'                      : md.mesh,
              'md.inversion.vx_obs'          : md.inversion.vx_obs,
@@ -96,7 +97,6 @@ md.materials.rho_ice         = rhoi
 md.materials.rho_water       = rhow
 md.constants.g               = g
 md.constants.yts             = spy
-md.transient.isthermal       = 0.0
 md.friction.p                = p * e_ones
 md.friction.q                = q * e_ones
 md.materials.rheology_B      = Bf * v_ones
@@ -159,7 +159,10 @@ b_ones = np.ones((md.mesh.numberofvertices, 3))
 # data assimilation using L_BFGS_B method (otherwise issm uses Brent search) :
 # FIXME: not obvious that you have to send the old issm::inversion instantiation
 #        in order to keep all the old variables (vx_obs, etc.) :
-md.inversion                    = im.m1qn3inversion(md.inversion)
+if opt_met == 'm1qn3':
+  md.inversion = im.m1qn3inversion(md.inversion)
+
+# common parameters to both ``miqn3`` and ``brent`` :
 md.inversion.iscontrol          = 1 # Do inversion? 1 = yes; 0 = no
 md.inversion.incomplete_adjoint = 1 # 1 = linear viscosity; 0 = non-linear visc
 md.inversion.control_parameters = ['FrictionCoefficient']
@@ -168,37 +171,55 @@ md.inversion.min_parameters     = 1e-16 * v_ones
 md.inversion.max_parameters     = 1e6   * v_ones
 
 # form cost functions :
-#
-#   Available cost functions:
-#   101: SurfaceAbsVelMisfit
-#   102: SurfaceRelVelMisfit
-#   103: SurfaceLogVelMisfit
-#   104: SurfaceLogVxVyMisfit
-#   105: SurfaceAverageVelMisfit
-#   201: ThicknessAbsMisfit
-#   501: DragCoefficientAbsGradient
-#   502: RheologyBbarAbsGradient
-#   503: ThicknessAbsGradient
-#
-md.inversion.cost_functions                   = [101, 103, 501]
-md.inversion.cost_functions_coefficients      = np.vstack([v_ones]*3).T
-md.inversion.cost_functions_coefficients[:,0] = 1e0
-md.inversion.cost_functions_coefficients[:,1] = 1e2
-md.inversion.cost_functions_coefficients[:,2] = 1e-7
+"""
+   Available cost functions:
+   101: SurfaceAbsVelMisfit
+   102: SurfaceRelVelMisfit
+   103: SurfaceLogVelMisfit
+   104: SurfaceLogVxVyMisfit
+   105: SurfaceAverageVelMisfit
+   201: ThicknessAbsMisfit
+   501: DragCoefficientAbsGradient
+   502: RheologyBbarAbsGradient
+   503: ThicknessAbsGradient
+"""
+if cst_met == 'cummings':
+  md.inversion.cost_functions                   = [101, 103]#, 501]
+  md.inversion.cost_functions_coefficients      = np.vstack([v_ones]*2).T
+  md.inversion.cost_functions_coefficients[:,0] = 1e0
+  md.inversion.cost_functions_coefficients[:,1] = 1e5
+  #md.inversion.cost_functions_coefficients[:,2] = 1e0
+
+elif cst_met == 'morlighem':
+  md.inversion.cost_functions                   = [101, 103]#, 501]
+  md.inversion.cost_functions_coefficients      = np.vstack([v_ones]*2).T
+  md.inversion.cost_functions_coefficients[:,0] = 1e0
+  md.inversion.cost_functions_coefficients[:,1] = 1e2
+  #md.inversion.cost_functions_coefficients[:,2] = 1e-7
+
+elif cst_met == 'log':
+  md.inversion.cost_functions                   = [103]
+  md.inversion.cost_functions_coefficients      = v_ones
+
+elif cst_met == 'l2':
+  md.inversion.cost_functions                   = [101]
+  md.inversion.cost_functions_coefficients      = v_ones
+
+# issm::m1qn3inversion-specific parameters :
+if opt_met == 'm1qn3':
+  md.inversion.maxsteps           = 3000  # max gradient evaluations
+  md.inversion.maxiter            = 3000  # max objective evaluations
+  md.inversion.dxmin              = 1e-16 # convergence criterion 1
+  md.inversion.gttol              = 1e-16 # convergence criterion 2 :
+                                          # ||g(X)|| / ||g(X0)||   where
+                                          # g(X0): gradient at initial guess X0
 
 # brent search specific parameters :
-md.inversion.step_threshold          = 0.7 * np.ones(md.inversion.nsteps)
-md.inversion.maxiter_per_step        = 20  * np.ones(md.inversion.nsteps)
-md.inversion.gradient_scaling        = 50  * np.ones(md.inversion.nsteps)
-md.inversion.cost_function_threshold = np.nan 
-
-## issm::m1qn3inversion-specific parameters :
-#md.inversion.maxsteps           = 3000  # max gradient evaluations
-#md.inversion.maxiter            = 3000  # max objective evaluations
-#md.inversion.dxmin              = 1e-16  # convergence criterion 1
-#md.inversion.gttol              = 1e-16 # convergence criterion 2 :
-#                                        # ||g(X)|| / ||g(X0)||   where
-#                                        # g(X0): gradient at initial guess X0
+elif opt_met == 'brent':
+  md.inversion.step_threshold          = 0.7 * np.ones(md.inversion.nsteps)
+  md.inversion.maxiter_per_step        = 20  * np.ones(md.inversion.nsteps)
+  md.inversion.gradient_scaling        = 50  * np.ones(md.inversion.nsteps)
+  md.inversion.cost_function_threshold = np.nan 
 
 ## FIXME: it is not obvious that the velocity observations have to be extruded :
 #md.inversion.vx_obs   = im.project3d(md,'vector',
@@ -218,75 +239,7 @@ md.cluster = im.generic('name', im.gethostname(), 'np', 2)
 md.verbose = im.verbose('solution', True, 'control', True)
 md         = im.solve(md, 'Stressbalance')
 
-
-#===============================================================================
-# plot the results :
-print_text('::: issm -- plotting :::', 'red')
-
-p    = md.results.StressbalanceSolution.Pressure[md.mesh.vertexonbase]
-u_x  = md.results.StressbalanceSolution.Vx[md.mesh.vertexonsurface] 
-u_y  = md.results.StressbalanceSolution.Vy[md.mesh.vertexonsurface] 
-u_z  = md.results.StressbalanceSolution.Vz[md.mesh.vertexonsurface] 
-u    = np.array([u_x.flatten(), u_y.flatten(), u_z.flatten()])
-
-# save the mesh coordinates and data for interpolation with CSLVR :
-np.savetxt(out_dir + 'x.txt',   md.mesh.x2d)
-np.savetxt(out_dir + 'y.txt',   md.mesh.y2d)
-np.savetxt(out_dir + 'u_x.txt', u[0])
-np.savetxt(out_dir + 'u_y.txt', u[1])
-np.savetxt(out_dir + 'u_z.txt', u[2])
-np.savetxt(out_dir + 'p.txt',   p)
-
-u_mag  = np.sqrt(u[0]**2 + u[1]**2 + u[2]**2 + 1e-16)
-U_lvls = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, u_mag.max()])
-
-tp_kwargs     = {'linestyle'      : '-',
-                 'lw'             : 1.0,
-                 'color'          : 'k',
-                 'alpha'          : 0.5}
-
-quiver_kwargs = {'pivot'          : 'middle',
-                 'color'          : 'k',
-                 'scale'          : 100,
-                 'alpha'          : 0.5,
-                 'width'          : 0.001,
-                 'headwidth'      : 3.0, 
-                 'headlength'     : 3.0, 
-                 'headaxislength' : 3.0}
-
-plot_variable(u                   = u,
-              name                = 'U_opt_morlighem_brent',
-              direc               = plt_dir, 
-              coords              = (md.mesh.x2d, md.mesh.y2d),
-              cells               = md.mesh.elements2d - 1,
-              figsize             = (5,7),
-              cmap                = 'viridis',
-              scale               = 'lin',
-              numLvls             = 10,
-              levels              = U_lvls,
-              levels_2            = None,
-              umin                = None,
-              umax                = None,
-              plot_tp             = False,#True,
-              tp_kwargs           = tp_kwargs,
-              show                = False,
-              hide_x_tick_labels  = True,#False,
-              hide_y_tick_labels  = True,#False,
-              xlabel              = '',#r'$x$',
-              ylabel              = '',#r'$y$',
-              equal_axes          = True,
-              title               = r'$\underline{u}^* |_S^{\mathrm{ISSM}}$',
-              hide_axis           = True,
-              colorbar_loc        = 'right',
-              contour_type        = 'filled',
-              extend              = 'neither',
-              ext                 = '.pdf',
-              normalize_vec       = True,
-              plot_quiver         = True,
-              quiver_kwargs       = quiver_kwargs,
-              res                 = 150,
-              cb                  = True,
-              cb_format           = '%g')
+im.savevars(out_dir + name + '.md', 'md', md)
 
 
 

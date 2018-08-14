@@ -1,0 +1,389 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.plotdoc &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.plotdoc</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.plotdoc</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="plotdoc"><a class="viewcode-back" href="../../api/issm.html#issm.plotdoc.plotdoc">[docs]</a><span></span><span class="k">def</span> <span class="nf">plotdoc</span><span class="p">():</span>
+	<span class="sd">&#39;&#39;&#39;PLOTDOC - plot documentation</span>
+<span class="sd">	%As of now it is more a TODO list</span>
+<span class="sd">	%   Usage:</span>
+<span class="sd">	%      plotdoc()</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+	<span class="n">pydata</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;quiver&#39;</span><span class="p">:</span><span class="s1">&#39; quiver plot give data and a vector array [Vx,Vy]&#39;</span><span class="p">,</span>
+					<span class="s1">&#39;mesh&#39;</span><span class="p">:</span><span class="s1">&#39; draw mesh using trisurf&#39;</span><span class="p">,</span>
+					<span class="s1">&#39;BC&#39;</span><span class="p">:</span><span class="s1">&#39; this will draw all the boundary conditions (Dirichlet and Neumann).&#39;</span><span class="p">,</span>
+					<span class="s1">&#39;elementnumbering&#39;</span><span class="p">:</span><span class="s1">&#39; numbering of elements (matlab indices)&#39;</span><span class="p">,</span>
+					<span class="s1">&#39;3D disclaimer&#39;</span><span class="p">:</span><span class="s1">&#39;3D is implemented with plot3d for now this is not optimal and may change to mayavi at some point. The impelementation is on the development side for now so expect some issue and question your plotting before you results.&#39;</span><span class="p">}</span>
+	<span class="n">TODOdata</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;basal_drag&#39;</span><span class="p">:</span><span class="s1">&#39; plot the basal drag on the bed (in kPa) based on the velocity in md.initialization&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;basal_dragx or basal_dragy&#39;</span> <span class="p">:</span><span class="s1">&#39; plot a component of the basal drag on the bed (in kPa)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;boundaries&#39;</span><span class="p">:</span><span class="s1">&#39; this will draw all the segment boundaries to the model, including rifts.&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;icefront&#39;</span><span class="p">:</span><span class="s1">&#39; this will show segments that are used to define the icefront of the model (Neumann boundary conditions).&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;deviatoricstress_tensor&#39;</span><span class="p">:</span><span class="s1">&#39; plot the components of the deviatoric stress tensor (tauxx,tauyy,tauzz,tauxy,tauxz,tauyz, if computed&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;deviatoricstress_principal&#39;</span><span class="p">:</span><span class="s1">&#39; plot the deviatoricstress tensor principal axis and principal values&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;deviatoricstress_principalaxis1&#39;</span><span class="p">:</span><span class="s1">&#39; arrow plot the first principal axis of the deviatoricstress tensor(replace 1 by 2 or 3 if needed)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;driving_stress&#39;</span><span class="p">:</span><span class="s1">&#39; plot the driving stress (in kPa)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;elements_type&#39;</span><span class="p">:</span><span class="s1">&#39; model used for each element&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;highlightvertices&#39;</span><span class="p">:</span><span class="s1">&#39; to highlight vertices (use highlight option to enter the vertex list&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;referential&#39;</span><span class="p">:</span><span class="s1">&#39; stressbalance referential&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;riftvel&#39;</span><span class="p">:</span><span class="s1">&#39; velocities along rifts&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;riftrelvel&#39;</span><span class="p">:</span><span class="s1">&#39; relative velocities along rifts&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;riftpenetration&#39;</span><span class="p">:</span><span class="s1">&#39; penetration levels for a fault&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;riftfraction&#39;</span><span class="p">:</span><span class="s1">&#39; fill fractions for every node of the rifts&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;rifts&#39;</span><span class="p">:</span><span class="s1">&#39; plot mesh with an offset so that rifts are visible&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;strainrate_tensor&#39;</span><span class="p">:</span><span class="s1">&#39; plot the components of the strainrate tensor (exx,eyy,ezz,exy,exz,eyz) if computed&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;strainrate_principal&#39;</span><span class="p">:</span><span class="s1">&#39; plot the strainrate tensor principal axis and principal values)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;strainrate_principalaxis1&#39;</span><span class="p">:</span><span class="s1">&#39; arrow plot the first principal axis of the strainrate tensor(replace 1 by 2 or 3 if needed)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;stress_tensor&#39;</span><span class="p">:</span><span class="s1">&#39; plot the components of stress tensor (sxx,syy,szz,sxy,sxz,syz) if computed&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;stress_principal&#39;</span><span class="p">:</span><span class="s1">&#39; plot the stress tensor principal axis and principal values&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;stress_principalaxis1&#39;</span><span class="p">:</span><span class="s1">&#39; arrow plot the first principal axis of the stress tensor(replace 1 by 2 or 3 if needed)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;transient_results&#39;</span><span class="p">:</span><span class="s1">&#39; this will printlay all the time steps of a transient run (use steps to specify the steps requested)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;transient_vel&#39;</span><span class="p">:</span><span class="s1">&#39; this will printlay the velocity for the time steps requested in &#39;&#39;steps&#39;&#39; of a transient run&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;transient_vel&#39;</span><span class="p">:</span><span class="s1">&#39; vel can be by any field of the transient results (vx, vy, vz, vel, temperature, melting, pressure, bed, thickness, surface)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;transient_field&#39;</span><span class="p">:</span><span class="s1">&#39; dynamic plot of results. specify &#39;&#39;steps&#39;&#39; option, as fell as &#39;&#39;field&#39;&#39; (defaults are all steps, for &#39;&#39;Vel&#39;&#39; field)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;transient_movie&#39;</span><span class="p">:</span><span class="s1">&#39; this will printlay the time steps of a given field of a transient run&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;transient_movie_field&#39;</span><span class="p">:</span><span class="s1">&#39; field to be printlayed when doing  transient_movie data printlay&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;transient_movie_output&#39;</span><span class="p">:</span><span class="s1">&#39; filename if output is desired for movie&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;transient_movie_time&#39;</span><span class="p">:</span><span class="s1">&#39; time for each image (default 2 seconds)&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;thermaltransient_results&#39;</span><span class="p">:</span><span class="s1">&#39; this will printlay all the time steps of a thermal transient run&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;qmuhistnorm&#39;</span><span class="p">:</span><span class="s1">&#39; histogram normal distribution. needs option qmudata&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;qmumean&#39;</span><span class="p">:</span><span class="s1">&#39; plot of mean distribution in sampling analysis with scaled response. needs option qmudata for descriptor&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;qmustddev&#39;</span><span class="p">:</span><span class="s1">&#39; plot of stddev distribution in sampling analysis with scaled response. needs option qmudata for descriptor&#39;</span><span class="p">,</span>
+						<span class="s1">&#39;part_hist&#39;</span><span class="p">:</span><span class="s1">&#39; partitioning node and area histogram&#39;</span><span class="p">}</span>
+	
+	<span class="n">pyoptions</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;axis&#39;</span><span class="p">:</span><span class="s2">&quot; show (&#39;on&#39;) or hide (&#39;off&#39;) axes&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;caxis&#39;</span><span class="p">:</span><span class="s2">&quot; modify  colorbar range. (array of type [a b] where b&gt;=a)&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;colorlevels&#39;</span><span class="p">:</span><span class="s2">&quot; N, number of levels to use&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;colorbar&#39;</span><span class="p">:</span><span class="s2">&quot; add colorbar (string &#39;on&#39;,&#39;off&#39; or &#39;one&#39;)&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;axes_pad&#39;</span><span class="p">:</span><span class="s2">&quot; spacing between axes (default is 0.25)&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;colorbartitle&#39;</span><span class="p">:</span><span class="s2">&quot; colorbar title (string)&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;colorbarticks&#39;</span><span class="p">:</span><span class="s2">&quot; set colorbar ticks manually (list)&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;colorbarfontsize&#39;</span><span class="p">:</span><span class="s2">&quot; specify colorbar fontsize&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;colormap&#39;</span><span class="p">:</span><span class="s2">&quot; change the default colormap (&#39;viridis&#39; is the default)&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;contourlevels&#39;</span><span class="p">:</span><span class="s2">&quot; N or [value1,...] add the contours of the specified values or N contours&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;streamlines&#39;</span><span class="p">:</span><span class="s2">&quot; TOFIX argument does nothing&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;edgecolor&#39;</span><span class="p">:</span><span class="s2">&quot; color of mesh edges. RGB tuple or standard string&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;fontsize&#39;</span><span class="p">:</span><span class="s2">&quot; fontsize for the title&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;fontweight&#39;</span><span class="p">:</span><span class="s2">&quot; fontweight for the title &#39;normal&#39;, &#39;bold&#39;&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;fontcolor&#39;</span><span class="p">:</span><span class="s2">&quot; TODO&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;highlight&#39;</span><span class="p">:</span><span class="s2">&quot; highlights certain nodes or elements when using &#39;vetrexnumbering&#39; or &#39;elementnumbering&#39; or &#39;highlightvertices &#39; or &#39;highlightelements&#39; option&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;title&#39;</span><span class="p">:</span><span class="s2">&quot; subplot title (string)&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;xlim&#39;</span><span class="p">:</span><span class="s2">&quot; limits of X axis (all subplots) (ex: [0,500])&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;ylim&#39;</span><span class="p">:</span><span class="s2">&quot; limits of Y axis (all subplots) (ex: [0,500])&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;xlabel&#39;</span><span class="p">:</span><span class="s2">&quot; X axis title&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;ylabel&#39;</span><span class="p">:</span><span class="s2">&quot; Y axis title&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;scaling&#39;</span><span class="p">:</span><span class="s2">&quot; scaling factor used by quiver plots.&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;quivercol&#39;</span><span class="p">:</span><span class="s2">&quot; color of quiver arrows, &#39;values&#39; give value colored arrows&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;text&#39;</span><span class="p">:</span><span class="s2">&quot; print string or list of strings&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;textposition&#39;</span><span class="p">:</span><span class="s2">&quot; [x,y] position of text, list if several texts (position betwee 0 and 1)&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;textsize&#39;</span><span class="p">:</span><span class="s2">&quot; text fontsize TOFIX &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;textweight&#39;</span><span class="p">:</span><span class="s2">&quot; text fontweight&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;textcolor&#39;</span><span class="p">:</span><span class="s2">&quot; text color&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;textrotation&#39;</span><span class="p">:</span><span class="s2">&quot; text rotation angle&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;mask&#39;</span><span class="p">:</span><span class="s2">&quot; condition. Only &#39;true&#39; values are plotted &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;log&#39;</span><span class="p">:</span><span class="s2">&quot; cutoff value for log&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;backgroundcolor&#39;</span><span class="p">:</span><span class="s2">&quot; plot background color. RGB tuple or standard string&quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;expdisp&#39;</span><span class="p">:</span><span class="s2">&quot; path (or list of paths) to the exp file to be plotted &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;explinewidth&#39;</span><span class="p">:</span><span class="s2">&quot; linewidth &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;explinestyle&#39;</span><span class="p">:</span><span class="s2">&quot; matplotlib linestyle string &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;explinecolor&#39;</span><span class="p">:</span><span class="s2">&quot; matplotlib color string &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;expfill&#39;</span><span class="p">:</span><span class="s2">&quot; (True/False) fill a closed contour &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;expfillcolor&#39;</span><span class="p">:</span><span class="s2">&quot; Color for a filled contour, only used if expfill is True &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;expfillalpha&#39;</span><span class="p">:</span><span class="s2">&quot; alpha transparency for filled contour &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;overlay&#39;</span><span class="p">:</span><span class="s2">&quot; True/False. Overlay a georeferenced image (radar/visible) &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;overlay_image&#39;</span><span class="p">:</span><span class="s2">&quot; path to overlay image &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;overlayhist&#39;</span><span class="p">:</span><span class="s2">&quot; plot a histogram of overlay image, used for setting overlaylims &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;overlaylims&#39;</span><span class="p">:</span><span class="s2">&quot; normalized limits to clip and stretch contrast of overlay image (in [0,1], ex. [0.25,0.75]) &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;alpha&#39;</span><span class="p">:</span><span class="s2">&quot; set transparency of plotted data (in [0,1]) &quot;</span><span class="p">,</span>
+						 <span class="s1">&#39;vertexnumbering&#39;</span><span class="p">:</span><span class="s1">&#39; numbering of vertices&#39;</span><span class="p">,</span>
+						 <span class="s1">&#39;elementnumbering&#39;</span><span class="p">:</span><span class="s1">&#39; numbering of elements (matlab indices)&#39;</span><span class="p">,</span>
+						 <span class="s1">&#39;highlightelements&#39;</span><span class="p">:</span><span class="s1">&#39; to highlight elements to highlight the element list&#39;</span><span class="p">,</span>
+						 <span class="s1">&#39;layer&#39;</span><span class="p">:</span><span class="s2">&quot;number of the layer to display for 3D runs&quot;</span><span class="p">}</span>
+
+	<span class="n">TODOoptions</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;basin&#39;</span><span class="p">:</span><span class="s2">&quot; zoom on a given basin (&#39;pineislandglacier&#39;,&#39;ronneiceshelf&#39;, use isbasin to identify a basin&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;figurebackgroundcolor&#39;</span><span class="p">:</span><span class="s2">&quot; figure background color. (default is &#39;none&#39;,&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;coord&#39;</span><span class="p">:</span><span class="s2">&quot;  &#39;xy&#39; (default) or &#39;latlon&#39;&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;colorbarpos&#39;</span><span class="p">:</span><span class="s2">&quot; [x,y,dx,dy] where x,y,dx and dy are within [0 1]&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;colorbarcornerposition&#39;</span><span class="p">:</span><span class="s2">&quot; &#39;West&#39;,&#39;North&#39;,etc ...&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;colorbartitlerotation&#39;</span><span class="p">:</span><span class="s2">&quot; -90, etc ...&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;colorbarwidth&#39;</span><span class="p">:</span><span class="s2">&quot; multiplier (default 1) to the default width colorbar&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;colorbarheight&#39;</span><span class="p">:</span><span class="s2">&quot; multiplier (default 1) to the default height colorbar&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;contourticks&#39;</span><span class="p">:</span><span class="s2">&quot; &#39;on&#39; or &#39;off&#39; to printlay the ticks of the contours&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;contouronly&#39;</span><span class="p">:</span><span class="s2">&quot; &#39;on&#39; or &#39;off&#39; to printlay the contours on a white background&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;contourcolor&#39;</span><span class="p">:</span><span class="s2">&quot; ticks and contour color&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;density&#39;</span><span class="p">:</span><span class="s2">&quot; density of quivers (one arrow every N nodes, N integer)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;inset&#39;</span><span class="p">:</span><span class="s2">&quot; add an inset (zoom) of the current figure if 1 (use &#39;insetx&#39;, &#39;insety&#39; and &#39;insetpos&#39; to determine the inset position and content)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;insetx&#39;</span><span class="p">:</span><span class="s2">&quot; [min(x) max(x)] where min(x) and max(x) are values determining the inset content&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;insety&#39;</span><span class="p">:</span><span class="s2">&quot; [min(y) max(y)] where min(y) and max(y) are values determining the inset content&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;insetpos&#39;</span><span class="p">:</span><span class="s2">&quot; [x,y,dx,dy] where x,y,dx and dy are within [0 1]&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;resolution&#39;</span><span class="p">:</span><span class="s2">&quot; resolution used by section value (array of type [horizontal_resolution vertical_resolution])&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;showsection&#39;</span><span class="p">:</span><span class="s2">&quot; show section used by &#39;sectionvalue&#39; (string &#39;on&#39; or a number of labels)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;sectionvalue&#39;</span><span class="p">:</span><span class="s2">&quot; give the value of data on a profile given by an Argus file (string &#39;Argusfile_name.exp&#39;,&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;profile&#39;</span><span class="p">:</span><span class="s2">&quot; give the value of data along a vertical profile ([xlocation ylocation])&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;smooth&#39;</span><span class="p">:</span><span class="s2">&quot; smooth element data (string &#39;yes&#39; or integer)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;view&#39;</span><span class="p">:</span><span class="s2">&quot; same as standard matlab option (ex: 2, 3 or [90 180]&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;zlim&#39;</span><span class="p">:</span><span class="s2">&quot; same as standard matlab option&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;xticklabel&#39;</span><span class="p">:</span><span class="s2">&quot; specifiy xticklabel&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;yticklabel&#39;</span><span class="p">:</span><span class="s2">&quot; specifiy yticklabel&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;contrast&#39;</span><span class="p">:</span><span class="s2">&quot; (default 1) coefficient to add contrast to the radar amplitude image used in overlays&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;highres&#39;</span><span class="p">:</span><span class="s2">&quot; resolution of overlayed radar amplitude image (default is 0, high resolution is 1).&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;alpha&#39;</span><span class="p">:</span><span class="s2">&quot; transparency coefficient (the higher, the more transparent). Default is 1.5&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;scaling&#39;</span><span class="p">:</span><span class="s2">&quot; scaling factor used by quiver plots. Default is 0.4&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;autoscale&#39;</span><span class="p">:</span><span class="s2">&quot; set to &#39;off&#39; to have all the quivers with the same size. Default is &#39;on&#39;&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;linewidth&#39;</span><span class="p">:</span><span class="s2">&quot; line width for expprint plot (use a cell of strings if more than one)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;border&#39;</span><span class="p">:</span><span class="s2">&quot; size of printlay border (in pixels). active only for overlay plots&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;nan&#39;</span><span class="p">:</span><span class="s2">&quot; value assigned to NaNs (convenient when plotting BC)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;partitionedges&#39;</span><span class="p">:</span><span class="s2">&quot; &#39;off&#39; by default. overlay plot of partition edges&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;latlon&#39;</span><span class="p">:</span><span class="s2">&quot; &#39;on&#39; or {latstep lonstep [resolution [color]]} where latstep,longstep and resolution are in degrees, color is a [r g b] array&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;latlonnumbering&#39;</span><span class="p">:</span><span class="s2">&quot; &#39;on&#39; or {latgap longap colornumber latangle lonangle} where latgap and longap are pixel gaps for the numbers&quot;</span><span class="p">,</span> 
+							 <span class="s1">&#39;latlonclick&#39;</span><span class="p">:</span><span class="s2">&quot; &#39;on&#39; to click on latlon ticks positions colornumber is a [r g b] array and latangle and lonangle are angles to flip the numbers&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;northarrow&#39;</span><span class="p">:</span><span class="s2">&quot; add an arrow pointing north, &#39;on&#39; for default value or [x0 y0 length [ratio width fontsize]] where (x0,y0) are the coordinates of the base, ratio=headlength/length&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;offset&#39;</span><span class="p">:</span><span class="s2">&quot; mesh offset used by &#39;rifts&#39;, default is 500&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;scaleruler&#39;</span><span class="p">:</span><span class="s2">&quot; add a scale ruler, &#39;on&#39; for default value or [x0 y0 length width numberofticks] where (x0,y0) are the coordinates of the lower left corner&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;showregion&#39;</span><span class="p">:</span><span class="s2">&quot; show domain in Antarctica on an inset, use &#39;insetpos&#39; properties&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;visible&#39;</span><span class="p">:</span><span class="s2">&quot; &#39;off&#39; to make figure unvisible, default is &#39;on&#39;&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;wrapping&#39;</span><span class="p">:</span><span class="s2">&quot; repeat &#39;n&#39; times the colormap (&#39;n&#39; must be an integer)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;unit&#39;</span><span class="p">:</span><span class="s2">&quot; by default, in m, otherwise, &#39;km&#39; is available&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;legend_position&#39;</span><span class="p">:</span><span class="s2">&quot; by default, &#39;NorthEasth&#39;&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;qmudata&#39;</span><span class="p">:</span><span class="s2">&quot; &quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;figposition&#39;</span><span class="p">:</span><span class="s2">&quot; position of figure: &#39;fullscreen&#39;, &#39;halfright&#39;, &#39;halfleft&#39;, &#39;portrait&#39;, &#39;landscape&#39;,... (hardcoded in applyoptions.m)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;offsetaxispos&#39;</span><span class="p">:</span><span class="s2">&quot; offset of current axis position to get more space (ex: [-0.02 0  0.04 0])&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;axispos&#39;</span><span class="p">:</span><span class="s2">&quot; axis position to get more space&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;hmin&#39;</span><span class="p">:</span><span class="s2">&quot; (numeric, minimum for histogram)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;hmax&#39;</span><span class="p">:</span><span class="s2">&quot; (numeric, maximum for histogram)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;hnint&#39;</span><span class="p">:</span><span class="s2">&quot; (numeric, number of intervals for histogram)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;ymin1&#39;</span><span class="p">:</span><span class="s2">&quot; (numeric, minimum of histogram y-axis)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;ymax1&#39;</span><span class="p">:</span><span class="s2">&quot; (numeric, maximum of histogram y-axis)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;ymin2&#39;</span><span class="p">:</span><span class="s2">&quot; (numeric, minimum of cdf y-axis)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;ymax2&#39;</span><span class="p">:</span><span class="s2">&quot; (numeric, maximum of cdf y-axis)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;cdfplt&#39;</span><span class="p">:</span><span class="s2">&quot; (char, &#39;off&#39; to turn off cdf line plots)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;cdfleg&#39;</span><span class="p">:</span><span class="s2">&quot; (char, &#39;off&#39; to turn off cdf legends)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;segmentnumbering&#39;</span><span class="p">:</span><span class="s2">&quot; (&#39;off&#39; by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlgroundoverlay&#39;</span><span class="p">:</span><span class="s2">&quot; (&#39;off&#39; by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlfilename&#39;</span><span class="p">:</span><span class="s2">&quot; (&#39;tempfile.kml&#39; by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlroot&#39;</span><span class="p">:</span><span class="s2">&quot; (&#39;./&#39; by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlimagename&#39;</span><span class="p">:</span><span class="s2">&quot; (&#39;tempimage&#39; by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlimagetype&#39;</span><span class="p">:</span><span class="s2">&quot; (&#39;png&#39; by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlresolution&#39;</span><span class="p">:</span><span class="s2">&quot; (1 by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlfolder&#39;</span><span class="p">:</span><span class="s2">&quot; (&#39;Ground Overlay&#39; by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlfolderdescription&#39;</span><span class="p">:</span><span class="s2">&quot; (&#39;&#39; by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlgroundoverlayname&#39;</span><span class="p">:</span><span class="s2">&quot; (&#39;&#39; by default)&quot;</span><span class="p">,</span>
+							 <span class="s1">&#39;kmlgroundoverlaydescription&#39;</span><span class="p">:</span><span class="s2">&quot;N/A by default&#39;)&quot;</span><span class="p">}</span>
+
+
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Plot usage: plotmodel(model,varargin)&quot;</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   plotting is done with couples of keywords values, the type and style of data to display is given by one (or several) of the followings&quot;</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   Options: &quot;</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     &#39;data&#39; : and a model field or one of the following options.&quot;</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">pydata</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     - </span><span class="si">{}</span><span class="s2"> : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">pydata</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;   The general look of the plot is then given by the following keywords&quot;</span><span class="p">)</span>
+	<span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pyoptions</span><span class="p">):</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;     - </span><span class="si">{}</span><span class="s2"> : </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">pyoptions</span><span class="p">[</span><span class="n">key</span><span class="p">]))</span>
+	<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;       any options (except &#39;data&#39;) can be followed by &#39;#i&#39; where &#39;i&#39; is the subplot number, or &#39;#all&#39; if applied to all plots&quot;</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.SectionValues &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.SectionValues</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.SectionValues</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">issm.expread</span> <span class="k">import</span> <span class="n">expread</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span>  <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">issm.project2d</span> <span class="k">import</span> <span class="n">project2d</span>
+<span class="c1">#from issm.InterpFromMesh2d import InterpFromMesh2d</span>
+<span class="kn">from</span> <span class="nn">issm.InterpFromMeshToMesh2d</span> <span class="k">import</span> <span class="n">InterpFromMeshToMesh2d</span>
+<span class="kn">from</span> <span class="nn">issm.InterpFromMeshToMesh3d</span> <span class="k">import</span> <span class="n">InterpFromMeshToMesh3d</span>
+
+<div class="viewcode-block" id="SectionValues"><a class="viewcode-back" href="../../api/issm.html#issm.SectionValues.SectionValues">[docs]</a><span class="k">def</span> <span class="nf">SectionValues</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">infile</span><span class="p">,</span><span class="n">resolution</span><span class="p">):</span>
+	<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">	compute the value of a field on a section</span>
+<span class="sd">	</span>
+<span class="sd">	This routine gets the value of a given field of the model on points</span>
+<span class="sd">	given in the file infile (Argus type file). Resolution must be a list</span>
+<span class="sd">	[horizontal_resolution, vertical_resolution]</span>
+<span class="sd">	</span>
+<span class="sd">	Usage:</span>
+<span class="sd">	[elements,x,y,z,s,data]=SectionValues(md,data,filename,resolution)</span>
+<span class="sd">	[elements,x,y,z,s,data]=SectionValues(md,data,profile_structure,resolution)</span>
+<span class="sd">	&#39;&#39;&#39;</span>
+
+	<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">infile</span><span class="p">):</span>
+		<span class="n">profile</span><span class="o">=</span><span class="n">expread</span><span class="p">(</span><span class="n">infile</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">nods</span><span class="o">=</span><span class="n">profile</span><span class="p">[</span><span class="s1">&#39;nods&#39;</span><span class="p">]</span>
+		<span class="n">x</span><span class="o">=</span><span class="n">profile</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
+		<span class="n">y</span><span class="o">=</span><span class="n">profile</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;file </span><span class="si">%s</span><span class="s1"> not found&#39;</span> <span class="o">%</span> <span class="n">infile</span><span class="p">)</span>
+
+	<span class="c1">#get the specified resolution</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span><span class="o">!=</span><span class="mi">2</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;SectionValues error message: Resolution must be a list [horizontal_resolution, vertical_resolution]&#39;</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">res_h</span><span class="o">=</span><span class="n">resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">domaintype</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;3d&#39;</span><span class="p">:</span>
+		<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="nb">float</span><span class="p">):</span>
+			<span class="n">res_v</span><span class="o">=</span><span class="n">resolution</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;SectionValues error: resolution must be a length-2 list of integers or floats&#39;</span><span class="p">)</span>
+
+	<span class="c1">#initialization</span>
+	<span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span> <span class="c1">#X-coordinate</span>
+	<span class="n">Y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span> <span class="c1">#Y-coordinate</span>
+	<span class="n">S</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="p">])</span>  <span class="c1">#curvilinear coordinate</span>
+	
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">nods</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+	
+		<span class="n">x_start</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+		<span class="n">x_end</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">y_start</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+		<span class="n">y_end</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">s_start</span><span class="o">=</span><span class="n">S</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+	
+		<span class="n">length_segment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">x_end</span><span class="o">-</span><span class="n">x_start</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">y_end</span><span class="o">-</span><span class="n">y_start</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+		<span class="n">portion</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">length_segment</span><span class="o">/</span><span class="n">res_h</span><span class="p">)</span>
+	
+		<span class="n">x_segment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">portion</span><span class="p">)</span>
+		<span class="n">y_segment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">portion</span><span class="p">)</span>
+		<span class="n">s_segment</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">portion</span><span class="p">)</span>
+
+		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">portion</span><span class="p">)):</span>
+			<span class="n">x_segment</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">x_start</span><span class="o">+</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x_end</span><span class="o">-</span><span class="n">x_start</span><span class="p">)</span><span class="o">/</span><span class="n">portion</span>
+			<span class="n">y_segment</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">y_start</span><span class="o">+</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">y_end</span><span class="o">-</span><span class="n">y_start</span><span class="p">)</span><span class="o">/</span><span class="n">portion</span>
+			<span class="n">s_segment</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="n">s_start</span><span class="o">+</span><span class="n">j</span><span class="o">*</span><span class="n">length_segment</span><span class="o">/</span><span class="n">portion</span>
+	
+		<span class="c1">#plug into X and Y</span>
+		<span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">x_segment</span><span class="p">)</span>
+		<span class="n">Y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">y_segment</span><span class="p">)</span>
+		<span class="n">S</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">S</span><span class="p">,</span><span class="n">s_segment</span><span class="p">)</span>
+
+	<span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">x</span><span class="p">[</span><span class="n">nods</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+	<span class="n">Y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">y</span><span class="p">[</span><span class="n">nods</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+	
+	<span class="c1">#Number of nodes:</span>
+	<span class="n">numberofnodes</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+	
+	<span class="c1">#Compute Z</span>
+	<span class="n">Z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberofnodes</span><span class="p">)</span>
+	
+	<span class="c1">#New mesh and Data interpolation</span>
+	<span class="k">if</span> <span class="s1">&#39;2d&#39;</span> <span class="ow">in</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">domaintype</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+	
+		<span class="c1">#Interpolation of data on specified points</span>
+		<span class="c1">#data_interp=InterpFromMesh2d(md.mesh.elements,md.mesh.x,md.mesh.y,data,X,Y)[0]</span>
+		<span class="n">data_interp</span><span class="o">=</span><span class="n">InterpFromMeshToMesh2d</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="c1">#data_interp=griddata(md.mesh.x,md.mesh.y,data,X,Y)</span>
+	
+		<span class="c1">#Compute index</span>
+		<span class="n">index</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">numberofnodes</span><span class="p">),</span><span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="n">numberofnodes</span><span class="o">+</span><span class="mi">1</span><span class="p">)])</span><span class="o">.</span><span class="n">T</span>
+	
+	<span class="k">else</span><span class="p">:</span>
+	
+		<span class="c1">#vertically extrude mesh</span>
+	
+		<span class="c1">#Get base and surface for each 2d point, offset to make sure that it is inside the glacier system</span>
+		<span class="n">offset</span><span class="o">=</span><span class="mf">1.e-3</span>
+		<span class="n">base</span><span class="o">=</span><span class="n">InterpFromMeshToMesh2d</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements2d</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x2d</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y2d</span><span class="p">,</span><span class="n">project2d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">base</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">offset</span>
+		<span class="n">base</span><span class="o">=</span><span class="n">base</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+		<span class="n">surface</span><span class="o">=</span><span class="n">InterpFromMeshToMesh2d</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements2d</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x2d</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y2d</span><span class="p">,</span><span class="n">project2d</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">surface</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">offset</span>
+		<span class="n">surface</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	
+		<span class="c1">#Some useful parameters</span>
+		<span class="n">layers</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">thickness</span><span class="p">)</span><span class="o">/</span><span class="n">res_v</span><span class="p">))</span>
+		<span class="n">nodesperlayer</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">numberofnodes</span><span class="p">)</span>
+		<span class="n">nodestot</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">nodesperlayer</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span>
+		<span class="n">elementsperlayer</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">nodesperlayer</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">elementstot</span><span class="o">=</span><span class="nb">int</span><span class="p">((</span><span class="n">nodesperlayer</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">layers</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+	
+		<span class="c1">#initialization</span>
+		<span class="n">X3</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nodesperlayer</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span> 
+		<span class="n">Y3</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nodesperlayer</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span> 
+		<span class="n">Z3</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nodesperlayer</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span> 
+		<span class="n">S3</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nodesperlayer</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span> 
+		<span class="n">index3</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">elementstot</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+	
+		<span class="c1">#Get new coordinates in 3d</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">layers</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+			<span class="n">X3</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">::</span><span class="n">layers</span><span class="p">]</span><span class="o">=</span><span class="n">X</span>
+			<span class="n">Y3</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">::</span><span class="n">layers</span><span class="p">]</span><span class="o">=</span><span class="n">Y</span>
+			<span class="n">Z3</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">::</span><span class="n">layers</span><span class="p">]</span><span class="o">=</span><span class="n">base</span><span class="o">+</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">surface</span><span class="o">-</span><span class="n">base</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">layers</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+			<span class="n">S3</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">::</span><span class="n">layers</span><span class="p">]</span><span class="o">=</span><span class="n">S</span>
+	
+			<span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">layers</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>  <span class="c1">#Build index3 with quads</span>
+				<span class="n">ids</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">nodestot</span><span class="o">-</span><span class="n">layers</span><span class="p">,</span><span class="n">layers</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">nodestot</span><span class="o">-</span><span class="n">layers</span><span class="p">,</span><span class="n">layers</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">layers</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">nodestot</span><span class="p">,</span><span class="n">layers</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="n">layers</span><span class="p">,</span><span class="n">nodestot</span><span class="p">,</span><span class="n">layers</span><span class="p">)))</span><span class="o">.</span><span class="n">T</span>
+				<span class="n">index3</span><span class="p">[(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">elementsperlayer</span><span class="p">:</span><span class="n">i</span><span class="o">*</span><span class="n">elementsperlayer</span><span class="p">,:]</span><span class="o">=</span><span class="n">ids</span>
+
+		<span class="c1">#Interpolation of data on specified points</span>
+		<span class="n">data_interp</span><span class="o">=</span><span class="n">InterpFromMeshToMesh3d</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">z</span><span class="p">,</span><span class="n">data</span><span class="p">,</span><span class="n">X3</span><span class="p">,</span><span class="n">Y3</span><span class="p">,</span><span class="n">Z3</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	
+		<span class="c1">#build outputs</span>
+		<span class="n">X</span><span class="o">=</span><span class="n">X3</span> 
+		<span class="n">Y</span><span class="o">=</span><span class="n">Y3</span> 
+		<span class="n">Z</span><span class="o">=</span><span class="n">Z3</span>  
+		<span class="n">S</span><span class="o">=</span><span class="n">S3</span> 
+
+		<span class="n">index</span><span class="o">=</span><span class="n">index3</span>
+
+	<span class="k">return</span> <span class="n">index</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">S</span><span class="p">,</span><span class="n">data_interp</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

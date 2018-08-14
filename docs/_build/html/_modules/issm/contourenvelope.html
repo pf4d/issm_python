@@ -1,0 +1,346 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.contourenvelope &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.contourenvelope</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.contourenvelope</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">issm.NodeConnectivity</span> <span class="k">import</span> <span class="n">NodeConnectivity</span>
+<span class="kn">from</span> <span class="nn">issm.ElementConnectivity</span> <span class="k">import</span> <span class="n">ElementConnectivity</span>
+<span class="kn">from</span> <span class="nn">issm.mesh2d</span> <span class="k">import</span> <span class="n">mesh2d</span>
+<span class="kn">from</span> <span class="nn">issm.mesh3dprisms</span> <span class="k">import</span> <span class="n">mesh3dprisms</span>
+<span class="kn">import</span> <span class="nn">issm.MatlabFuncs</span> <span class="k">as</span> <span class="nn">m</span>
+
+<div class="viewcode-block" id="contourenvelope"><a class="viewcode-back" href="../../api/issm.html#issm.contourenvelope.contourenvelope">[docs]</a><span class="k">def</span> <span class="nf">contourenvelope</span><span class="p">(</span><span class="n">md</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	CONTOURENVELOPE - build a set of segments enveloping a contour .exp</span>
+
+<span class="sd">	   Usage:</span>
+<span class="sd">	      segments=contourenvelope(md,varargin)</span>
+
+<span class="sd">	   Example:</span>
+<span class="sd">	      segments=contourenvelope(md,&#39;Stream.exp&#39;);</span>
+<span class="sd">	      segments=contourenvelope(md);</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="c1">#some checks</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;contourenvelope error message: bad usage&quot;</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+		<span class="n">flags</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+		<span class="k">if</span>   <span class="nb">isinstance</span><span class="p">(</span><span class="n">flags</span><span class="p">,(</span><span class="nb">str</span><span class="p">,</span><span class="n">unicode</span><span class="p">)):</span>
+			<span class="n">file</span><span class="o">=</span><span class="n">flags</span>
+			<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
+				<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;contourenvelope error message: file &#39;</span><span class="si">%s</span><span class="s2">&#39; not found&quot;</span> <span class="o">%</span> <span class="n">file</span><span class="p">)</span>
+			<span class="n">isfile</span><span class="o">=</span><span class="mi">1</span>
+		<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">flags</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+			<span class="c1">#do nothing for now</span>
+			<span class="n">isfile</span><span class="o">=</span><span class="mi">0</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;contourenvelope error message:  second argument should be a file or an elements flag&quot;</span><span class="p">)</span>
+
+	<span class="c1">#Now, build the connectivity tables for this mesh.</span>
+	<span class="c1">#Computing connectivity</span>
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexconnectivity</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">!=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexconnectivity</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">!=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">:</span>
+		<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexconnectivity</span><span class="o">=</span><span class="n">NodeConnectivity</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elementconnectivity</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">!=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elementconnectivity</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">!=</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">:</span>
+		<span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elementconnectivity</span><span class="o">=</span><span class="n">ElementConnectivity</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">,</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexconnectivity</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+	<span class="c1">#get nodes inside profile</span>
+	<span class="n">elementconnectivity</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elementconnectivity</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">dimension</span><span class="p">()</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+		<span class="n">elements</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements</span><span class="p">)</span>
+		<span class="n">x</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x</span><span class="p">)</span>
+		<span class="n">y</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+		<span class="n">numberofvertices</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices</span><span class="p">)</span>
+		<span class="n">numberofelements</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements</span><span class="p">)</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="n">elements</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements2d</span><span class="p">)</span>
+		<span class="n">x</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x2d</span><span class="p">)</span>
+		<span class="n">y</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y2d</span><span class="p">)</span>
+		<span class="n">numberofvertices</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofvertices2d</span><span class="p">)</span>
+		<span class="n">numberofelements</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">numberofelements2d</span><span class="p">)</span>
+
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+
+		<span class="k">if</span> <span class="n">isfile</span><span class="p">:</span>
+			<span class="c1">#get flag list of elements and nodes inside the contour</span>
+			<span class="n">nodein</span><span class="o">=</span><span class="n">ContourToMesh</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">file</span><span class="p">,</span><span class="s1">&#39;node&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+			<span class="n">elemin</span><span class="o">=</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">nodein</span><span class="p">(</span><span class="n">elements</span><span class="p">),</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+			<span class="c1">#modify element connectivity</span>
+			<span class="n">elemout</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">elemin</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">elementconnectivity</span><span class="p">[</span><span class="n">elemout</span><span class="p">,:]</span><span class="o">=</span><span class="mi">0</span>
+			<span class="n">elementconnectivity</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">ismember</span><span class="p">(</span><span class="n">elementconnectivity</span><span class="p">,</span><span class="n">elemout</span><span class="o">+</span><span class="mi">1</span><span class="p">))]</span><span class="o">=</span><span class="mi">0</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="c1">#get flag list of elements and nodes inside the contour</span>
+			<span class="n">nodein</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberofvertices</span><span class="p">)</span>
+			<span class="n">elemin</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">numberofelements</span><span class="p">)</span>
+
+			<span class="n">pos</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span>
+			<span class="n">elemin</span><span class="p">[</span><span class="n">pos</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+			<span class="n">nodein</span><span class="p">[</span><span class="n">elements</span><span class="p">[</span><span class="n">pos</span><span class="p">,:]</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+
+			<span class="c1">#modify element connectivity</span>
+			<span class="n">elemout</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">elemin</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">elementconnectivity</span><span class="p">[</span><span class="n">elemout</span><span class="p">,:]</span><span class="o">=</span><span class="mi">0</span>
+			<span class="n">elementconnectivity</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">ismember</span><span class="p">(</span><span class="n">elementconnectivity</span><span class="p">,</span><span class="n">elemout</span><span class="o">+</span><span class="mi">1</span><span class="p">))]</span><span class="o">=</span><span class="mi">0</span>
+
+	<span class="c1">#Find element on boundary</span>
+	<span class="c1">#First: find elements on the boundary of the domain</span>
+	<span class="n">flag</span><span class="o">=</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">elementconnectivity</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+		<span class="n">flag</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">flag</span><span class="p">)]</span><span class="o">=</span><span class="n">elemin</span><span class="p">[</span><span class="n">flag</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">flag</span><span class="p">)]]</span>
+	<span class="n">elementonboundary</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span>
+
+	<span class="c1">#Find segments on boundary</span>
+	<span class="n">pos</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">elementonboundary</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+	<span class="n">num_segments</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+	<span class="n">segments</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_segments</span><span class="o">*</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="nb">int</span><span class="p">)</span>
+	<span class="n">count</span><span class="o">=</span><span class="mi">0</span>
+
+	<span class="k">for</span> <span class="n">el1</span> <span class="ow">in</span> <span class="n">pos</span><span class="p">:</span>
+		<span class="n">els2</span><span class="o">=</span><span class="n">elementconnectivity</span><span class="p">[</span><span class="n">el1</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">elementconnectivity</span><span class="p">[</span><span class="n">el1</span><span class="p">,:])[</span><span class="mi">0</span><span class="p">]]</span><span class="o">-</span><span class="mi">1</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">els2</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+			<span class="n">flag</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">elements</span><span class="p">[</span><span class="n">els2</span><span class="p">[</span><span class="mi">0</span><span class="p">],:],</span><span class="n">elements</span><span class="p">[</span><span class="n">els2</span><span class="p">[</span><span class="mi">1</span><span class="p">],:]),</span><span class="n">elements</span><span class="p">[</span><span class="n">el1</span><span class="p">,:])</span>
+			<span class="n">nods1</span><span class="o">=</span><span class="n">elements</span><span class="p">[</span><span class="n">el1</span><span class="p">,:]</span>
+			<span class="n">nods1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">nods1</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">nods1</span><span class="o">==</span><span class="n">flag</span><span class="p">))</span>
+			<span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,:]</span><span class="o">=</span><span class="p">[</span><span class="n">nods1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">nods1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">el1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+
+			<span class="n">ord1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">nods1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">elements</span><span class="p">[</span><span class="n">el1</span><span class="p">,:])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">ord2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">nods1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">elements</span><span class="p">[</span><span class="n">el1</span><span class="p">,:])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+			<span class="c1">#swap segment nodes if necessary</span>
+			<span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="n">ord1</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">ord2</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ord1</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">ord2</span><span class="o">==</span><span class="mi">2</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ord1</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">ord2</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="p">):</span>
+				<span class="n">temp</span><span class="o">=</span><span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+				<span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+				<span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">temp</span>
+			<span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+			<span class="n">count</span><span class="o">+=</span><span class="mi">1</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">nods1</span><span class="o">=</span><span class="n">elements</span><span class="p">[</span><span class="n">el1</span><span class="p">,:]</span>
+			<span class="n">flag</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">nods1</span><span class="p">,</span><span class="n">elements</span><span class="p">[</span><span class="n">els2</span><span class="p">,:])</span>
+			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
+				<span class="n">nods</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">nods1</span><span class="p">,</span><span class="n">j</span><span class="p">)</span>
+				<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">ismember</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span><span class="n">nods</span><span class="p">)):</span>
+					<span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,:]</span><span class="o">=</span><span class="p">[</span><span class="n">nods</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">nods</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">el1</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+					<span class="n">ord1</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">nods</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">elements</span><span class="p">[</span><span class="n">el1</span><span class="p">,:])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+					<span class="n">ord2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">nods</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="n">elements</span><span class="p">[</span><span class="n">el1</span><span class="p">,:])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+					<span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="n">ord1</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">ord2</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ord1</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">ord2</span><span class="o">==</span><span class="mi">2</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ord1</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">ord2</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span> <span class="p">):</span>
+						<span class="n">temp</span><span class="o">=</span><span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+						<span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+						<span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">temp</span>
+					<span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">segments</span><span class="p">[</span><span class="n">count</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+					<span class="n">count</span><span class="o">+=</span><span class="mi">1</span>
+	<span class="n">segments</span><span class="o">=</span><span class="n">segments</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">count</span><span class="p">,:]</span>
+
+	<span class="k">return</span> <span class="n">segments</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

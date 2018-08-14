@@ -1,0 +1,477 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>issm.arch &mdash; issm 4.12 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> issm
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                4.12
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Preliminaries</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ismip_hom.html">ISMIP-HOM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mismip_plus.html">MISMIP+</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/issm.html">issm package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">issm</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>issm.arch</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for issm.arch</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+
+<div class="viewcode-block" id="archwrite"><a class="viewcode-back" href="../../api/issm.html#issm.arch.archwrite">[docs]</a><span class="k">def</span> <span class="nf">archwrite</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">):</span> <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	ARCHWRITE - Write data to a field, given the file name, field name, and data.</span>
+
+<span class="sd">		Usage:</span>
+<span class="sd">			archwrite(&#39;archive101.arch&#39;,&#39;variable_name&#39;,data);</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="n">nargs</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">);</span>
+	<span class="k">if</span> <span class="n">nargs</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Incorrect number of arguments.&#39;</span><span class="p">)</span>
+	<span class="c1"># open file</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;ab&#39;</span><span class="p">)</span>
+	<span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;archwrite error: could not open &#39;</span><span class="si">%s</span><span class="s2">&#39; to write to.&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+
+	<span class="n">nfields</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+	<span class="c1"># generate data to write</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nfields</span><span class="p">):</span>
+		<span class="c1"># write field name</span>
+		<span class="n">name</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="p">]</span>
+		<span class="n">write_field_name</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+		
+		<span class="c1"># write data associated with field name</span>
+		<span class="n">data</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="o">*</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+		<span class="n">code</span><span class="o">=</span><span class="n">format_archive_code</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+		<span class="k">if</span> <span class="n">code</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;archwrite : error writing data, string should not be written as field data&quot;</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">code</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+			<span class="n">write_scalar</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+		<span class="k">elif</span> <span class="n">code</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+			<span class="n">write_vector</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">data</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;archwrite : error writing data, invalid code entered &#39;</span><span class="si">%d</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">code</span><span class="p">)</span>
+	
+	<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<span class="c1"># }}}</span>
+<div class="viewcode-block" id="archread"><a class="viewcode-back" href="../../api/issm.html#issm.arch.archread">[docs]</a><span class="k">def</span> <span class="nf">archread</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="n">fieldname</span><span class="p">):</span> <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	ARCHREAD - Given an arch file name, and a field name, find and return the data</span>
+<span class="sd">					associated with that field name.</span>
+<span class="sd">		Usage:</span>
+<span class="sd">			archread(&#39;archive101.arch&#39;,&#39;field_var_1&#39;)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;archread error : file &#39;</span><span class="si">%s</span><span class="s2">&#39; does not exist&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+	<span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;archread error : could not open file &#39;</span><span class="si">%s</span><span class="s2">&#39; to read from&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+	
+	<span class="n">archive_results</span><span class="o">=</span><span class="p">[]</span>
+
+	<span class="c1"># read first result</span>
+	<span class="n">result</span><span class="o">=</span><span class="n">read_field</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+	<span class="k">while</span> <span class="n">result</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">fieldname</span> <span class="o">==</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;field_name&#39;</span><span class="p">]:</span>
+			<span class="c1"># found the data we wanted</span>
+			<span class="n">archive_results</span><span class="o">=</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">];</span> <span class="c1"># we only want the data</span>
+			<span class="k">break</span>
+		
+		<span class="c1"># read next result</span>
+		<span class="n">result</span><span class="o">=</span><span class="n">read_field</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+	
+	<span class="c1"># close file</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+	
+	<span class="k">return</span> <span class="n">archive_results</span></div>
+<span class="c1"># }}}</span>
+<div class="viewcode-block" id="archdisp"><a class="viewcode-back" href="../../api/issm.html#issm.arch.archdisp">[docs]</a><span class="k">def</span> <span class="nf">archdisp</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span> <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	ARCHDISP - Given an arch filename, display the contents of that file</span>
+
+<span class="sd">		Usage:</span>
+<span class="sd">			archdisp(&#39;archive101.arch&#39;)</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">try</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+			<span class="n">fid</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;archread error : file &#39;</span><span class="si">%s</span><span class="s2">&#39; does not exist&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+	<span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;archread error : could not open file &#39;</span><span class="si">%s</span><span class="s2">&#39; to read from&quot;</span> <span class="o">%</span> <span class="n">filename</span><span class="p">)</span>
+	
+	<span class="nb">print</span> <span class="s1">&#39;Source file: &#39;</span>
+	<span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+	<span class="nb">print</span> <span class="s1">&#39;Variables: &#39;</span>
+
+	<span class="n">result</span><span class="o">=</span><span class="n">read_field</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+	<span class="k">while</span> <span class="n">result</span><span class="p">:</span>
+		<span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;field_name&#39;</span><span class="p">])</span>
+		<span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">Size:</span><span class="se">\t\t</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">])</span>
+		<span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\t\t</span><span class="s1">Datatype:</span><span class="se">\t</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s1">&#39;data_type&#39;</span><span class="p">])</span>
+		<span class="c1"># go to next result</span>
+		<span class="n">result</span><span class="o">=</span><span class="n">read_field</span><span class="p">(</span><span class="n">fid</span><span class="p">)</span>
+	
+	<span class="c1"># close file</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<span class="c1"># }}}</span>
+
+<span class="c1"># Helper functions </span>
+<div class="viewcode-block" id="write_field_name"><a class="viewcode-back" href="../../api/issm.html#issm.arch.write_field_name">[docs]</a><span class="k">def</span> <span class="nf">write_field_name</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">data</span><span class="p">):</span> <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Routine to write field name (variable name) to an archive file.</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># write the length of the record</span>
+	<span class="c1"># length to write + string size (len) + format code</span>
+	<span class="n">reclen</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">reclen</span><span class="p">))</span>
+	
+	<span class="c1"># write format code</span>
+	<span class="n">code</span><span class="o">=</span><span class="n">format_archive_code</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+	<span class="k">if</span> <span class="n">code</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;archwrite : error writing field name, expected string, but got </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+	<span class="c1"># write string length, and then the string</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;</span><span class="si">%d</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span><span class="n">data</span><span class="p">))</span></div>
+<span class="c1"># }}}</span>
+<div class="viewcode-block" id="write_scalar"><a class="viewcode-back" href="../../api/issm.html#issm.arch.write_scalar">[docs]</a><span class="k">def</span> <span class="nf">write_scalar</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">data</span><span class="p">):</span> <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Procedure to write a double to an arch file pointed to by fid</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># write length of record</span>
+	<span class="c1"># double (8 bytes) + format code (4 bytes)</span>
+	<span class="n">reclen</span><span class="o">=</span><span class="mi">8</span><span class="o">+</span><span class="mi">4</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">reclen</span><span class="p">))</span>
+
+	<span class="c1"># write the format code (2 for scalar)</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+	
+	<span class="c1"># write the double</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;d&#39;</span><span class="p">,</span><span class="n">data</span><span class="p">))</span></div>
+
+<span class="c1"># }}}</span>
+<div class="viewcode-block" id="write_vector"><a class="viewcode-back" href="../../api/issm.html#issm.arch.write_vector">[docs]</a><span class="k">def</span> <span class="nf">write_vector</span><span class="p">(</span><span class="n">fid</span><span class="p">,</span><span class="n">data</span><span class="p">):</span> <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Procedure to write a np.array to an arch file</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="c1"># Make sure our vector is the correct shape.</span>
+	<span class="c1"># Reshape it into a row vector if it is not correct.</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,(</span><span class="nb">bool</span><span class="p">,</span><span class="nb">int</span><span class="p">,</span><span class="n">long</span><span class="p">,</span><span class="nb">float</span><span class="p">)):</span>
+		<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">data</span><span class="p">])</span>
+	<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">)):</span>
+		<span class="n">data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,)</span>
+	
+	<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+		<span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">data</span><span class="p">),)</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+	
+	<span class="c1"># get size of data</span>
+	<span class="n">sz</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+	<span class="c1"># write length of record</span>
+	<span class="c1"># format code + row size + col size + (double size * row amt * col amt)</span>
+	<span class="n">reclen</span><span class="o">=</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">4</span><span class="o">+</span><span class="mi">8</span><span class="o">*</span><span class="n">sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+	<span class="c1"># make sure we can fit data into file</span>
+	<span class="k">if</span> <span class="n">reclen</span><span class="o">&gt;</span><span class="mi">2</span><span class="o">**</span><span class="mi">31</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;archwrite error : can not write vector to binary file because it is too large&quot;</span><span class="p">)</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">reclen</span><span class="p">))</span>
+	
+	<span class="c1"># write format code</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+	<span class="c1"># write vector</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+	<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+	<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">sz</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+		<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">sz</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+			<span class="n">fid</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;&gt;d&#39;</span><span class="p">,</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])))</span></div>
+
+<span class="c1"># }}}</span>
+
+<div class="viewcode-block" id="read_field"><a class="viewcode-back" href="../../api/issm.html#issm.arch.read_field">[docs]</a><span class="k">def</span> <span class="nf">read_field</span><span class="p">(</span><span class="n">fid</span><span class="p">):</span> <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Procedure to read a field and return a results list with the following attributes:</span>
+<span class="sd">	result[&#39;field_name&#39;]	-&gt; the name of the variable that was just read</span>
+<span class="sd">	result[&#39;size&#39;]			-&gt; size (dimensions) of the variable just read</span>
+<span class="sd">	result[&#39;data_type&#39;]	-&gt; the type of data that was just read</span>
+<span class="sd">	result[&#39;data&#39;]			-&gt; the actual data</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">try</span><span class="p">:</span>
+		<span class="c1"># first, read the string</span>
+		<span class="n">reclen</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">check_name</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">if</span> <span class="n">check_name</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;archread error : a string was not present at the start of the arch file&#39;</span><span class="p">)</span>
+		<span class="n">namelen</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">fieldname</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;</span><span class="si">%d</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">namelen</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">namelen</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+		
+		<span class="c1"># then, read the data</span>
+		<span class="n">datalen</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">data_type</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+
+		<span class="k">if</span> <span class="n">data_type</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+			<span class="c1"># unpack scalar</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;d&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;&gt;d&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="k">elif</span> <span class="n">data_type</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+			<span class="n">rows</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">cols</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;&gt;i&#39;</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">raw_data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="n">cols</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+			<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+				<span class="n">raw_data</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span><span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;</span><span class="si">%d</span><span class="s1">d&#39;</span> <span class="o">%</span> <span class="n">cols</span><span class="p">,</span><span class="n">fid</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cols</span><span class="o">*</span><span class="n">struct</span><span class="o">.</span><span class="n">calcsize</span><span class="p">(</span><span class="s1">&#39;&gt;d&#39;</span><span class="p">)))</span>
+			<span class="c1"># The matrix will be unpacked in order and will be filled left -&gt; right by column</span>
+			<span class="c1"># We need to reshape and transpose the matrix so it can be read correctly</span>
+			<span class="n">data</span><span class="o">=</span><span class="n">raw_data</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>
+		<span class="k">else</span><span class="p">:</span>
+			<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot read data type </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">data_type</span><span class="p">)</span>
+			
+		<span class="c1"># give additional data to user</span>
+		<span class="k">if</span> <span class="n">data_type</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+			<span class="n">data_size</span><span class="o">=</span><span class="s1">&#39;1x1&#39;</span>
+			<span class="n">data_type_str</span><span class="o">=</span><span class="s1">&#39;double&#39;</span>
+		<span class="k">elif</span> <span class="n">data_type</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+			<span class="n">data_size</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">x</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="n">cols</span><span class="p">)</span>
+			<span class="n">data_type_str</span><span class="o">=</span><span class="s1">&#39;vector/matrix&#39;</span>
+
+		<span class="n">result</span><span class="o">=</span><span class="n">OrderedDict</span><span class="p">()</span>
+		<span class="n">result</span><span class="p">[</span><span class="s1">&#39;field_name&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">fieldname</span>
+		<span class="n">result</span><span class="p">[</span><span class="s1">&#39;size&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">data_size</span>
+		<span class="n">result</span><span class="p">[</span><span class="s1">&#39;data_type&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">data_type_str</span>
+		<span class="n">result</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">=</span><span class="n">data</span>
+
+	<span class="k">except</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+		<span class="n">result</span><span class="o">=</span><span class="kc">None</span>
+
+	<span class="k">return</span> <span class="n">result</span></div>
+<span class="c1"># }}}</span>
+
+<div class="viewcode-block" id="format_archive_code"><a class="viewcode-back" href="../../api/issm.html#issm.arch.format_archive_code">[docs]</a><span class="k">def</span> <span class="nf">format_archive_code</span><span class="p">(</span><span class="nb">format</span><span class="p">):</span> <span class="c1"># {{{</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	Given a variable, determine it&#39;s type and return</span>
+<span class="sd">	an integer value:</span>
+
+<span class="sd">	1 : string</span>
+<span class="sd">	2 : double (scalar)</span>
+<span class="sd">	3 : vector or matrix (of type double)</span>
+
+<span class="sd">	&quot;&quot;&quot;</span>
+	<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span><span class="n">basestring</span><span class="p">):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">1</span>
+	<span class="k">elif</span> <span class="nb">format</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">format</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">2</span>
+	<span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">format</span><span class="p">,(</span><span class="nb">list</span><span class="p">,</span><span class="nb">tuple</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+		<span class="n">code</span><span class="o">=</span><span class="mi">3</span>
+	<span class="k">else</span><span class="p">:</span>
+		<span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;archwrite error: data type &#39;</span><span class="si">%s</span><span class="s2">&#39; is not valid.&quot;</span> <span class="o">%</span> <span class="nb">type</span><span class="p">(</span><span class="nb">format</span><span class="p">))</span>
+	<span class="k">return</span> <span class="n">code</span></div>
+<span class="c1"># }}}</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2002-2011, California Institute of Technology; 2017-2018, Evan Cummings.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'4.12',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
