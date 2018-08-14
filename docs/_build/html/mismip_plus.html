@@ -165,8 +165,8 @@
 <div class="section" id="set-up-the-model">
 <h2>Set up the model<a class="headerlink" href="#set-up-the-model" title="Permalink to this headline">¶</a></h2>
 <p>First, import all the packages we will need:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">issm</span>         <span class="k">as</span> <span class="nn">im</span>
-<span class="kn">import</span> <span class="nn">numpy</span>        <span class="k">as</span> <span class="nn">np</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">issm</span>  <span class="k">as</span> <span class="nn">im</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
 <p>Next, create some variables to use later on which set the physics and output directories to save too:</p>
@@ -177,7 +177,6 @@
 
 <span class="k">if</span> <span class="n">mdl_odr</span> <span class="o">==</span> <span class="s1">&#39;HO&#39;</span><span class="p">:</span> <span class="n">mdl_pfx</span> <span class="o">=</span> <span class="s1">&#39;BP&#39;</span>
 <span class="k">else</span><span class="p">:</span>               <span class="n">mdl_pfx</span> <span class="o">=</span> <span class="n">mdl_odr</span>
-<span class="n">plt_dir</span> <span class="o">=</span> <span class="s1">&#39;./images/&#39;</span> <span class="o">+</span> <span class="n">mdl_pfx</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>  <span class="c1"># directory for images</span>
 <span class="n">out_dir</span> <span class="o">=</span> <span class="s1">&#39;./results/&#39;</span> <span class="o">+</span> <span class="n">mdl_pfx</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>              <span class="c1"># directory for data</span>
 
 <span class="c1"># create the output directory if it does not exist :</span>
@@ -227,7 +226,7 @@
 <span class="n">num_p</span>  <span class="o">=</span>  <span class="mi">2</span>           <span class="c1"># [--] number of processor cores to use</span>
 </pre></div>
 </div>
-<p>Next, we make a simple three-dimensional box mesh with <code class="docutils literal notranslate"><span class="pre">nx</span></code> cells in the <span class="math notranslate nohighlight">\(x\)</span> direction and <code class="docutils literal notranslate"><span class="pre">ny</span></code> cells in the <span class="math notranslate nohighlight">\(y\)</span> directions over a width of <code class="docutils literal notranslate"><span class="pre">Lx</span></code> and height <code class="docutils literal notranslate"><span class="pre">Ly</span></code> using <a class="reference internal" href="api/issm.html#issm.squaremesh.squaremesh" title="issm.squaremesh.squaremesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">squaremesh</span></code></a>:</p>
+<p>Next, we make a simple two-dimensional box mesh with <code class="docutils literal notranslate"><span class="pre">nx</span></code> cells in the <span class="math notranslate nohighlight">\(x\)</span> direction and <code class="docutils literal notranslate"><span class="pre">ny</span></code> cells in the <span class="math notranslate nohighlight">\(y\)</span> directions over a width of <code class="docutils literal notranslate"><span class="pre">Lx</span></code> and height <code class="docutils literal notranslate"><span class="pre">Ly</span></code> using <a class="reference internal" href="api/issm.html#issm.squaremesh.squaremesh" title="issm.squaremesh.squaremesh"><code class="xref py py-class docutils literal notranslate"><span class="pre">squaremesh</span></code></a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span>     <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">squaremesh</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="n">Lx</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -335,6 +334,20 @@
 <span class="n">md</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">SetMarineIceSheetBC</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="s1">&#39;./exp/mismip_front.exp&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>The ice front must be specified, and is saved as the file <code class="docutils literal notranslate"><span class="pre">./exp/mismip_front.exp</span></code> given by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1">## Name:icefront</span>
+<span class="c1">## Icon:0</span>
+<span class="c1"># Points Count  Value</span>
+<span class="mi">5</span> <span class="mf">1.</span>
+<span class="c1"># X pos Y pos</span>
+<span class="mi">639999</span> <span class="o">-</span><span class="mi">1</span>
+<span class="mi">640001</span> <span class="o">-</span><span class="mi">1</span>
+<span class="mi">640001</span> <span class="mi">80001</span>
+<span class="mi">639999</span> <span class="mi">80001</span>
+<span class="mi">639999</span> <span class="o">-</span><span class="mi">1</span>
+</pre></div>
+</div>
+<p>Note this is just a rectangle surrounding each face of the Eastern-most edge.</p>
 <p>In order to apply lateral slip along the North, South, and West boundaries, we have to manually deterimine the nodal indicies of the <span class="math notranslate nohighlight">\(x\)</span>-component of velocity <code class="docutils literal notranslate"><span class="pre">spcvx</span></code>, <span class="math notranslate nohighlight">\(y\)</span>-component of velocity <code class="docutils literal notranslate"><span class="pre">spcvy</span></code>, and <span class="math notranslate nohighlight">\(z\)</span>-component of velocity <code class="docutils literal notranslate"><span class="pre">spcvz</span></code> within the <a class="reference internal" href="api/issm.html#issm.stressbalance.stressbalance" title="issm.stressbalance.stressbalance"><code class="xref py py-class docutils literal notranslate"><span class="pre">stressbalance</span></code></a> class and set them to <code class="docutils literal notranslate"><span class="pre">np.nan</span></code>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># apply lateral slip on north, south, and west boundaries :</span>
 <span class="k">if</span> <span class="n">lat_slip</span><span class="p">:</span>  <span class="n">slip</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -429,7 +442,7 @@ The numerical solver will complain if the unknowns are not initialized to someth
 </div>
 <div class="section" id="solve-the-momentum-balance">
 <h2>Solve the momentum balance<a class="headerlink" href="#solve-the-momentum-balance" title="Permalink to this headline">¶</a></h2>
-<p>Now, set up the computing environment variables using the <a class="reference internal" href="api/issm.html#issm.generic.generic" title="issm.generic.generic"><code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code></a> class, enable verbose solver output with <a class="reference internal" href="api/issm.html#issm.verbose.verbose" title="issm.verbose.verbose"><code class="xref py py-class docutils literal notranslate"><span class="pre">verbose</span></code></a>, and finally solve the system with the <a class="reference internal" href="api/issm.html#issm.solve.solve" title="issm.solve.solve"><code class="xref py py-class docutils literal notranslate"><span class="pre">solve</span></code></a> class:</p>
+<p>Now, set up the computing environment variables using the <a class="reference internal" href="api/issm.html#issm.generic.generic" title="issm.generic.generic"><code class="xref py py-class docutils literal notranslate"><span class="pre">generic</span></code></a> class, enable verbose solver output with <a class="reference internal" href="api/issm.html#issm.verbose.verbose" title="issm.verbose.verbose"><code class="xref py py-class docutils literal notranslate"><span class="pre">verbose</span></code></a>, and finally solve the system with the <a class="reference internal" href="api/issm.html#issm.solve.solve" title="issm.solve.solve"><code class="xref py py-class docutils literal notranslate"><span class="pre">solve</span></code></a> class with <code class="docutils literal notranslate"><span class="pre">num_p</span></code> CPU processes:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span><span class="o">.</span><span class="n">cluster</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">generic</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">gethostname</span><span class="p">(),</span> <span class="s1">&#39;np&#39;</span><span class="p">,</span> <span class="n">num_p</span><span class="p">)</span>
 <span class="n">md</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">verbose</span><span class="p">(</span><span class="s1">&#39;solution&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;control&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;convergence&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 <span class="n">md</span>         <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">md</span><span class="p">,</span> <span class="s1">&#39;Transient&#39;</span><span class="p">)</span>
@@ -445,22 +458,225 @@ The numerical solver will complain if the unknowns are not initialized to someth
 </div>
 <div class="section" id="plot-the-results">
 <h2>Plot the results<a class="headerlink" href="#plot-the-results" title="Permalink to this headline">¶</a></h2>
-<p>TODO: particulars need to be adjusted here.</p>
-<p>You can plot the resulting variables on the surface or the be easily like so:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">p</span>   <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Pressure</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonbase</span><span class="p">]</span>
-<span class="n">u_x</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Vx</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonsurface</span><span class="p">]</span>
-<span class="n">u_y</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Vy</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonsurface</span><span class="p">]</span>
-<span class="n">u_z</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Vz</span><span class="p">[</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonsurface</span><span class="p">]</span>
-<span class="n">u</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">u_x</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">u_y</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">u_z</span><span class="o">.</span><span class="n">flatten</span><span class="p">()])</span>
+<p>You can utilize the plotting capabilities of the <a class="reference external" href="https://github.com/pf4d/fenics_viz">fenics_viz</a> package to plot the solution as follows.</p>
+<p>First, we import the packages we need:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">fenics_viz</span> <span class="k">import</span> <span class="n">print_text</span><span class="p">,</span> <span class="n">plot_variable</span>
+<span class="kn">import</span> <span class="nn">issm</span>         <span class="k">as</span> <span class="nn">im</span>
+<span class="kn">import</span> <span class="nn">numpy</span>        <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>Next, we set the input directory to <code class="docutils literal notranslate"><span class="pre">out_dir</span></code> set in the previous script, as well as the time-step <span class="math notranslate nohighlight">\(\Delta t\)</span> between output results we set earlier named <code class="docutils literal notranslate"><span class="pre">dt_sav</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># directories for saving data :</span>
+<span class="n">mdl_odr</span> <span class="o">=</span> <span class="s1">&#39;HO&#39;</span>
+<span class="n">name</span>    <span class="o">=</span> <span class="s1">&#39;lateral_slip&#39;</span>
+<span class="n">dt</span>      <span class="o">=</span> <span class="mi">10</span>
+
+<span class="k">if</span> <span class="n">mdl_odr</span> <span class="o">==</span> <span class="s1">&#39;HO&#39;</span><span class="p">:</span> <span class="n">mdl_pfx</span> <span class="o">=</span> <span class="s1">&#39;BP&#39;</span>
+<span class="k">else</span><span class="p">:</span>               <span class="n">mdl_pfx</span> <span class="o">=</span> <span class="n">mdl_odr</span>
+<span class="n">out_dir</span> <span class="o">=</span> <span class="s1">&#39;./results/&#39;</span> <span class="o">+</span> <span class="n">mdl_pfx</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+</pre></div>
+</div>
+<p>We will output the images in a uniquie directory here:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">plt_dir</span> <span class="o">=</span> <span class="s1">&#39;./images/&#39;</span> <span class="o">+</span> <span class="n">mdl_pfx</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+</pre></div>
+</div>
+<p>Next, we load the model using <a class="reference internal" href="api/issm.html#issm.loadmodel.loadmodel" title="issm.loadmodel.loadmodel"><code class="xref py py-class docutils literal notranslate"><span class="pre">loadmodel</span></code></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">md</span> <span class="o">=</span> <span class="n">im</span><span class="o">.</span><span class="n">loadmodel</span><span class="p">(</span><span class="n">out_dir</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.md&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Record the total number of solutions saved, here the output was set the solution script to every 10 years within the <a class="reference internal" href="api/issm.html#issm.transient.transient" title="issm.transient.transient"><code class="xref py py-class docutils literal notranslate"><span class="pre">transient</span></code></a> instantiation’s <a class="reference internal" href="api/issm.html#issm.results.results" title="issm.results.results"><code class="xref py py-class docutils literal notranslate"><span class="pre">results</span></code></a> class object:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">n</span>      <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Next, we have to get the upper and lower surface vertex indicies so that we can extract the solution values a the lower surface <span class="math notranslate nohighlight">\(z=B\)</span> and upper surface <span class="math notranslate nohighlight">\(z=S\)</span>, respectively:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vbed</span>   <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonbase</span>
+<span class="n">vsrf</span>   <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">vertexonsurface</span>
+</pre></div>
+</div>
+<p>The vertex coordinates <code class="docutils literal notranslate"><span class="pre">coords</span></code> and cell connectivity indices <code class="docutils literal notranslate"><span class="pre">cells</span></code> are saved in two dimensions within the <a class="reference internal" href="api/issm.html#issm.model.model" title="issm.model.model"><code class="xref py py-class docutils literal notranslate"><span class="pre">model</span></code></a>’s <code class="docutils literal notranslate"><span class="pre">mesh</span></code> data:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">coords</span> <span class="o">=</span> <span class="p">(</span><span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">x2d</span><span class="p">,</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">y2d</span><span class="p">)</span>
+<span class="n">cells</span>  <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">elements2d</span> <span class="o">-</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>Now, the <a class="reference external" href="https://github.com/pf4d/fenics_viz">fenics_viz</a> package’s <code class="docutils literal notranslate"><span class="pre">plot_variable</span></code> function will take a number of parameters we can set here:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># set the mesh plot parameters :</span>
+<span class="n">tp_kwargs</span>     <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;linestyle&#39;</span>        <span class="p">:</span> <span class="s1">&#39;-&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;lw&#39;</span>               <span class="p">:</span> <span class="mf">0.5</span><span class="p">,</span>
+                 <span class="s1">&#39;color&#39;</span>            <span class="p">:</span> <span class="s1">&#39;k&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;alpha&#39;</span>            <span class="p">:</span> <span class="mf">0.5</span><span class="p">}</span>
+
+<span class="c1"># set the vector plot parameters :</span>
+<span class="n">quiver_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pivot&#39;</span>            <span class="p">:</span> <span class="s1">&#39;middle&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;color&#39;</span>            <span class="p">:</span> <span class="s1">&#39;0.5&#39;</span><span class="p">,</span>
+                 <span class="s1">&#39;scale&#39;</span>            <span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                 <span class="s1">&#39;alpha&#39;</span>            <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                 <span class="s1">&#39;width&#39;</span>            <span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+                 <span class="s1">&#39;headwidth&#39;</span>        <span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+                 <span class="s1">&#39;headlength&#39;</span>       <span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+                 <span class="s1">&#39;headaxislength&#39;</span>   <span class="p">:</span> <span class="mf">3.0</span><span class="p">}</span>
+
+<span class="c1"># the plot parameters will mostly stay the same for each plot :</span>
+<span class="n">plot_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;direc&#39;</span>              <span class="p">:</span> <span class="n">plt_dir</span><span class="p">,</span>
+               <span class="s1">&#39;coords&#39;</span>             <span class="p">:</span> <span class="n">coords</span><span class="p">,</span>
+               <span class="s1">&#39;cells&#39;</span>              <span class="p">:</span> <span class="n">cells</span><span class="p">,</span>
+               <span class="s1">&#39;figsize&#39;</span>            <span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">),</span>
+               <span class="s1">&#39;cmap&#39;</span>               <span class="p">:</span> <span class="s1">&#39;viridis&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;scale&#39;</span>              <span class="p">:</span> <span class="s1">&#39;lin&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;numLvls&#39;</span>            <span class="p">:</span> <span class="mi">8</span><span class="p">,</span>
+               <span class="s1">&#39;levels&#39;</span>             <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="s1">&#39;levels_2&#39;</span>           <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="s1">&#39;umin&#39;</span>               <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="s1">&#39;umax&#39;</span>               <span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+               <span class="s1">&#39;plot_tp&#39;</span>            <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+               <span class="s1">&#39;tp_kwargs&#39;</span>          <span class="p">:</span> <span class="n">tp_kwargs</span><span class="p">,</span>
+               <span class="s1">&#39;show&#39;</span>               <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+               <span class="s1">&#39;hide_x_tick_labels&#39;</span> <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+               <span class="s1">&#39;hide_y_tick_labels&#39;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+               <span class="s1">&#39;xlabel&#39;</span>             <span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;ylabel&#39;</span>             <span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;equal_axes&#39;</span>         <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+               <span class="s1">&#39;hide_axis&#39;</span>          <span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+               <span class="s1">&#39;colorbar_loc&#39;</span>       <span class="p">:</span> <span class="s1">&#39;right&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;contour_type&#39;</span>       <span class="p">:</span> <span class="s1">&#39;filled&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;extend&#39;</span>             <span class="p">:</span> <span class="s1">&#39;neither&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;ext&#39;</span>                <span class="p">:</span> <span class="s1">&#39;.pdf&#39;</span><span class="p">,</span>
+               <span class="s1">&#39;normalize_vec&#39;</span>      <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+               <span class="s1">&#39;plot_quiver&#39;</span>        <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+               <span class="s1">&#39;quiver_kwargs&#39;</span>      <span class="p">:</span> <span class="n">quiver_kwargs</span><span class="p">,</span>
+               <span class="s1">&#39;res&#39;</span>                <span class="p">:</span> <span class="mi">150</span><span class="p">,</span>
+               <span class="s1">&#39;cb&#39;</span>                 <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+               <span class="s1">&#39;cb_format&#39;</span>          <span class="p">:</span> <span class="s1">&#39;</span><span class="si">%.1f</span><span class="s1">&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>First, we plot the bedrock topography, which is invariant with time:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># the bed topography :</span>
+<span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$z_b$&#39;</span>
+<span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">bed</span><span class="p">[</span><span class="n">vbed</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>  <span class="o">=</span> <span class="s1">&#39;z_b&#39;</span>
+<span class="n">plot_variable</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Next, we loop through and plot the solutions every <span class="math notranslate nohighlight">\(\Delta t *10 = 100\)</span> years:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="p">,</span><span class="mi">10</span><span class="p">):</span>
+
+  <span class="c1"># get this solution :</span>
+  <span class="n">soln_i</span> <span class="o">=</span> <span class="n">md</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">TransientSolution</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+  <span class="c1"># the `plot_variable` function requires the output data be row vectors :</span>
+  <span class="n">S</span>       <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Surface</span><span class="p">[</span><span class="n">vbed</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">B</span>       <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Base</span><span class="p">[</span><span class="n">vbed</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">H</span>       <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Thickness</span><span class="p">[</span><span class="n">vbed</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">p</span>       <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Pressure</span><span class="p">[</span><span class="n">vbed</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">u_x_s</span>   <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Vx</span><span class="p">[</span><span class="n">vsrf</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">u_y_s</span>   <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Vy</span><span class="p">[</span><span class="n">vsrf</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">u_z_s</span>   <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Vz</span><span class="p">[</span><span class="n">vsrf</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">u_x_b</span>   <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Vx</span><span class="p">[</span><span class="n">vbed</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">u_y_b</span>   <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Vy</span><span class="p">[</span><span class="n">vbed</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">u_z_b</span>   <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">Vz</span><span class="p">[</span><span class="n">vbed</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+  <span class="n">ls</span>      <span class="o">=</span> <span class="n">soln_i</span><span class="o">.</span><span class="n">MaskGroundediceLevelset</span><span class="p">[</span><span class="n">vbed</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+  <span class="c1"># form the velocity vectors :</span>
+  <span class="n">u_s</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">u_x_s</span><span class="p">,</span> <span class="n">u_y_s</span><span class="p">],</span> <span class="n">u_z_s</span><span class="p">])</span>
+  <span class="n">u_b</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">u_x_b</span><span class="p">,</span> <span class="n">u_y_b</span><span class="p">],</span> <span class="n">u_z_b</span><span class="p">])</span>
+
+  <span class="c1"># calculate the grounded/floating mask :</span>
+  <span class="n">mask</span>   <span class="o">=</span> <span class="p">(</span><span class="n">ls</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+
+  <span class="c1"># the simulation time :</span>
+  <span class="n">time</span> <span class="o">=</span> <span class="n">i</span><span class="o">*</span><span class="n">dt</span>
+
+  <span class="c1"># plot the upper-surface height :</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$S$&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">S</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;S_</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="s1">&#39;lin&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cb_format&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.1f</span><span class="s1">&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;plot_tp&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">False</span>
+  <span class="n">plot_variable</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+  <span class="c1"># plot the lower-surface height :</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$B$&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">B</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;B_</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="s1">&#39;lin&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cb_format&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.1f</span><span class="s1">&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;plot_tp&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">False</span>
+  <span class="n">plot_variable</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+  <span class="c1"># plot the ice thickness :</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$H$&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">H</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;H_</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="s1">&#39;lin&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cb_format&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.1f</span><span class="s1">&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;plot_tp&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">False</span>
+  <span class="n">plot_variable</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+  <span class="c1"># plot the vertical component of the upper-surface velocity :</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$u_z |_S$&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">u_z_s</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;u_z_s_</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="s1">&#39;lin&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cb_format&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.1e</span><span class="s1">&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;plot_tp&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">False</span>
+  <span class="n">plot_variable</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+  <span class="c1"># plot the vertical component of the lower-surface velocity :</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$u_z |_B$&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">u_z_b</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;u_z_b_</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="s1">&#39;lin&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cb_format&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.1e</span><span class="s1">&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;plot_tp&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">False</span>
+  <span class="n">plot_variable</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+  <span class="c1"># plot the upper-surface velocity :</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$\underline</span><span class="si">{u}</span><span class="s1"> |_S$&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">u_s</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;U_s_</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="s1">&#39;log&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cb_format&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.1e</span><span class="s1">&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;plot_tp&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">False</span>
+  <span class="n">plot_variable</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+  <span class="c1"># plot the lower-surface velocity :</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$\underline</span><span class="si">{u}</span><span class="s1"> |_B$&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">u_b</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;U_b_</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="s1">&#39;log&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;viridis&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cb_format&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.1e</span><span class="s1">&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;plot_tp&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">False</span>
+  <span class="n">plot_variable</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+
+  <span class="c1"># plot the floating-ice mask :</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;mask&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;u&#39;</span><span class="p">]</span>           <span class="o">=</span> <span class="n">mask</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;mask_</span><span class="si">%i</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">time</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">]</span>       <span class="o">=</span> <span class="s1">&#39;bool&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cmap&#39;</span><span class="p">]</span>        <span class="o">=</span> <span class="s1">&#39;gist_yarg&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;cb_format&#39;</span><span class="p">]</span>   <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%g</span><span class="s1">&#39;</span>
+  <span class="n">plot_kwargs</span><span class="p">[</span><span class="s1">&#39;plot_tp&#39;</span><span class="p">]</span>     <span class="o">=</span> <span class="kc">True</span>
+  <span class="n">plot_variable</span><span class="p">(</span><span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>This will produce a plot of final state of the model after <span class="math notranslate nohighlight">\(t = 20000\)</span> years like so:</p>
-<img alt="_images/z_b.jpg" src="_images/z_b.jpg" />
-<img alt="_images/H_20000.jpg" src="_images/H_20000.jpg" />
+<img alt="images/z_b.jpg" src="images/z_b.jpg" />
 <img alt="_images/S_20000.jpg" src="_images/S_20000.jpg" />
-<img alt="_images/mask_20000.jpg" src="_images/mask_20000.jpg" />
+<img alt="_images/B_20000.jpg" src="_images/B_20000.jpg" />
+<img alt="_images/H_20000.jpg" src="_images/H_20000.jpg" />
 <img alt="_images/U_b_20000.jpg" src="_images/U_b_20000.jpg" />
 <img alt="_images/U_s_20000.jpg" src="_images/U_s_20000.jpg" />
+<img alt="_images/u_z_s_20000.jpg" src="_images/u_z_s_20000.jpg" />
+<img alt="_images/u_z_b_20000.jpg" src="_images/u_z_b_20000.jpg" />
+<img alt="_images/mask_20000.jpg" src="_images/mask_20000.jpg" />
+<p>Note that the velocity vectors have been normalized using the keyword argument (kwarg) <code class="docutils literal notranslate"><span class="pre">normalize_vec</span> <span class="pre">=</span> <span class="pre">True</span></code> of the dictionary <code class="docutils literal notranslate"><span class="pre">plot_kwargs</span></code>.</p>
 </div>
 <div class="section" id="references">
 <h2>References:<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>

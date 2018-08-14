@@ -16,7 +16,7 @@ First, create an empty :class:`~issm.model.model` instance and name the simulati
   md = im.model()
   md.miscellaneous.name = 'ISMIP_HOM_A'
   
-Next, we make a simple three-dimensional box mesh with 49 cells in the :math:`x` and :math:`y` directions over a width of 8 km using :class:`~issm.squaremesh.squaremesh`::
+Next, we make a simple two-dimensional box mesh with 49 cells in the :math:`x` and :math:`y` directions over a width of 8 km using :class:`~issm.squaremesh.squaremesh`::
 
   L  = 80000.0
   n  = 15

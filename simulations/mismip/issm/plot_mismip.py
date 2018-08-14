@@ -2,7 +2,6 @@ from fenics_viz      import *
 from netCDF4         import Dataset
 import issm              as im
 import numpy             as np
-import os
 
 # directories for saving data :
 mdl_odr = 'HO'
@@ -62,60 +61,58 @@ coords = (md.mesh.x2d, md.mesh.y2d)
 cells  = md.mesh.elements2d - 1
 
 # set the mesh plot parameters :  
-tp_kwargs     = {'linestyle'      : '-',
-                 'lw'             : 0.5,
-                 'color'          : 'k',
-                 'alpha'          : 0.5}
+tp_kwargs     = {'linestyle'        : '-',
+                 'lw'               : 0.5,
+                 'color'            : 'k',
+                 'alpha'            : 0.5}
 
 # set the vector plot parameters :
-quiver_kwargs = {'pivot'          : 'middle',
-                 'color'          : '0.5',
-                 'scale'          : 100,
-                 'alpha'          : 1.0,
-                 'width'          : 0.001,
-                 'headwidth'      : 3.0, 
-                 'headlength'     : 3.0, 
-                 'headaxislength' : 3.0}
+quiver_kwargs = {'pivot'            : 'middle',
+                 'color'            : '0.5',
+                 'scale'            : 100,
+                 'alpha'            : 1.0,
+                 'width'            : 0.001,
+                 'headwidth'        : 3.0, 
+                 'headlength'       : 3.0, 
+                 'headaxislength'   : 3.0}
 
-numlvls = 8        # number of contour levels to plot
-figsize = (8,1.5)  # figure size
+# the plot parameters will mostly stay the same for each plot :
+plot_kwargs = {'direc'              : plt_dir, 
+               'coords'             : coords,
+               'cells'              : cells,
+               'figsize'            : (8, 1.5),
+               'cmap'               : 'viridis',
+               'scale'              : 'lin',
+               'numLvls'            : 8,
+               'levels'             : None,
+               'levels_2'           : None,
+               'umin'               : None,
+               'umax'               : None,
+               'plot_tp'            : False,
+               'tp_kwargs'          : tp_kwargs,
+               'show'               : False,
+               'hide_x_tick_labels' : False,
+               'hide_y_tick_labels' : True,
+               'xlabel'             : '',
+               'ylabel'             : '',
+               'equal_axes'         : True,
+               'hide_axis'          : False,
+               'colorbar_loc'       : 'right',
+               'contour_type'       : 'filled',
+               'extend'             : 'neither',
+               'ext'                : '.pdf',
+               'normalize_vec'      : True,
+               'plot_quiver'        : True,
+               'quiver_kwargs'      : quiver_kwargs,
+               'res'                : 150,
+               'cb'                 : True,
+               'cb_format'          : '%.1f'}
 
 # the bed topography :
-zb = md.geometry.bed[vbed].flatten()
-  
-plot_variable(u                   = zb,
-              name                = 'z_b',
-              direc               = plt_dir, 
-              coords              = coords,
-              cells               = cells,
-              figsize             = figsize,
-              cmap                = 'viridis',
-              scale               = 'lin',
-              numLvls             = numlvls,
-              levels              = None,
-              levels_2            = None,
-              umin                = None,
-              umax                = None,
-              plot_tp             = False,
-              tp_kwargs           = tp_kwargs,
-              show                = False,
-              hide_x_tick_labels  = False,
-              hide_y_tick_labels  = True,
-              xlabel              = '',
-              ylabel              = '',
-              equal_axes          = True,
-              title               = r'$z_b$',
-              hide_axis           = False,
-              colorbar_loc        = 'right',
-              contour_type        = 'filled',
-              extend              = 'neither',
-              ext                 = '.pdf',
-              normalize_vec       = True,
-              plot_quiver         = False,
-              quiver_kwargs       = quiver_kwargs,
-              res                 = 150,
-              cb                  = True,
-              cb_format           = '%.1f')
+plot_kwargs['title'] = r'$z_b$'
+plot_kwargs['u']     = md.geometry.bed[vbed].flatten()
+plot_kwargs['name']  = 'z_b'
+plot_variable(**plot_kwargs)
 
 
 # loop through all the timesteps and plot them :
@@ -129,232 +126,103 @@ for i in range(0,n,10):
   B       = soln_i.Base[vbed].flatten()
   H       = soln_i.Thickness[vbed].flatten()
   p       = soln_i.Pressure[vbed].flatten()
-  u_mag_s = soln_i.Vel[vsrf].flatten()
   u_x_s   = soln_i.Vx[vsrf].flatten()
   u_y_s   = soln_i.Vy[vsrf].flatten()
   u_z_s   = soln_i.Vz[vsrf].flatten()
-  u_mag_b = soln_i.Vel[vbed].flatten()
   u_x_b   = soln_i.Vx[vbed].flatten()
   u_y_b   = soln_i.Vy[vbed].flatten()
   u_z_b   = soln_i.Vz[vbed].flatten()
   ls      = soln_i.MaskGroundediceLevelset[vbed].flatten()
 
-  # form the velocity vector :
+  # form the velocity vectors :
   u_s    = np.array([u_x_s, u_y_s, u_z_s])
   u_b    = np.array([u_x_b, u_y_b, u_z_b])
 
-  #U_lvl_s = np.array([u_mag_s.min(), 5e2, u_mag_s.max()])
-     
   # calculate the grounded/floating mask :
   mask   = (ls > 0).astype('int')
 
   # the simulation time :
   time = i*dt
- 
-  # plot each of the variables of interest :
-  plot_variable(u                   = u_s,
-                name                = 'U_s_%i' % time,
-                direc               = plt_dir,
-                coords              = coords,
-                cells               = cells,
-                figsize             = figsize,
-                cmap                = 'viridis',
-                scale               = 'log',
-                numLvls             = numlvls,
-                levels              = None,
-                levels_2            = None,
-                umin                = None,
-                umax                = None,
-                plot_tp             = False,
-                tp_kwargs           = tp_kwargs,
-                show                = False,
-                hide_x_tick_labels  = False,
-                hide_y_tick_labels  = True,
-                xlabel              = '',
-                ylabel              = '',
-                equal_axes          = True,
-                title               = r'$\underline{u} |_S$',
-                hide_axis           = False,
-                colorbar_loc        = 'right',
-                contour_type        = 'filled',
-                extend              = 'neither',
-                ext                 = '.pdf',
-                normalize_vec       = True,
-                plot_quiver         = True,
-                quiver_kwargs       = quiver_kwargs,
-                res                 = 150,
-                cb                  = True,
-                cb_format           = '%.1e')
- 
-  plot_variable(u                   = u_b,
-                name                = 'U_b_%i' % time,
-                direc               = plt_dir,
-                coords              = coords,
-                cells               = cells,
-                figsize             = figsize,
-                cmap                = 'viridis',
-                scale               = 'log',
-                numLvls             = numlvls,
-                levels              = None,
-                levels_2            = None,
-                umin                = None,
-                umax                = None,
-                plot_tp             = False,
-                tp_kwargs           = tp_kwargs,
-                show                = False,
-                hide_x_tick_labels  = False,
-                hide_y_tick_labels  = True,
-                xlabel              = '',
-                ylabel              = '',
-                equal_axes          = True,
-                title               = r'$\underline{u} |_B$',
-                hide_axis           = False,
-                colorbar_loc        = 'right',
-                contour_type        = 'filled',
-                extend              = 'neither',
-                ext                 = '.pdf',
-                normalize_vec       = True,
-                plot_quiver         = True,
-                quiver_kwargs       = quiver_kwargs,
-                res                 = 150,
-                cb                  = True,
-                cb_format           = '%.1e')
 
-  plot_variable(u                   = mask,
-                name                = 'mask_%i' % time,
-                direc               = plt_dir, 
-                coords              = coords,
-                cells               = cells,
-                figsize             = figsize,
-                cmap                = 'gist_yarg',
-                scale               = 'bool',
-                numLvls             = numlvls,
-                levels              = None,
-                levels_2            = None,
-                umin                = None,
-                umax                = None,
-                plot_tp             = True,
-                tp_kwargs           = tp_kwargs,
-                show                = False,
-                hide_x_tick_labels  = False,
-                hide_y_tick_labels  = True,
-                xlabel              = '',
-                ylabel              = '',
-                equal_axes          = True,
-                title               = r'mask',
-                hide_axis           = False,
-                colorbar_loc        = 'right',
-                contour_type        = 'filled',
-                extend              = 'neither',
-                ext                 = '.pdf',
-                normalize_vec       = True,
-                plot_quiver         = False,
-                quiver_kwargs       = quiver_kwargs,
-                res                 = 150,
-                cb                  = True,
-                cb_format           = '%g')
-  
-  plot_variable(u                   = S,
-                name                = 'S_%i' % time,
-                direc               = plt_dir, 
-                coords              = coords,
-                cells               = cells,
-                figsize             = figsize,
-                cmap                = 'viridis',
-                scale               = 'lin',
-                numLvls             = numlvls,
-                levels              = None,
-                levels_2            = None,
-                umin                = None,
-                umax                = None,
-                plot_tp             = False,
-                tp_kwargs           = tp_kwargs,
-                show                = False,
-                hide_x_tick_labels  = False,
-                hide_y_tick_labels  = True,
-                xlabel              = '',
-                ylabel              = '',
-                equal_axes          = True,
-                title               = r'$S$',
-                hide_axis           = False,
-                colorbar_loc        = 'right',
-                contour_type        = 'filled',
-                extend              = 'neither',
-                ext                 = '.pdf',
-                normalize_vec       = True,
-                plot_quiver         = False,
-                quiver_kwargs       = quiver_kwargs,
-                res                 = 150,
-                cb                  = True,
-                cb_format           = '%.1f')
-  
-  #plot_variable(u                   = B,
-  #              name                = 'B_%i' % time,
-  #              direc               = plt_dir, 
-  #              coords              = coords,
-  #              cells               = cells,
-  #              figsize             = figsize,
-  #              cmap                = 'viridis',
-  #              scale               = 'lin',
-  #              numLvls             = numlvls,
-  #              levels              = None,
-  #              levels_2            = None,
-  #              umin                = None,
-  #              umax                = None,
-  #              plot_tp             = False,
-  #              tp_kwargs           = tp_kwargs,
-  #              show                = False,
-  #              hide_x_tick_labels  = False,
-  #              hide_y_tick_labels  = True,
-  #              xlabel              = '',
-  #              ylabel              = '',
-  #              equal_axes          = True,
-  #              title               = r'$B$',
-  #              hide_axis           = False,
-  #              colorbar_loc        = 'right',
-  #              contour_type        = 'filled',
-  #              extend              = 'neither',
-  #              ext                 = '.pdf',
-  #              normalize_vec       = True,
-  #              plot_quiver         = False,
-  #              quiver_kwargs       = quiver_kwargs,
-  #              res                 = 150,
-  #              cb                  = True,
-  #              cb_format           = '%.1f')
-  
-  plot_variable(u                   = H,
-                name                = 'H_%i' % time,
-                direc               = plt_dir, 
-                coords              = coords,
-                cells               = cells,
-                figsize             = figsize,
-                cmap                = 'viridis',
-                scale               = 'lin',
-                numLvls             = numlvls,
-                levels              = None,
-                levels_2            = None,
-                umin                = None,
-                umax                = None,
-                plot_tp             = False,
-                tp_kwargs           = tp_kwargs,
-                show                = False,
-                hide_x_tick_labels  = False,
-                hide_y_tick_labels  = True,
-                xlabel              = '',
-                ylabel              = '',
-                equal_axes          = True,
-                title               = r'$H$',
-                hide_axis           = False,
-                colorbar_loc        = 'right',
-                contour_type        = 'filled',
-                extend              = 'neither',
-                ext                 = '.pdf',
-                normalize_vec       = True,
-                plot_quiver         = False,
-                quiver_kwargs       = quiver_kwargs,
-                res                 = 150,
-                cb                  = True,
-                cb_format           = '%.1f')
+  # plot the upper-surface height :
+  plot_kwargs['title']       = r'$S$'
+  plot_kwargs['u']           = S
+  plot_kwargs['name']        = 'S_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1f'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
 
+  # plot the lower-surface height :
+  plot_kwargs['title']       = r'$B$'
+  plot_kwargs['u']           = B
+  plot_kwargs['name']        = 'B_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1f'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
+
+  # plot the ice thickness :
+  plot_kwargs['title']       = r'$H$'
+  plot_kwargs['u']           = H
+  plot_kwargs['name']        = 'H_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1f'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
+
+  # plot the vertical component of the upper-surface velocity :
+  plot_kwargs['title']       = r'$u_z |_S$'
+  plot_kwargs['u']           = u_z_s
+  plot_kwargs['name']        = 'u_z_s_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1e'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
+
+  # plot the vertical component of the lower-surface velocity :
+  plot_kwargs['title']       = r'$u_z |_B$'
+  plot_kwargs['u']           = u_z_b
+  plot_kwargs['name']        = 'u_z_b_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1e'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
+
+  # plot the upper-surface velocity :
+  plot_kwargs['title']       = r'$\underline{u} |_S$'
+  plot_kwargs['u']           = u_s
+  plot_kwargs['name']        = 'U_s_%i' % time
+  plot_kwargs['scale']       = 'log'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1e'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
+
+  # plot the lower-surface velocity :
+  plot_kwargs['title']       = r'$\underline{u} |_B$'
+  plot_kwargs['u']           = u_b
+  plot_kwargs['name']        = 'U_b_%i' % time
+  plot_kwargs['scale']       = 'log'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1e'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
+
+  # plot the floating-ice mask :
+  plot_kwargs['title']       = r'mask'
+  plot_kwargs['u']           = mask
+  plot_kwargs['name']        = 'mask_%i' % time
+  plot_kwargs['scale']       = 'bool'
+  plot_kwargs['cmap']        = 'gist_yarg'
+  plot_kwargs['cb_format']   = '%g'
+  plot_kwargs['plot_tp']     = True
+  plot_variable(**plot_kwargs)
+  
 
 
