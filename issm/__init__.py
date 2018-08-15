@@ -146,6 +146,7 @@ from miscellaneous import *
 from mismipbasalforcings import *
 from model import *
 from mumpsoptions import *
+from ollie import *
 from organizer import *
 from outputdefinition import *
 from pairoptions import *

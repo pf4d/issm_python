@@ -22,8 +22,8 @@ Variable 'md' shelved.
 """
 
 
-from netCDF4    import Dataset
-from fenics_viz import print_text, plot_variable
+#from netCDF4    import Dataset
+#from fenics_viz import print_text, plot_variable
 import issm         as im
 import numpy        as np
 import os
@@ -48,7 +48,6 @@ md = im.model()
 md.miscellaneous.name = name
 
 #===============================================================================
-print_text('::: issm -- initializing model :::', 'red')
 
 # define the geometry of the simulation :
 Lx     =  640000.0    # [m] domain length (along ice flow)
@@ -78,11 +77,11 @@ beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  3.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
-tf     =  20000.0     # [a] final time
+tf     =  1     # [a] final time
 dt     =  1           # [a] time step
-dt_sav =  10.0        # [a] time interval to save data
+dt_sav =  1        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
-num_p  =  2           # [--] number of processor cores to use
+num_p  =  4           # [--] number of processor cores to use
 
 # create an empty rectangular mesh :
 #md     = triangle(md, './exp/MismipDomain.exp', 10000)
@@ -148,7 +147,6 @@ Bf  =  (A / spy)**(-1/n)
 
 #===============================================================================
 # specify constants and varaibles used by MISMIP experiment :
-print_text('::: issm -- set boundary conditions :::', 'red')
 
 md.materials.rho_ice         = rhoi
 md.materials.rho_water       = rhow
@@ -269,7 +267,6 @@ im.savevars(out_dir + 'mismip_init.md', 'md', md)
 
 #===============================================================================
 # solve :
-print_text('::: issm -- solving :::', 'red')
 
 ## initialize the velocity for the CFL condition:
 #md.cluster = im.generic('name', im.gethostname(), 'np', 2)
@@ -282,7 +279,8 @@ print_text('::: issm -- solving :::', 'red')
 #md.initialization.vel = md.results.StressbalanceSolution.Vel
 
 # solve the transient :
-md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
+#md.cluster = im.ollie('name', im.gethostname(), 'np', num_p)
+md.cluster = im.ollie('name', name, 'np', num_p, 'login', 'ecumming')
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Transient')
 
