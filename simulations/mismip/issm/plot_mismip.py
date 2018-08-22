@@ -62,7 +62,7 @@ cells  = md.mesh.elements2d - 1
 
 # set the mesh plot parameters :  
 tp_kwargs     = {'linestyle'        : '-',
-                 'lw'               : 0.01,
+                 'lw'               : 0.5,
                  'color'            : 'k',
                  'alpha'            : 0.5}
 
@@ -103,7 +103,6 @@ plot_kwargs = {'direc'              : plt_dir,
                'ext'                : '.pdf',
                'normalize_vec'      : True,
                'plot_quiver'        : True,
-               'quiver_skip'        : 56,
                'quiver_kwargs'      : quiver_kwargs,
                'res'                : 150,
                'cb'                 : True,
@@ -113,7 +112,7 @@ plot_kwargs = {'direc'              : plt_dir,
 plot_kwargs['title'] = r'$z_b$'
 plot_kwargs['u']     = md.geometry.bed[vbed].flatten()
 plot_kwargs['name']  = 'z_b'
-#plot_variable(**plot_kwargs)
+plot_variable(**plot_kwargs)
 
 
 # loop through all the timesteps and plot them :
@@ -145,55 +144,55 @@ for i in range(0,n,10):
   # the simulation time :
   time = i*dt
 
-  ## plot the upper-surface height :
-  #plot_kwargs['title']       = r'$S$'
-  #plot_kwargs['u']           = S
-  #plot_kwargs['name']        = 'S_%i' % time
-  #plot_kwargs['scale']       = 'lin'
-  #plot_kwargs['cmap']        = 'viridis'
-  #plot_kwargs['cb_format']   = '%.1f'
-  #plot_kwargs['plot_tp']     = False
-  #plot_variable(**plot_kwargs)
+  # plot the upper-surface height :
+  plot_kwargs['title']       = r'$S$'
+  plot_kwargs['u']           = S
+  plot_kwargs['name']        = 'S_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1f'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
 
-  ## plot the lower-surface height :
-  #plot_kwargs['title']       = r'$B$'
-  #plot_kwargs['u']           = B
-  #plot_kwargs['name']        = 'B_%i' % time
-  #plot_kwargs['scale']       = 'lin'
-  #plot_kwargs['cmap']        = 'viridis'
-  #plot_kwargs['cb_format']   = '%.1f'
-  #plot_kwargs['plot_tp']     = False
-  #plot_variable(**plot_kwargs)
+  # plot the lower-surface height :
+  plot_kwargs['title']       = r'$B$'
+  plot_kwargs['u']           = B
+  plot_kwargs['name']        = 'B_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1f'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
 
-  ## plot the ice thickness :
-  #plot_kwargs['title']       = r'$H$'
-  #plot_kwargs['u']           = H
-  #plot_kwargs['name']        = 'H_%i' % time
-  #plot_kwargs['scale']       = 'lin'
-  #plot_kwargs['cmap']        = 'viridis'
-  #plot_kwargs['cb_format']   = '%.1f'
-  #plot_kwargs['plot_tp']     = False
-  #plot_variable(**plot_kwargs)
+  # plot the ice thickness :
+  plot_kwargs['title']       = r'$H$'
+  plot_kwargs['u']           = H
+  plot_kwargs['name']        = 'H_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1f'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
 
-  ## plot the vertical component of the upper-surface velocity :
-  #plot_kwargs['title']       = r'$u_z |_S$'
-  #plot_kwargs['u']           = u_z_s
-  #plot_kwargs['name']        = 'u_z_s_%i' % time
-  #plot_kwargs['scale']       = 'lin'
-  #plot_kwargs['cmap']        = 'viridis'
-  #plot_kwargs['cb_format']   = '%.1e'
-  #plot_kwargs['plot_tp']     = False
-  #plot_variable(**plot_kwargs)
+  # plot the vertical component of the upper-surface velocity :
+  plot_kwargs['title']       = r'$u_z |_S$'
+  plot_kwargs['u']           = u_z_s
+  plot_kwargs['name']        = 'u_z_s_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1e'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
 
-  ## plot the vertical component of the lower-surface velocity :
-  #plot_kwargs['title']       = r'$u_z |_B$'
-  #plot_kwargs['u']           = u_z_b
-  #plot_kwargs['name']        = 'u_z_b_%i' % time
-  #plot_kwargs['scale']       = 'lin'
-  #plot_kwargs['cmap']        = 'viridis'
-  #plot_kwargs['cb_format']   = '%.1e'
-  #plot_kwargs['plot_tp']     = False
-  #plot_variable(**plot_kwargs)
+  # plot the vertical component of the lower-surface velocity :
+  plot_kwargs['title']       = r'$u_z |_B$'
+  plot_kwargs['u']           = u_z_b
+  plot_kwargs['name']        = 'u_z_b_%i' % time
+  plot_kwargs['scale']       = 'lin'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1e'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
 
   # plot the upper-surface velocity :
   plot_kwargs['title']       = r'$\underline{u} |_S$'
@@ -205,25 +204,25 @@ for i in range(0,n,10):
   plot_kwargs['plot_tp']     = False
   plot_variable(**plot_kwargs)
 
-  ## plot the lower-surface velocity :
-  #plot_kwargs['title']       = r'$\underline{u} |_B$'
-  #plot_kwargs['u']           = u_b
-  #plot_kwargs['name']        = 'U_b_%i' % time
-  #plot_kwargs['scale']       = 'log'
-  #plot_kwargs['cmap']        = 'viridis'
-  #plot_kwargs['cb_format']   = '%.1e'
-  #plot_kwargs['plot_tp']     = False
-  #plot_variable(**plot_kwargs)
+  # plot the lower-surface velocity :
+  plot_kwargs['title']       = r'$\underline{u} |_B$'
+  plot_kwargs['u']           = u_b
+  plot_kwargs['name']        = 'U_b_%i' % time
+  plot_kwargs['scale']       = 'log'
+  plot_kwargs['cmap']        = 'viridis'
+  plot_kwargs['cb_format']   = '%.1e'
+  plot_kwargs['plot_tp']     = False
+  plot_variable(**plot_kwargs)
 
-  ## plot the floating-ice mask :
-  #plot_kwargs['title']       = r'mask'
-  #plot_kwargs['u']           = mask
-  #plot_kwargs['name']        = 'mask_%i' % time
-  #plot_kwargs['scale']       = 'bool'
-  #plot_kwargs['cmap']        = 'gist_yarg'
-  #plot_kwargs['cb_format']   = '%g'
-  #plot_kwargs['plot_tp']     = True
-  #plot_variable(**plot_kwargs)
+  # plot the floating-ice mask :
+  plot_kwargs['title']       = r'mask'
+  plot_kwargs['u']           = mask
+  plot_kwargs['name']        = 'mask_%i' % time
+  plot_kwargs['scale']       = 'bool'
+  plot_kwargs['cmap']        = 'gist_yarg'
+  plot_kwargs['cb_format']   = '%g'
+  plot_kwargs['plot_tp']     = True
+  plot_variable(**plot_kwargs)
   
 
 
