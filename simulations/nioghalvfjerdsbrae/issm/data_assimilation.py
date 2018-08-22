@@ -6,7 +6,7 @@ import os, sys
 # directories for saving data :
 mdl_odr = 'HO'
 opt_met = 'm1qn3'#'brent'#
-cst_met = 'morlighem'#'log''l2'#'cummings'#
+cst_met = 'cummings'# 'morlighem'#'log''l2'#
 
 name    = mdl_odr + '_' + cst_met + '_cost_' + opt_met
 
@@ -68,7 +68,7 @@ dt     =  1.0         # [a] time step
 dt_sav =  10.0        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
 q_geo  =  0.0         # [W m^-2] geothermal heat flux
-
+num_p  =  4           # [--] number of processors
 
 #===============================================================================
 # set up element-wise multiplicative identities :
@@ -133,7 +133,7 @@ md.flowequation.fe_HO = 'P1'
 # solve :
 print_text('::: issm -- solving initial velocity :::', 'red')
 
-md.cluster = im.generic('name', im.gethostname(), 'np', 1)
+md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
 md.verbose = im.verbose('convergence', True)
 md         = im.solve(md, 'Stressbalance')
 
@@ -183,12 +183,15 @@ md.inversion.max_parameters     = 1e6   * v_ones
    502: RheologyBbarAbsGradient
    503: ThicknessAbsGradient
 """
+flt = md.mask.groundedice_levelset == -1  # get the floating indicies
 if cst_met == 'cummings':
   md.inversion.cost_functions                   = [101, 103]#, 501]
   md.inversion.cost_functions_coefficients      = np.vstack([v_ones]*2).T
   md.inversion.cost_functions_coefficients[:,0] = 1e0
   md.inversion.cost_functions_coefficients[:,1] = 1e5
   #md.inversion.cost_functions_coefficients[:,2] = 1e0
+  md.inversion.cost_functions_coefficients[:,0][flt] = 0.0
+  md.inversion.cost_functions_coefficients[:,1][flt] = 0.0
 
 elif cst_met == 'morlighem':
   md.inversion.cost_functions                   = [101, 103]#, 501]
@@ -196,14 +199,18 @@ elif cst_met == 'morlighem':
   md.inversion.cost_functions_coefficients[:,0] = 1e0
   md.inversion.cost_functions_coefficients[:,1] = 1e2
   #md.inversion.cost_functions_coefficients[:,2] = 1e-7
+  md.inversion.cost_functions_coefficients[:,0][flt] = 0.0
+  md.inversion.cost_functions_coefficients[:,1][flt] = 0.0
 
 elif cst_met == 'log':
   md.inversion.cost_functions                   = [103]
   md.inversion.cost_functions_coefficients      = v_ones
+  md.inversion.cost_functions_coefficients[flt] = 0.0
 
 elif cst_met == 'l2':
   md.inversion.cost_functions                   = [101]
   md.inversion.cost_functions_coefficients      = v_ones
+  md.inversion.cost_functions_coefficients[flt] = 0.0
 
 # issm::m1qn3inversion-specific parameters :
 if opt_met == 'm1qn3':
@@ -235,7 +242,7 @@ elif opt_met == 'brent':
 
 #===============================================================================
 # assimilate the velocity data :
-md.cluster = im.generic('name', im.gethostname(), 'np', 2)
+md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
 md.verbose = im.verbose('solution', True, 'control', True)
 md         = im.solve(md, 'Stressbalance')
 

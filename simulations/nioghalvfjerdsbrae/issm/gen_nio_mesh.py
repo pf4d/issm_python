@@ -21,6 +21,13 @@ md.miscellaneous.name = 'Nioghalvfjerdsbrae'
 mouginot = cs.DataFactory.get_mouginot()
 dmg      = cs.DataInput(mouginot)
 
+# get the togography data :
+bedmachine = cs.DataFactory.get_bedmachine()
+dbm        = cs.DataInput(bedmachine)
+
+dbm.interpolate_from_di(dmg, 'vx', 'vx', order=1)
+dbm.interpolate_from_di(dmg, 'vy', 'vy', order=1)
+
 # define the geometry of the simulation :
 #md     = im.triangle(md, out_dir + mesh_name + '.exp', 50000)
 md    = im.bamg(md,
@@ -28,13 +35,23 @@ md    = im.bamg(md,
                 'hmax',   5000)
 
 # change data type to that required by InterpFromGridToMesh() :
-x1    = dmg.x.astype('float64')
-y1    = dmg.y.astype('float64')
-velx  = dmg.data['vx'].astype('float64')
-vely  = dmg.data['vy'].astype('float64')
+x1    = dbm.x.astype('float64')
+y1    = dbm.y.astype('float64')
+velx  = dbm.data['vx'].astype('float64')
+vely  = dbm.data['vy'].astype('float64')
+
+# get the gradient of the mask :
+mask      = dbm.data['mask'].copy()
+mask[mask < 2.0] = 0.0
+gradm     = np.gradient(mask)
+lat_mask  = gradm[0]**2 + gradm[1]**2
+lat_mask  = lat_mask > 0.0
 
 # calculate the velocity magnitude :
 vel   = np.sqrt(velx**2 + vely**2)
+
+# increase the velocity at the grounding line or ice/ocean interface :
+vel[lat_mask] = 100000.0
 
 # interpolate the data onto the issm mesh :
 u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
@@ -42,7 +59,7 @@ u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
 # refine mesh using surface velocities as metric :
 md    = im.bamg(md,
                 'hmax',      100000,
-                'hmin',      1000,
+                'hmin',      500,
                 'gradation', 100,
                 'field',     u_mag,
                 'err',       8)

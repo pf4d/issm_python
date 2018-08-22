@@ -8,7 +8,7 @@ import os, sys
 
 # directories for saving data :
 mdl_odr = 'HO'
-tmc     = False
+tmc     = True
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
@@ -70,7 +70,12 @@ dt     =  1.0         # [a] time step
 dt_sav =  10.0        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
 q_geo  =  0.0         # [W m^-2] geothermal heat flux
-
+a_T_l  =  3.985e-13   # [s^-1 Pa^-3] lower bound of flow-rate constant
+a_T_u  =  1.916e3     # [s^-1 Pa^-3] upper bound of flow-rate constant
+Q_T_l  =  6e4         # [J mol^-1] lower bound of creep activation energy
+Q_T_u  =  13.9e4      # [J mol^-1] upper bound of creep activation energy
+R      =  8.3144621   # [J mol^-1] universal gas constant
+num_p  =  4           # [--] number of processors to use
 
 #===============================================================================
 # set up element-wise multiplicative identities :
@@ -91,7 +96,14 @@ b_ones = np.ones((md.mesh.numberofvertices, 3))
 flt    = np.where(md.mask.groundedice_levelset < 0)[0]
 
 # specify rheology parameters :
-Bf  =  (A / spy)**(-1/n)
+T         = md.initialization.temperature # temperature
+warm      = T >= Tm - 10.0
+a_T       = a_T_l * v_ones
+a_T[warm] = a_T_u
+Q_T       = Q_T_l * v_ones
+Q_T[warm] = Q_T_u
+A         = a_T * np.exp( - Q_T / (R * T) )
+Bf        = A**(-1/n)
 
 #===============================================================================
 # ISMIP_HOM experiment :
@@ -106,7 +118,7 @@ md.friction.p                = p * e_ones
 md.friction.q                = q * e_ones
 
 md.materials.rheology_n      =  n * e_ones
-md.materials.rheology_B      = Bf * v_ones
+md.materials.rheology_B      = Bf
 #md.materials.rheology_B      = im.paterson(md.initialization.temperature)
 md.materials.rheology_law    = "Arrhenius"
 
@@ -166,7 +178,7 @@ md.flowequation.fe_HO = 'P1'
 # solve :
 print_text('::: issm -- solving :::', 'red')
 
-md.cluster = im.generic('name', im.gethostname(), 'np', 1)
+md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
 md.verbose = im.verbose('convergence', True)
 if tmc: md = im.solve(md, 'SteadyState')
 else:   md = im.solve(md, 'StressBalance')
@@ -190,7 +202,7 @@ np.savetxt(out_dir + 'u_z.txt', u[2])
 np.savetxt(out_dir + 'p.txt',   p)
 
 u_mag     = np.sqrt(u[0]**2 + u[1]**2 + u[2]**2 + 1e-16)
-U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, 
+U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3,
                       u_mag.max()])
 
 tp_kwargs     = {'linestyle'      : '-',
@@ -208,7 +220,7 @@ quiver_kwargs = {'pivot'          : 'middle',
                  'headaxislength' : 3.0}
 
 plot_variable(u                   = u,
-              name                = 'U_beta_sia_no_lvls',
+              name                = 'U_beta_sia_tmc',
               direc               = plt_dir, 
               coords              = (md.mesh.x2d, md.mesh.y2d),
               cells               = md.mesh.elements2d - 1,

@@ -59,6 +59,7 @@ md.mask.groundedice_levelset = mask
 
 # ice is present when negative :
 md.mask.ice_levelset         = -1 * np.ones(md.mesh.numberofvertices)
+flt = md.mask.groundedice_levelset == -1  # get the floating indicies
 
 #===============================================================================
 # calculate input data :
@@ -104,6 +105,7 @@ u_0       = 1e-2
 u_mag_c   = u_mag.copy()
 u_mag_c[u_mag_c < u_0] = u_0
 beta_sia  = np.sqrt( rhoi * g * H * gS_mag / u_mag_c )
+beta_sia[flt] = 0.0 # make the friction zero over the ice shelves
 
 # set the issm model variables :
 md.geometry.surface           = S
@@ -136,7 +138,7 @@ im.savevars(out_dir + 'issm_nio.shelve', var_dict)
 tp_kwargs     = {'linestyle'      : '-',
                  'lw'             : 0.1,
                  'color'          : 'k',
-                 'alpha'          : 0.5}
+                 'alpha'          : 0.8}
 
 quiver_kwargs = {'pivot'          : 'middle',
                  'color'          : '0.0',
@@ -195,10 +197,12 @@ plt_kwargs['name']   = 'T'
 plt_kwargs['title']  =  r'$T |_S^{\mathrm{ISSM}}$'
 fv.plot_variable(u=T, **plt_kwargs)
 
-plt_kwargs['name']   = 'mask'
-plt_kwargs['title']  =  ''#r'$\mathrm{mask} |^{\mathrm{ISSM}}$'
-plt_kwargs['scale']  = 'bool'
-plt_kwargs['cmap']   = 'gist_gray'
+plt_kwargs['name']    = 'mask'
+plt_kwargs['title']   =  ''#r'$\mathrm{mask} |^{\mathrm{ISSM}}$'
+plt_kwargs['scale']   = 'bool'
+#plt_kwargs['cmap']    = 'RdGy'
+plt_kwargs['plot_tp'] = True
+plt_kwargs['show']    = True
 fv.plot_variable(u=mask, **plt_kwargs)
 
 U_lvls = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, u_mag.max()])
@@ -208,6 +212,8 @@ plt_kwargs['levels']      = U_lvls
 plt_kwargs['scale']       = 'lin'
 plt_kwargs['cmap']        = 'viridis'
 plt_kwargs['plot_quiver'] = True
+plt_kwargs['plot_tp']     = False
+plt_kwargs['show']        = False
 fv.plot_variable(u=np.array([u_x.flatten(), u_y.flatten()]), **plt_kwargs)
 
 beta_lvls = np.array([beta_sia.min()**2, 1e7, 1e8, 1e9, 5e9, 1e10, 5e10,
