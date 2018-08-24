@@ -96,8 +96,9 @@ class ollie(object):
       elif self.time >  30    and self.time <= 48*60:  qos       = 'large'
       elif self.time >  48*60:                         qos       = 'xlarge'
       if   self.ntasks <= 12:                          partition = 'mini'
-      if   self.ntasks >  12 and self.ntasks <= 36:    partition = 'smp'
+      elif self.ntasks >  12 and self.ntasks <= 36:    partition = 'smp'
       elif self.ntasks >  36:                          partition = 'mpp'
+      partition = 'mpp'
       fid = open(modelname + '.queue', 'w')
       fid.write('#!/bin/bash\n')
       fid.write('#SBATCH --ntasks=%i\n'          % self.ntasks)
