@@ -7,45 +7,42 @@ mpl.rcParams['legend.fontsize']      = 'medium'
 mpl.rcParams['text.usetex']          = True
 mpl.rcParams['text.latex.preamble']  = ['\usepackage[mathscr]{euscript}']
 
-# dx = 5000 :
-x_5000 = array([1,       2,  4,  8,  16, 18, 36, 72], dtype='float64')
-y_5000 = array([1*60+43, 56, 35, 24, 21, 20, 17, 17], dtype='float64')
+x_pos_1M = array([1,       2,      4,      8,      16,     36],
+                  dtype='float64')
+#y_pos_1M = array([155.0,   96.0,   54.0,   34.0,   21.0,   30.0],
+#                  dtype='float64')
+y_pos_1M = array([12.3174, 7.1439, 4.1811, 2.4166, 1.7914, 1.7256],
+                  dtype='float64')
 
-# dx = 2500 :
-x_2500 = array([1,       2,       4,       9,       18,      36,     72],
+x_cs_100k = array([1,      2,      4,      8,      16,    36,    72],
                dtype='float64')
-y_2500 = array([7*60+53, 4*60+19, 2*60+33, 1*60+41, 1*60+20, 1*60+9, 59],
+y_cs_100k = array([63.577, 35.785, 21.123, 13.653, 9.865, 7.390, 7.090],
                dtype='float64')
 
-# dx = 1000 :
-x_1000 = array([1, 2, 4, 8, 16, 36, 72], dtype='float64')
-y_1000 = array([60*60 + 3*60 + 14,
-                33*60 + 54,
-                20*60 + 02,
-                13*60 + 48,
-                10*60 + 44,
-                8*60  + 50,
-                7*60  + 27], dtype='float64')
-
-x_hom = array([1,      2,      4,      8,      16,    36,    72],
+x_cs_500k = array([1,       2,       4,      8,       16,     36,     72],
                dtype='float64')
-y_hom = array([63.577, 35.785, 21.123, 13.653, 9.865, 7.390, 7.090],
+y_cs_500k = array([555.819, 394.893, 215.16, 122.485, 86.880, 67.015, 53.665],
                dtype='float64')
 
 fig  = plt.figure(figsize=(6,3))
 ax_l = fig.add_subplot(121)
 ax_r = fig.add_subplot(122)
 
-ax_l.plot( x_5000, y_5000[0] / y_5000, ls='-',  c='k')
-ax_l.plot( x_2500, y_2500[0] / y_2500, ls='--', c='k')
-ax_l.plot( x_1000, y_1000[0] / y_1000, ls=':',  c='k')
-ax_l.plot( x_hom,  y_hom[0]  / y_hom,  ls='-',  c='r')
-                                
-ax_r.plot( x_5000, y_5000[0] / (y_5000*x_5000), ls='-',  c='k', label=r'$\Delta x = 5000$')
-ax_r.plot( x_2500, y_2500[0] / (y_2500*x_2500), ls='--', c='k', label=r'$\Delta x = 2500$')
-ax_r.plot( x_1000, y_1000[0] / (y_1000*x_1000), ls=':',  c='k', label=r'$\Delta x = 1000$')
-ax_r.plot( x_hom,  y_hom[0]  / (y_hom*x_hom),   ls='-',  c='r', label=r'$\Delta x = 1000$')
+ax_l.plot( x_cs_100k,  y_cs_100k[0] / y_cs_100k,               ls='-',  c='k')
+ax_l.plot( x_cs_500k,  y_cs_500k[0] / y_cs_500k,               ls='--', c='k')
+ax_l.plot( x_pos_1M,   y_pos_1M[0]  / y_pos_1M,                ls='-',  c='r')
+                             
+ax_r.plot( x_cs_100k,  y_cs_100k[0] / (y_cs_100k*x_cs_100k),   ls='-',  c='k',
+           label=r'$n_v = 100$k')
+ax_r.plot( x_cs_500k,  y_cs_500k[0] / (y_cs_500k*x_cs_500k),   ls='--', c='k',
+           label=r'$n_v = 500$k')
+ax_r.plot( x_pos_1M,   y_pos_1M[0]  / (y_pos_1M*x_pos_1M),     ls='-',  c='r',
+           label=r'$n_v = 1$M')
 
+ax_r.set_xlim([0,80])
+ax_l.set_xlim([0,80])
+ax_r.set_ylim([0,1])
+ax_l.set_ylim([0,12])
 ax_r.set_xlabel(r'$n$')
 ax_l.set_xlabel(r'$n$')
 ax_r.set_ylabel(r'$T_0 / \left( nT_n \right)$')

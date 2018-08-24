@@ -12,14 +12,11 @@ else:               mdl_pfx = mdl_odr
 plt_dir = './images/' + mdl_pfx + '/' + name + '/'
 out_dir = './results/' + mdl_pfx + '/'
 
-# create the output directory if it does not exist :
-d       = os.path.dirname(out_dir)
-if not os.path.exists(d):
-  os.makedirs(d)
+# load the model mesh created by gen_nio_mesh.py :
+md   = im.loadmodel(out_dir + 'mismip_init.md')
 
-# MISMIP+ experiment :
-md = im.model()
-md.miscellaneous.name = name
+# update the model with current output :
+md   = im.loadresultsfromdisk(md, './lateral_slip/lateral_slip.outbin')
 
 #===============================================================================
 
