@@ -15,9 +15,15 @@ else:               mdl_pfx = mdl_odr
 var_dir = '../dump/vars/'
 plt_dir = '../dump/images/issm/' + mdl_pfx + '/'
 out_dir = '../dump/results/issm/' + mdl_pfx + '/'
+vtu_dir = plt_dir + 'vtu/'
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(out_dir)
+if not os.path.exists(d):
+  os.makedirs(d)
+
+# create the output directory if it does not exist :
+d       = os.path.dirname(vtu_dir)
 if not os.path.exists(d):
   os.makedirs(d)
 
@@ -96,7 +102,7 @@ b_ones = np.ones((md.mesh.numberofvertices, 3))
 flt    = np.where(md.mask.groundedice_levelset < 0)[0]
 
 # specify rheology parameters :
-T         = md.initialization.temperature # temperature
+T         = md.initialization.temperature
 warm      = T >= Tm - 10.0
 a_T       = a_T_l * v_ones
 a_T[warm] = a_T_u
@@ -112,35 +118,24 @@ md.materials.rho_water       = rhow
 md.constants.g               = g
 md.constants.yts             = spy
 
-#md.friction.coefficient      = beta * v_ones
-#md.friction.coefficient[flt] = 0
 md.friction.p                = p * e_ones
 md.friction.q                = q * e_ones
 
 md.materials.rheology_n      =  n * e_ones
 md.materials.rheology_B      = Bf
-#md.materials.rheology_B      = im.paterson(md.initialization.temperature)
 md.materials.rheology_law    = "Arrhenius"
 
 # initialization :
-md.initialization.vx          = 0.0 * v_ones#md.inversion.vx_obs * v_ones
-md.initialization.vy          = 0.0 * v_ones#md.inversion.vy_obs * v_ones
+md.initialization.vx          = 0.0 * v_ones
+md.initialization.vy          = 0.0 * v_ones
 md.initialization.vz          = 0.0 * v_ones
-md.initialization.vel         = 0.0 * v_ones#md.inversion.vel_obs * v_ones
-md.initialization.pressure    = rhoi * g * md.geometry.thickness
+md.initialization.vel         = 0.0 * v_ones
+md.initialization.pressure    = 0.0 * v_ones
 
-## create placeholders :
-#md.stressbalance.spcvx       = np.nan * v_ones
-#md.stressbalance.spcvy       = np.nan * v_ones
-#md.stressbalance.spcvz       = np.nan * v_ones
-
+# boundary conditions :
 md.basalforcings.groundedice_melting_rate = 0.0 * v_ones
 md.basalforcings.floatingice_melting_rate = 0.0 * v_ones
 md.basalforcings.geothermalflux           = q_geo * v_ones
-md.stressbalance.referential              = np.nan * A_ones
-md.stressbalance.loadingforce             = np.nan * b_ones
-md.smb.mass_balance                       = adot * v_ones
-md.masstransport.spcthickness             = np.nan * v_ones
 
 # thermal model :
 #md.initialization.temperature = Tm * v_ones
@@ -161,17 +156,11 @@ print_text('::: issm -- set boundary conditions :::', 'red')
 md = im.SetMarineIceSheetBC(md)  # create placeholder arrays for indicies 
 
 # extrude the mesh so that there are 5 cells in height :
-md.extrude(6, 1.0)
+md.extrude(20, 1.0)
 
 # set the flow equation of type `mdl_odr` defined above :
 md = im.setflowequation(md, mdl_odr, 'all')
 md.flowequation.fe_HO = 'P1'
-
-## set for no-slip basal velocity BC (replaced with high friction above) :
-#basal_v                         = md.mesh.vertexonbase
-#md.stressbalance.spcvx[basal_v] = 0.0
-#md.stressbalance.spcvy[basal_v] = 0.0
-#md.stressbalance.spcvz[basal_v] = 0.0
 
 
 #===============================================================================
@@ -182,6 +171,18 @@ md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
 md.verbose = im.verbose('convergence', True)
 if tmc: md = im.solve(md, 'SteadyState')
 else:   md = im.solve(md, 'StressBalance')
+
+#===============================================================================
+# save .vtu files :
+p      = md.results.StressbalanceSolution.Pressure.flatten()
+u_x    = md.results.StressbalanceSolution.Vx.flatten()
+u_y    = md.results.StressbalanceSolution.Vy.flatten()
+u_z    = md.results.StressbalanceSolution.Vz.flatten()
+
+u      = [u_x, u_y, u_z]
+
+im.vtuwrite(u, 'u', md, vtu_dir + 'u.vtu')
+im.vtuwrite(p, 'p', md, vtu_dir + 'p.vtu')
 
 #===============================================================================
 # plot the results :

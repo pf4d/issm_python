@@ -14,36 +14,10 @@ plt_dir = './images/' + mdl_pfx + '/' + name + '/'
 out_dir = './results/' + mdl_pfx + '/'
 
 # load the model mesh created by gen_nio_mesh.py :
-md = im.loadmodel(out_dir + name + '.md')
+md   = im.loadmodel(out_dir + 'mismip_init.md')
 
-#===============================================================================
-# FIXME: doesn't work :
-#md = im.loadmodel(out_dir + 'mismip_init.md')
-#
-#var_dict  = {'md.results.TransientSolution' : md.results.TransientSolution}
-#load_dict = im.loadvars(out_dir + name + '.shelve', var_dict)
-#
-#md.results.TransientSolution = var_dict['md.results.TransientSolution']
-
-#===============================================================================
-# load the model mesh created by gen_nio_mesh.py :
-#
-## set the current result number :
-#rst_num = '07-11-2018-16-48-15-18062'
-#rst_num = '07-12-2018-15-27-02-31448'
-#rst_num = '07-21-2018-16-11-59-31372'
-#rst_num = '07-30-2018-11-53-35-19792'
-#rst_num = '07-30-2018-13-56-15-32031'
-#rst_num = '07-31-2018-08-56-34-28764'
-#rst_num = '07-31-2018-09-17-22-29775'
-#
-#md   = im.loadmodel(out_dir + 'mismip_init.md')
-#
-## get the current output :
-#data = '/home/pf4d/software/issm/trunk/execution/%s-%s/%s.outbin'
-#
-## update the model with current output :
-#md   = im.loadresultsfromdisk(md, data % (name,rst_num,name))
+# update the model with current output :
+md   = im.loadresultsfromdisk(md, './lateral_slip/lateral_slip.outbin')
 
 #===============================================================================
 # plot the results :
@@ -68,9 +42,9 @@ tp_kwargs     = {'linestyle'        : '-',
 
 # set the vector plot parameters :
 quiver_kwargs = {'pivot'            : 'middle',
-                 'color'            : '0.5',
-                 'scale'            : 100,
-                 'alpha'            : 1.0,
+                 'color'            : 'k',
+                 'scale'            : 150,
+                 'alpha'            : 0.5,
                  'width'            : 0.001,
                  'headwidth'        : 3.0, 
                  'headlength'       : 3.0, 
@@ -103,6 +77,7 @@ plot_kwargs = {'direc'              : plt_dir,
                'ext'                : '.pdf',
                'normalize_vec'      : True,
                'plot_quiver'        : True,
+               'quiver_skip'        : 0,
                'quiver_kwargs'      : quiver_kwargs,
                'res'                : 150,
                'cb'                 : True,
