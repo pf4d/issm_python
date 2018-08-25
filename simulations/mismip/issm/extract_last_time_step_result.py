@@ -32,6 +32,9 @@ md.geometry.base              = res.Base
 md.geometry.thickness         = res.Thickness
 md.mask.groundedice_levelset  = res.MaskGroundediceLevelset
 
+# get rid of the other data :
+md.results = im.results()
+
 # save the current state of the model as a new model :
 im.savevars(out_dir + 'mismip_restart.md', 'md', md)
 
