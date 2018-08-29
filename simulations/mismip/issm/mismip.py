@@ -1,61 +1,5 @@
-"""
-
- dx = 1000.0
-
-1   : 01:03:14
-2   : 00:33:54
-4   : 00:20:02
-8   : 00:13:48
-16  : 00:10:44
-36  : 00:08:50
-72  : 00:07:27
-
- dx = 2500.0
-
-1   : 07:53
-2   : 04:19
-4   : 02:33
-9   : 01:41
-18  : 01:20
-36  : 01:09
-72  : 00:59
-
- dx = 5000.0; partition = mpp
-
-1   : 01:43
-2   : 00:56 ; 00:57
-4   : 00:35
-8   : 00:24
-16  : 00:21
-18  : 00:20
-36  : 00:17
-72  : 00:17
- 
- dx = 5000.0; --cpu_bind=cores; partition = smp
-
-1   : 01:46
-2   : 01:23 ; 01:11
-4   : 00:37
-8   : 00:27
-16  : 00:21
-18  : 00:20
-36  : 00:17
-
- dx = 5000.0; --cpu_bind=cores; partition = mini
-
-1   : 02:05
-2   : 01:14
-4   : 00:50
-8   : 00:33
-12  : 00:28
-
-"""
-
-
-#from netCDF4    import Dataset
-#from fenics_viz import print_text, plot_variable
-import issm         as im
-import numpy        as np
+import issm   as im
+import numpy  as np
 import os
 
 # directories for saving data :
@@ -102,13 +46,13 @@ spy    =  31556926.0  # [s a^-1] seconds per year
 Hini   =  100.0       # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
-A      =  2e-17       # [Pa^{-n} s^{-1}] flow 
+A      =  1e-16       # [Pa^{-n} s^{-1}] flow 
 beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  3.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
 tf     =  20000.0     # [a] final time
-dt     =  1.0         # [a] time step
+dt     =  0.5         # [a] time step
 dt_sav =  10.0        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
 nodes  =  1           # [--] number of nodes to use
@@ -117,7 +61,6 @@ ntasks =  nodes*ntpn  # [--] number of processor cores to use
 time   =  48*60       # [m] time to complete
 
 # create an empty rectangular mesh :
-#md     = triangle(md, './exp/MismipDomain.exp', 10000)
 md     = im.squaremesh(md, Lx, Ly, nx=nx, ny=ny)
 md     = im.setmask(md, 'all', '')
 
@@ -135,12 +78,7 @@ A_ones = np.ones((md.mesh.numberofvertices, 6))
 # rank-one tensor ones vector :
 b_ones = np.ones((md.mesh.numberofvertices, 3))
 
-# interpolate the thickness data onto the mesh :
-#data   = Dataset('data/weertman-A2.2e-17-ssa.nc', mode = 'r')
-#xd     = np.array(data.variables['x'][:])
-#yd     = np.array(data.variables['y'][:])
-#Hd     = np.array(data.variables['thickness'][:])
-#H      = im.InterpFromGridToMesh(xd, yd, Hd, md.mesh.x, md.mesh.y, thklim)[0]
+# initialize the thickness uniformly :
 H      = Hini * v_ones
 
 # eq'n (3)
@@ -197,11 +135,9 @@ md.friction.p                =  p * e_ones
 md.friction.q                =  q * e_ones
 md.friction.coefficient      = beta * v_ones
 floating_v = np.where(md.mask.groundedice_levelset < 0)[0]
-#md.friction.coefficient[floating_v] = 0
 
 md.materials.rheology_B      = Bf * v_ones
 md.materials.rheology_n      =  n * e_ones
-#md.materials.rheology_B      = im.paterson((Tm - 20.0) * v_ones)
 md.materials.rheology_law    = "None"
 
 md.basalforcings.geothermalflux           = 0.0 * v_ones
@@ -210,10 +146,6 @@ md.basalforcings.floatingice_melting_rate = 0.0 * v_ones
 
 # Set the default boundary conditions for an ice-sheet :
 md = im.SetMarineIceSheetBC(md, './exp/mismip_front.exp')
-#md = im.SetIceShelfBC(md, './exp/mismip_front.exp')
-
-#md.stressbalance.referential              = np.nan * A_ones
-#md.stressbalance.loadingforce             = np.nan * b_ones
 
 # apply lateral slip on north, south, and west boundaries :
 if lat_slip:  slip = np.nan
@@ -240,8 +172,8 @@ md.stressbalance.spcvz[pos_s] = slip
 # go back and ensure that the west corners have zero x-component velocity :
 md.stressbalance.spcvx[pos_w] = 0.0
 
-md.smb.mass_balance          = adot * v_ones
-#md.thermal.spctemperature    = np.nan * v_ones
+# set up the upper-surface mass balance :
+md.smb.mass_balance           = adot * v_ones
 
 #md.groundingline.migration              = 'SoftMigration'
 md.groundingline.migration              = 'SubelementMigration'
@@ -257,8 +189,8 @@ md.initialization.vx          = 0.0 * v_ones
 md.initialization.vy          = 0.0 * v_ones
 md.initialization.vz          = 0.0 * v_ones
 md.initialization.vel         = 0.0 * v_ones
-md.initialization.pressure    = rhoi * g * H
-md.initialization.temperature = Tm * v_ones
+md.initialization.pressure    = 0.0 * v_ones
+#md.initialization.temperature = Tm * v_ones
 
 # tansient settings :
 md.transient.isstressbalance      = 1
@@ -285,18 +217,11 @@ md.extrude(8, 3.0)
 md = im.setflowequation(md, mdl_odr, 'all')
 md.flowequation.fe_HO = 'P1'
 
-## set no-slip basal velocity BC :
-## FIXME: if you do not call ``md.extrude()`` before, ``md.mesh.vertexonbase``
-##        does not exist.
-#basal_v                         = md.mesh.vertexonbase
-#md.stressbalance.spcvx[basal_v] = 0.0
-#md.stressbalance.spcvy[basal_v] = 0.0
-#md.stressbalance.spcvz[basal_v] = 0.0
-
 
 #===============================================================================
 # save the state of the model :
 im.savevars(out_dir + 'mismip_init.md', 'md', md)
+
 
 #===============================================================================
 # solve :
