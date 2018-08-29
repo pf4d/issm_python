@@ -60,13 +60,16 @@ mesh  = BoxMesh(p1, p2, nx, ny, nz)   # a box to fill the void
 # initialize the model :
 model    = D3Model(mesh, out_dir=out_dir, use_periodic=False)
 
+# form the 2D upper-surface mesh :
 model.form_srf_mesh()
 
+# form a 2D model using the upper-surface mesh :
 srfmodel = D2Model(model.srfmesh, 
                    out_dir      = out_dir,
                    use_periodic = False,
                    kind         = 'submesh')
-  
+
+# generate the map between the 3D and 2D models : 
 model.generate_submesh_to_mesh_map(sub_model=srfmodel)
 
 # the MISMIP+ experiment lower topography :
@@ -130,6 +133,11 @@ model.init_A(A)                 # constant flow-rate factor
 #model.solve_hydrostatic_pressure()
 #model.form_energy_dependent_rate_factor()
 
+# update the 2D model variables that we'll need to compute the mass balance :
+model.assign_to_submesh_variable(u = model.S,      u_sub = srfmodel.S)
+model.assign_to_submesh_variable(u = model.B,      u_sub = srfmodel.B)
+model.assign_to_submesh_variable(u = model.adot,   u_sub = srfmodel.adot)
+
 # we can choose any of these to solve our 3D-momentum problem :
 if mdl_odr == 'BP':
   mom = MomentumBP(model, use_pressure_bc=True)
@@ -144,22 +152,6 @@ elif mdl_odr == 'FS_stab':
 elif mdl_odr == 'FS_th':
   mom = MomentumNitscheStokes(model, use_pressure_bc=True, stabilized=False)
 
-# save the geometry :
-mom.solve()
-model.save_xdmf(model.U3, 'U3')
-model.save_xdmf(model.ff, 'ff')
-  
-#model.assign_submesh_variable(u, u_sub)
-model.assign_to_submesh_variable(u = model.S,    u_sub = srfmodel.S)
-model.assign_to_submesh_variable(u = model.B,    u_sub = srfmodel.B)
-model.assign_to_submesh_variable(u = model.adot, u_sub = srfmodel.adot)
-model.assign_to_submesh_variable(u = model.U3,   u_sub = srfmodel.U3)
-srfmodel.save_xdmf(srfmodel.S, 'S_0')
-srfmodel.save_xdmf(srfmodel.U3, 'U3_srf')
-srfmodel.init_time_step(dt)
-import sys; sys.exit(0)
-
-
 #nrg = Enthalpy(model, mom,
 #               transient  = True,
 #               use_lat_bc = False)
@@ -167,15 +159,10 @@ mass = FreeSurface(srfmodel,
                    thklim              = thklim,
                    lump_mass_matrix    = False)
 
-srfmodel.init_time_step(dt)
-mass.solve()
-srfmodel.save_xdmf(srfmodel.S, 'S')
-import sys; sys.exit(0)
 
 # create a function to be called at the end of each iteration :
 U_file  = XDMFFile(out_dir + 'U.xdmf')
 S_file  = XDMFFile(out_dir + 'S.xdmf')
-
 def cb_ftn():
   model.save_xdmf(model.U3, 'U3', U_file)
   model.save_xdmf(model.S,  'S',  S_file)

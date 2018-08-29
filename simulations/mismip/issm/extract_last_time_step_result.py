@@ -15,11 +15,20 @@ out_dir = './results/' + mdl_pfx + '/'
 # load the model mesh created by gen_nio_mesh.py :
 md   = im.loadmodel(out_dir + 'mismip_init.md')
 
+# save the initial thickness and bed for the initial mesh :
+Hini = md.geometry.thickness
+Bini = md.geometry.base
+
 # update the model with current output :
 md   = im.loadresultsfromdisk(md, './lateral_slip/lateral_slip.outbin')
 
 # get the last timestep :
 res  = md.results.TransientSolution[-1]
+
+# fix the mesh z coordinate first :
+B         = res.Base.flatten()
+H         = res.Thickness.flatten()
+md.mesh.z = B + H / Hini * (md.mesh.z - Bini)
 
 # initialize the model with data from the last timestep :
 md.initialization.vx          = res.Vx

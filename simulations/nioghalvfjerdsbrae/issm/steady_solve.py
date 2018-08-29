@@ -75,7 +75,7 @@ tf     =  2.0         # [a] final time
 dt     =  1.0         # [a] time step
 dt_sav =  10.0        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
-q_geo  =  0.0         # [W m^-2] geothermal heat flux
+q_geo  =  0.042       # [W m^-2] geothermal heat flux
 a_T_l  =  3.985e-13   # [s^-1 Pa^-3] lower bound of flow-rate constant
 a_T_u  =  1.916e3     # [s^-1 Pa^-3] upper bound of flow-rate constant
 Q_T_l  =  6e4         # [J mol^-1] lower bound of creep activation energy
@@ -169,8 +169,10 @@ print_text('::: issm -- solving :::', 'red')
 
 md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
 md.verbose = im.verbose('convergence', True)
-if tmc: md = im.solve(md, 'SteadyState')
-else:   md = im.solve(md, 'StressBalance')
+#if tmc: md = im.solve(md, 'SteadyState')
+#else:   md = im.solve(md, 'StressBalance')
+md = im.solve(md, 'StressBalance')
+md = im.solve(md, 'Thermal')
 
 #===============================================================================
 # save .vtu files :
