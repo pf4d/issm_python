@@ -12,9 +12,9 @@ name    = mdl_odr + '_' + cst_met + '_cost_' + opt_met
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
-var_dir = '../dump/vars/'
-plt_dir = '../dump/images/issm/' + mdl_pfx + '/' + opt_met + '/'
-out_dir = '../dump/results/issm/' + mdl_pfx + '/' + opt_met + '/'
+var_dir = './dump/vars/'
+plt_dir = './dump/images/' + mdl_pfx + '/' + opt_met + '/'
+out_dir = './dump/results/' + mdl_pfx + '/' + opt_met + '/'
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(out_dir)
@@ -25,28 +25,30 @@ if not os.path.exists(d):
 md                    = im.model()
 md.miscellaneous.name = name
 
-var_dict  = {'md.mesh'                      : md.mesh,
-             'md.inversion.vx_obs'          : md.inversion.vx_obs,
-             'md.inversion.vy_obs'          : md.inversion.vy_obs,
-             'md.inversion.vel_obs'         : md.inversion.vel_obs,
-             'md.mask.groundedice_levelset' : md.mask.groundedice_levelset,
-             'md.mask.ice_levelset'         : md.mask.ice_levelset,
-             'md.geometry.surface'          : md.geometry.surface,
-             'md.geometry.base'             : md.geometry.base,
-             'md.geometry.thickness'        : md.geometry.thickness,
-             'md.friction_coefficient'      : md.friction.coefficient}
+var_dict  = {'md.mesh'                       : md.mesh,
+             'md.inversion.vx_obs'           : md.inversion.vx_obs,
+             'md.inversion.vy_obs'           : md.inversion.vy_obs,
+             'md.inversion.vel_obs'          : md.inversion.vel_obs,
+             'md.mask.groundedice_levelset'  : md.mask.groundedice_levelset,
+             'md.mask.ice_levelset'          : md.mask.ice_levelset,
+             'md.geometry.surface'           : md.geometry.surface,
+             'md.geometry.base'              : md.geometry.base,
+             'md.geometry.thickness'         : md.geometry.thickness,
+             'md.initialization.temperature' : md.initialization.temperature,
+             'md.friction_coefficient'       : md.friction.coefficient}
 load_dict = im.loadvars(var_dir + 'issm_nio.shelve', var_dict)
 
-md.mesh                      = load_dict['md.mesh']
-md.inversion.vx_obs          = load_dict['md.inversion.vx_obs']
-md.inversion.vy_obs          = load_dict['md.inversion.vy_obs']
-md.inversion.vel_obs         = load_dict['md.inversion.vel_obs']
-md.mask.groundedice_levelset = load_dict['md.mask.groundedice_levelset']
-md.mask.ice_levelset         = load_dict['md.mask.ice_levelset']
-md.geometry.surface          = load_dict['md.geometry.surface']
-md.geometry.base             = load_dict['md.geometry.base']
-md.geometry.thickness        = load_dict['md.geometry.thickness']
-md.friction.coefficient      = load_dict['md.friction_coefficient']
+md.mesh                       = load_dict['md.mesh']
+md.inversion.vx_obs           = load_dict['md.inversion.vx_obs']
+md.inversion.vy_obs           = load_dict['md.inversion.vy_obs']
+md.inversion.vel_obs          = load_dict['md.inversion.vel_obs']
+md.mask.groundedice_levelset  = load_dict['md.mask.groundedice_levelset']
+md.mask.ice_levelset          = load_dict['md.mask.ice_levelset']
+md.geometry.surface           = load_dict['md.geometry.surface']
+md.geometry.base              = load_dict['md.geometry.base']
+md.geometry.thickness         = load_dict['md.geometry.thickness']
+md.initialization.temperature = load_dict['md.initialization.temperature']
+md.friction.coefficient       = load_dict['md.friction_coefficient']
 
 
 #===============================================================================
@@ -67,8 +69,13 @@ tf     =  2.0         # [a] final time
 dt     =  1.0         # [a] time step
 dt_sav =  10.0        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
-q_geo  =  0.0         # [W m^-2] geothermal heat flux
-num_p  =  4           # [--] number of processors
+q_geo  =  0.0#0.042   # [W m^-2] geothermal heat flux
+a_T_l  =  3.985e-13   # [s^-1 Pa^-3] lower bound of flow-rate constant
+a_T_u  =  1.916e3     # [s^-1 Pa^-3] upper bound of flow-rate constant
+Q_T_l  =  6e4         # [J mol^-1] lower bound of creep activation energy
+Q_T_u  =  13.9e4      # [J mol^-1] upper bound of creep activation energy
+R      =  8.3144621   # [J mol^-1] universal gas constant
+num_p  =  2           # [--] number of processors
 
 #===============================================================================
 # set up element-wise multiplicative identities :
@@ -89,7 +96,14 @@ b_ones = np.ones((md.mesh.numberofvertices, 3))
 flt    = np.where(md.mask.groundedice_levelset < 0)[0]
 
 # specify rheology parameters :
-Bf  =  (A / spy)**(-1/n)
+T         = md.initialization.temperature
+warm      = T >= Tm - 10.0
+a_T       = a_T_l * v_ones
+a_T[warm] = a_T_u
+Q_T       = Q_T_l * v_ones
+Q_T[warm] = Q_T_u
+A         = a_T * np.exp( - Q_T / (R * T) )
+Bf        = A**(-1/n)
 
 #===============================================================================
 # ISMIP_HOM experiment :
@@ -99,16 +113,13 @@ md.constants.g               = g
 md.constants.yts             = spy
 md.friction.p                = p * e_ones
 md.friction.q                = q * e_ones
-md.materials.rheology_B      = Bf * v_ones
+md.materials.rheology_B      = Bf
 md.materials.rheology_n      =  n * e_ones
-#md.materials.rheology_B      = im.paterson((Tm - 20.0) * v_ones)
-md.materials.rheology_law    = "None"
+md.materials.rheology_law    = "Arrhenius"
 
 md.basalforcings.groundedice_melting_rate = 0.0 * v_ones
 md.basalforcings.floatingice_melting_rate = 0.0 * v_ones
 md.basalforcings.geothermalflux           = q_geo * v_ones
-md.stressbalance.referential              = np.nan * A_ones
-md.stressbalance.loadingforce             = np.nan * b_ones
 md.thermal.spctemperature                 = md.initialization.temperature
 md.smb.mass_balance                       = adot * v_ones
 md.masstransport.spcthickness             = np.nan * v_ones

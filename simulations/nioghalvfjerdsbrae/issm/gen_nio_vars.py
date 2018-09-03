@@ -4,8 +4,8 @@ import numpy      as np
 import fenics_viz as fv
 import os, sys
 
-out_dir   = '../dump/vars/'
-plt_dir   = '../dump/images/issm/'
+out_dir   = './dump/vars/'
+plt_dir   = './dump/images/'
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(out_dir)
@@ -37,6 +37,10 @@ mouginot = cs.DataFactory.get_mouginot()
 dsr     = cs.DataInput(searise)
 dbm     = cs.DataInput(bedmach)
 dmg     = cs.DataInput(mouginot)
+
+# put the velocity on the bedmachine grid :
+dbm.interpolate_from_di(dmg, 'vx', 'vx', order=1)
+dbm.interpolate_from_di(dmg, 'vy', 'vy', order=1)
 
 # change the projection of all data to be the same as the mesh :
 #dbm.interpolate_from_di(dsr, 'T', 'T', order=3)
@@ -97,15 +101,16 @@ u_y     = im.InterpFromGridToMesh(x1, y1, vely, md.mesh.x, md.mesh.y, 0)[0]
 u_mag   = im.InterpFromGridToMesh(x1, y1, vel,  md.mesh.x, md.mesh.y, 0)[0]
 
 # calculate initial friction based on the SIA :
-grad_S    = np.gradient(S)
+grad_S    = np.gradient(S,dbm.dx)
 gS_mag    = np.sqrt(grad_S[0]**2 + grad_S[1]**2 + 1e-16)
 rhoi      = 910.0
 g         = 9.81
 u_0       = 1e-2
-u_mag_c   = u_mag.copy()
+u_mag_c   = np.sqrt(dbm.data['vx']**2 + dbm.data['vy']**2 + 1e-16)
 u_mag_c[u_mag_c < u_0] = u_0
-beta_sia  = np.sqrt( rhoi * g * H * gS_mag / u_mag_c )
-beta_sia[flt] = 0.0 # make the friction zero over the ice shelves
+beta_sia  = rhoi * g * dbm.data['H'] * gS_mag / u_mag_c
+beta_sia  = im.InterpFromGridToMesh(dbm.x, dbm.y, beta_sia,
+                                    md.mesh.x, md.mesh.y, 0)[0]
 
 # set the issm model variables :
 md.geometry.surface           = S
@@ -211,20 +216,20 @@ plt_kwargs['title']       = r'$\underline{u}_{\mathrm{ob}} |_S^{\mathrm{ISSM}}$'
 plt_kwargs['levels']      = U_lvls
 plt_kwargs['scale']       = 'lin'
 plt_kwargs['cmap']        = 'viridis'
-plt_kwargs['plot_quiver'] = True
+#plt_kwargs['plot_quiver'] = True
 plt_kwargs['plot_tp']     = False
 plt_kwargs['show']        = False
 fv.plot_variable(u=np.array([u_x.flatten(), u_y.flatten()]), **plt_kwargs)
 
-beta_lvls = np.array([beta_sia.min()**2, 1e7, 1e8, 1e9, 5e9, 1e10, 5e10,
-                      beta_sia.max()**2])
+beta_lvls = np.array([beta_sia.min(), 1e5, 1e6, 5e6, 1e7, 5e7,
+                      beta_sia.max()])
 plt_kwargs['name']        = 'beta_sia'
-plt_kwargs['title']       = r'$\beta_{\mathrm{SIA}}^2 |^{\mathrm{ISSM}}$'
+plt_kwargs['title']       = r'$\beta_{\mathrm{SIA}} |^{\mathrm{ISSM}}$'
 plt_kwargs['levels']      = beta_lvls
 plt_kwargs['scale']       = 'lin'
 plt_kwargs['cmap']        = 'viridis'
 plt_kwargs['plot_quiver'] = False
-fv.plot_variable(u=beta_sia**2, **plt_kwargs)
+fv.plot_variable(u=beta_sia, **plt_kwargs)
 
 
 

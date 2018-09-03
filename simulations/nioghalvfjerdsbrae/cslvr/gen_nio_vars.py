@@ -1,8 +1,8 @@
 from   cslvr import *
 import numpy     as np
 
-out_dir  = '../dump/vars/'
-msh_dir  = '../dump/meshes/cslvr/'
+out_dir  = './dump/vars/'
+msh_dir  = './dump/meshes/'
 
 # collect the raw data :
 searise  = DataFactory.get_searise()

@@ -1,8 +1,8 @@
 from cslvr import *
 
 # set the output directory :
-in_dir  = '../dump/vars/'
-msh_dir = '../dump/meshes/cslvr/'
+in_dir  = './dump/vars/'
+msh_dir = './dump/meshes/'
 out_dir = in_dir
 
 # retrieve the domain contour 

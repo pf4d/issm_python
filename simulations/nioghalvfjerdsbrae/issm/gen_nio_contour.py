@@ -1,10 +1,16 @@
 import cslvr as cs
 import numpy as np
+import os
 
 #===============================================================================
 # data preparation :
-out_dir   = '../dump/meshes/issm/'
+out_dir   = './dump/meshes/'
 mesh_name = 'nioghalvfjerdsbrae'
+
+# create the output directory if it does not exist :
+d       = os.path.dirname(out_dir)
+if not os.path.exists(d):
+  os.makedirs(d)
 
 # get the togography data :
 bedmachine = cs.DataFactory.get_bedmachine()
@@ -14,9 +20,9 @@ dbm        = cs.DataInput(bedmachine)
 # generate the contour :
 m = cs.MeshGenerator(dbm, mesh_name, out_dir)
 
-m.create_contour('mask', zero_cntr=0.001, skip_pts=5)
+m.create_contour('mask', zero_cntr=0.001, skip_pts=8)
 #m.create_contour('H', zero_cntr=100, skip_pts=20)   # 50 meter thick. contour
-m.eliminate_intersections(dist=50)                 # eliminate interscting lines
+m.eliminate_intersections(dist=100)                  # eliminate problems
 
 #===============================================================================
 # a box region :

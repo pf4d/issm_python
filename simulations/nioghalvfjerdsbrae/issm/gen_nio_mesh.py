@@ -2,12 +2,18 @@ import issm       as im
 import cslvr      as cs
 import numpy      as np
 import fenics_viz as fv
+import os
 
 #===============================================================================
 # data preparation :
-out_dir   = '../dump/vars/'
-msh_dir   = '../dump/meshes/issm/'
+out_dir   = './dump/vars/'
+msh_dir   = './dump/meshes/'
 mesh_name = 'nioghalvfjerdsbrae'
+
+# create the output directory if it does not exist :
+d       = os.path.dirname(out_dir)
+if not os.path.exists(d):
+  os.makedirs(d)
 
 #===============================================================================
 # use issm to create mesh for 79 N Glacier :
