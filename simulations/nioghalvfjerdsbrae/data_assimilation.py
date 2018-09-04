@@ -6,7 +6,7 @@ import os, sys
 # directories for saving data :
 mdl_odr = 'HO'
 opt_met = 'm1qn3'#'brent'#
-cst_met = 'cummings'# 'morlighem'#'log''l2'#
+cst_met = 'log'#'cummings'# 'morlighem'#'l2'#
 
 name    = mdl_odr + '_' + cst_met + '_cost_' + opt_met
 
