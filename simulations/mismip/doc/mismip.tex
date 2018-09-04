@@ -1,0 +1,72 @@
+\documentclass{evanpresentation}
+
+\usepackage[nomessages]{fp}% http://ctan.org/pkg/fp
+
+
+
+\title{MISMIP+ experiment output}
+\author{Evan M.~Cummings}
+\begin{document}
+\frame{
+\titlepage
+{\scriptsize
+\justify
+\textbf{Abstract:}
+  The [M]arine [I]ce [S]heet [M]odel [I]intercomparison [P]roject + experiment is performed using the newly-revised \texttt{issm\_python} package.
+}}
+
+\begin{frame}
+\frametitle{Input variables}
+\begin{center}
+\parbox[t]{60mm}{
+\pythonexternal[firstline=27, lastline=61]{../mismip.py}}
+\end{center}
+\end{frame}
+
+%% =============================================================================
+\foreach \n in {0,1,2,...,132}
+{
+  \FPeval{\ti}{clip(\n*100)}
+  \FPeval{\tn}{clip(1 + \ti)}
+  \begin{frame}
+    \frametitle{MISMIP+ \hfill $t = \tn$ years}
+    \begin{figure}
+      \centering
+      \includegraphics[width=0.95\linewidth]{../images/BP/lateral_slip/S_\ti.pdf}
+      \includegraphics[width=0.95\linewidth]{../images/BP/lateral_slip/H_\ti.pdf}
+      \includegraphics[width=0.95\linewidth]{../images/BP/lateral_slip/U_s_\ti.pdf}
+      \includegraphics[width=0.95\linewidth]{../images/BP/lateral_slip/U_b_\ti.pdf}
+      \includegraphics[width=0.10\linewidth]{../images/BP/lateral_slip/mask_\ti.pdf}
+    \end{figure}
+  \end{frame}
+}
+
+%% =============================================================================
+%\foreach \n in {0,1,...,100}
+%{
+%  \FPeval{\ti}{clip(20010 + \n*100)}
+%  \FPeval{\tn}{clip(1 + \ti)}
+%  \begin{frame}
+%    \frametitle{MISMIP+ \hfill $t = \tn$ years}
+%    \begin{figure}
+%      \centering
+%      \includegraphics[width=0.95\linewidth]{../images/BP/lateral_slip_restart/S_\ti.pdf}
+%      \includegraphics[width=0.95\linewidth]{../images/BP/lateral_slip_restart/H_\ti.pdf}
+%      \includegraphics[width=0.95\linewidth]{../images/BP/lateral_slip_restart/U_s_\ti.pdf}
+%      \includegraphics[width=0.95\linewidth]{../images/BP/lateral_slip_restart/U_b_\ti.pdf}
+%      \includegraphics[width=0.10\linewidth]{../images/BP/lateral_slip_restart/mask_\ti.pdf}
+%    \end{figure}
+%  \end{frame}
+%}
+
+
+\end{document}
+
+%  \begin{figure}[H]
+%    \centering
+%      \includegraphics[width=0.45\textwidth]{images/.png}
+%    \caption{\scriptsize .}
+%  \end{figure}
+
+
+
