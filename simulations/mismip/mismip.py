@@ -47,7 +47,7 @@ Hini   =  100.0       # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
 A      =  1e-16       # [Pa^{-n} s^{-1}] flow 
-beta   =  5e3         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
+beta   =  2e3         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  3.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
@@ -250,10 +250,10 @@ md         = im.solve(md, 'Transient')
 # save the state of the model :
 # FIXME: the savevars method will work for small problems, but fails without 
 #        error for large ones.
-im.savevars(out_dir + name + '.md', 'md', md)
+#im.savevars(out_dir + name + '.md', 'md', md)
 
-var_dict  = {'md.results.TransientSolution' : md.results.TransientSolution}
-im.savevars(out_dir + name + '.shelve', var_dict)
+#var_dict  = {'md.results.TransientSolution' : md.results.TransientSolution}
+#im.savevars(out_dir + name + '.shelve', var_dict)
 
 
 
