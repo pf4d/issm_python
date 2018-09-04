@@ -18,21 +18,21 @@ md   = im.loadmodel(out_dir + 'mismip_restart.md')
 #===============================================================================
 # define new simulation parameters :
 beta   =  2e3             # [Pa m^{-1/n} a^{-1/n}] friction coefficient
-t0     =  20000.0         # [a] starting time
-tf     =  t0 + 20000.0    # [a] final time
+t0     =  13200.0         # [a] starting time
+tf     =  20000.0         # [a] final time
 dt     =  0.5             # [a] time step
 dt_sav =  10.0            # [a] time interval to save data
 cfl    =  0.5             # [--] CFL coefficient
-nodes  =  4               # [--] number of nodes to use
-ntpn   =  1               # [--] number of tasks per node
+nodes  =  1               # [--] number of nodes to use
+ntpn   =  36              # [--] number of tasks per node
 ntasks =  ntpn*nodes      # [--] number of processor cores to use
-time   = '00:05:00'       # [s] time to complete
+time   =  48*60           # [m] time to complete
 
 # rank-zero tensor vertex ones vector :
 v_ones = np.ones(md.mesh.numberofvertices)
 
 # change the friction (to make the grounding line begin at around 450 km :
-md.friction.coefficient      = beta * v_ones
+#md.friction.coefficient      = beta * v_ones
 
 #===============================================================================
 # tansient settings :
@@ -59,13 +59,12 @@ md.transient.requested_outputs    = ['default',
 # solve :
 
 # solve the transient :
-md.cluster = im.generic('name', im.gethostname(), 'np', ntasks)
-#md.cluster = im.ollie('name',            name,
-#                      'ntasks',          ntasks,
-#                      'nodes',           nodes,
-#                      'ntasks_per_node', ntpn,
-#                      'time',            time,
-#                      'login',           'ecumming')
+#md.cluster = im.generic('name', im.gethostname(), 'np', ntasks)
+md.cluster = im.ollie('name',            name,
+                      'ntasks',          ntasks,
+                      'nodes',           nodes,
+                      'time',            time,
+                      'login',           'ecumming')
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Transient')
 
