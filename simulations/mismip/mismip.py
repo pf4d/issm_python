@@ -26,7 +26,7 @@ md.miscellaneous.name = name
 # define the geometry of the simulation :
 Lx     =  640000.0    # [m] domain length (along ice flow)
 Ly     =  80000.0     # [m] domain width (across ice flow)
-dx     =  5000.0      # [m] element diameter 
+dx     =  10000.0     # [m] element diameter 
 nx     =  int(Lx/dx)  # [--] number of x-coordinate divisions
 ny     =  int(Ly/dx)  # [--] number of y-coordinate divisions
 B0     = -150.0       # [m] bedrock topography at x = 0
@@ -47,18 +47,18 @@ Hini   =  100.0       # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
 A      =  1e-16       # [Pa^{-n} s^{-1}] flow 
-beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
+beta   =  5e3         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  3.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
 tf     =  20000.0     # [a] final time
-dt     =  0.5         # [a] time step
+dt     =  1.0         # [a] time step
 dt_sav =  10.0        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
 nodes  =  1           # [--] number of nodes to use
-ntpn   =  12          # [--] number of tasks per node
+ntpn   =  36          # [--] number of tasks per node
 ntasks =  nodes*ntpn  # [--] number of processor cores to use
-time   =  48*60       # [m] time to complete
+time   =  24*60       # [m] time to complete
 
 # create an empty rectangular mesh :
 md     = im.squaremesh(md, Lx, Ly, nx=nx, ny=ny)
@@ -190,7 +190,7 @@ md.initialization.vy          = 0.0 * v_ones
 md.initialization.vz          = 0.0 * v_ones
 md.initialization.vel         = 0.0 * v_ones
 md.initialization.pressure    = 0.0 * v_ones
-#md.initialization.temperature = Tm * v_ones
+md.initialization.temperature = Tm * v_ones   # needed even without thermal
 
 # tansient settings :
 md.transient.isstressbalance      = 1
