@@ -5,7 +5,7 @@ import numpy             as np
 # directories for saving data :
 mdl_odr = 'HO'
 name    = 'lateral_slip_restart'
-t0      = 20000
+t0      = 13200
 dt      = 10.0
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'

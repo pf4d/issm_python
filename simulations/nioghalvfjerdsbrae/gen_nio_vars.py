@@ -16,16 +16,10 @@ if not os.path.exists(d):
 md                    = im.model()
 md.miscellaneous.name = 'Nioghalvfjerdsbrae'
 
-var_dict  = {'md.mesh'              : md.mesh,
-             'md.inversion.vx_obs'  : md.inversion.vx_obs,
-             'md.inversion.vy_obs'  : md.inversion.vy_obs,
-             'md.inversion.vel_obs' : md.inversion.vel_obs}
+# load the mesh created by running ``gen_nio_mesh.py`` :
+var_dict  = {'md.mesh' : md.mesh}
 load_dict = im.loadvars(out_dir + 'issm_nio.shelve', var_dict)
-
-md.mesh                = load_dict['md.mesh']
-md.inversion.vx_obs    = load_dict['md.inversion.vx_obs']
-md.inversion.vy_obs    = load_dict['md.inversion.vy_obs']
-md.inversion.vel_obs   = load_dict['md.inversion.vel_obs']
+md.mesh   = load_dict['md.mesh']
 
 #===============================================================================
 # collect the raw data :
@@ -198,10 +192,6 @@ plt_kwargs['name']   = 'H'
 plt_kwargs['title']  =  r'$H |^{\mathrm{ISSM}}$'
 fv.plot_variable(u=H, **plt_kwargs)
 
-plt_kwargs['name']   = 'T'
-plt_kwargs['title']  =  r'$T |_S^{\mathrm{ISSM}}$'
-fv.plot_variable(u=T, **plt_kwargs)
-
 plt_kwargs['name']    = 'mask'
 plt_kwargs['title']   =  ''#r'$\mathrm{mask} |^{\mathrm{ISSM}}$'
 plt_kwargs['scale']   = 'bool'
@@ -209,6 +199,15 @@ plt_kwargs['scale']   = 'bool'
 plt_kwargs['plot_tp'] = True
 plt_kwargs['show']    = True
 fv.plot_variable(u=mask, **plt_kwargs)
+
+T_lvls = np.array([T.min(), 242, 244, 246, 248, 250, 252, 254, 256, 258,
+                   T.max()])
+plt_kwargs['levels']  = T_lvls
+plt_kwargs['scale']   = 'lin'
+plt_kwargs['plot_tp'] = False
+plt_kwargs['name']    = 'T'
+plt_kwargs['title']   =  r'$T |_S^{\mathrm{ISSM}}$'
+fv.plot_variable(u=T, **plt_kwargs)
 
 U_lvls = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, u_mag.max()])
 plt_kwargs['name']        = 'U_ob'

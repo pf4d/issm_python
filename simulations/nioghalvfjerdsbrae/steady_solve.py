@@ -146,9 +146,9 @@ md.basalforcings.geothermalflux           = q_geo * v_ones
 #md.initialization.temperature = Tm * v_ones
 md.initialization.waterfraction           = 0.0 * v_ones
 md.initialization.watercolumn             = 0.0 * v_ones
-md.thermal.spctemperature                 = md.initialization.temperature.copy()
-md.thermal.stabilization                  = 2 # SUPG
+md.thermal.stabilization                  = 1 # 1 == art'f'ial diff', 2 == SUPG
 md.thermal.isenthalpy                     = 1
+md.steadystate.maxiter                    = 2
 
 # FIXME: ``SteadyState`` throws an error if this is not zero :
 md.timestepping.time_step                 = 0.0
@@ -160,12 +160,18 @@ print_text('::: issm -- set boundary conditions :::', 'red')
 # set the default boundary conditions for an ice-sheet :
 md = im.SetMarineIceSheetBC(md)  # create placeholder arrays for indicies 
 
-md.stressbalance.spcvx      = np.nan * v_ones
-md.stressbalance.spcvy      = np.nan * v_ones
-md.stressbalance.spcvz      = np.nan * v_ones
+md.stressbalance.spcvx     = np.nan * v_ones
+md.stressbalance.spcvy     = np.nan * v_ones
+md.stressbalance.spcvz     = np.nan * v_ones
 
 # extrude the mesh so that there are 5 cells in height :
 md.extrude(20, 1.0)
+
+# FIXME: this has to be done post-extrude, unlike the momentum ``spc`` stuff :
+md.thermal.spctemperature  = md.initialization.temperature.copy()
+
+# set the basal boundary condition to Neumann :
+md.thermal.spctemperature[md.mesh.vertexonbase] = np.nan
 
 # set the flow equation of type `mdl_odr` defined above :
 md = im.setflowequation(md, mdl_odr, 'all')
@@ -181,13 +187,14 @@ md.verbose = im.verbose('convergence', True)
 if tmc: md = im.solve(md, 'SteadyState')
 else:   md = im.solve(md, 'StressBalance')
 
-#md = im.solve(md, 'StressBalance')
+"""
+md = im.solve(md, 'StressBalance')
 
-#md.initialization.vx       = md.results.StressbalanceSolution.Vx
-#md.initialization.vy       = md.results.StressbalanceSolution.Vy
-#md.initialization.vz       = md.results.StressbalanceSolution.Vz
-#md.initialization.vel      = md.results.StressbalanceSolution.Vel
-#md.initialization.pressure = md.results.StressbalanceSolution.Pressure
+md.initialization.vx       = md.results.StressbalanceSolution.Vx
+md.initialization.vy       = md.results.StressbalanceSolution.Vy
+md.initialization.vz       = md.results.StressbalanceSolution.Vz
+md.initialization.vel      = md.results.StressbalanceSolution.Vel
+md.initialization.pressure = md.results.StressbalanceSolution.Pressure
 
 #md.initialization.vx       = md.inversion.vx_obs
 #md.initialization.vy       = md.inversion.vy_obs
@@ -195,21 +202,23 @@ else:   md = im.solve(md, 'StressBalance')
 #md.initialization.vel      = md.inversion.vel_obs
 #md.initialization.pressure = md.results.StressbalanceSolution.Pressure
 
-#md = im.solve(md, 'Thermal')
+md = im.solve(md, 'Thermal')
+"""
 
 #===============================================================================
 # save .vtu files :
-p      = md.results.StressbalanceSolution.Pressure.flatten()
-u_x    = md.results.StressbalanceSolution.Vx.flatten()
-u_y    = md.results.StressbalanceSolution.Vy.flatten()
-u_z    = md.results.StressbalanceSolution.Vz.flatten()
-T      = md.results.ThermalSolution.Temperature.flatten()
+if tmc:  res = md.results.SteadystateSolution
+else:    res = md.results.StressbalanceSolution
+
+p      = res.Pressure.flatten()
+u_x    = res.Vx.flatten()
+u_y    = res.Vy.flatten()
+u_z    = res.Vz.flatten()
 
 u      = [u_x, u_y, u_z]
 
 im.vtuwrite(u, 'u', md, vtu_dir + 'u.vtu')
 im.vtuwrite(p, 'p', md, vtu_dir + 'p.vtu')
-im.vtuwrite(T, 'T', md, vtu_dir + 'T.vtu')
 
 #===============================================================================
 # plot the results :
@@ -220,7 +229,6 @@ u_x_s = u_x[md.mesh.vertexonsurface]
 u_y_s = u_y[md.mesh.vertexonsurface] 
 u_z_s = u_z[md.mesh.vertexonsurface] 
 u_s   = np.array([u_x_s, u_y_s, u_z_s])
-T_b   = T[md.mesh.vertexonbase]
 
 # save the mesh coordinates and data for interpolation with CSLVR :
 np.savetxt(out_dir + 'x.txt',   md.mesh.x2d)
@@ -233,7 +241,6 @@ np.savetxt(out_dir + 'p.txt',   p)
 u_mag     = np.sqrt(u_x_s**2 + u_y_s**2 + u_z_s**2 + 1e-16)
 U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3,
                       u_mag.max()])
-T_lvls    = np.array([T_b.min(), 260.0, 265.0, 270.0, 271.0, 272.0, T_b.max()])
 
 tp_kwargs     = {'linestyle'      : '-',
                  'lw'             : 1.0,
@@ -289,12 +296,31 @@ plot_kwargs['levels'] = U_lvls
 plot_kwargs['title']  = r'$\underline{u} |_S^{\mathrm{ISSM}}$'
 plot_variable(**plot_kwargs)
 
-plot_kwargs['u']      = T_b
-plot_kwargs['scale']  = 'lin'
-plot_kwargs['name']   = 'T_B'
-plot_kwargs['levels'] = T_lvls
-plot_kwargs['title']  = r'$T |_B^{\mathrm{ISSM}}$'
-plot_variable(**plot_kwargs)
+if tmc:
+  T      = res.Temperature.flatten()
+  
+  im.vtuwrite(T, 'T', md, vtu_dir + 'T.vtu')
+ 
+  T_b      = T[md.mesh.vertexonbase]
+  T_s      = T[md.mesh.vertexonsurface]
+  T_mid    = np.arange(242, 262, 2)
+  T_b_mid  = np.arange(262, 274, 2) 
+  T_b_lvls = np.hstack([T_b.min(), T_mid, T_b_mid, T_b.max()])
+  T_s_lvls = np.hstack([T_s.min(), T_mid, T_s.max()])
+  
+  plot_kwargs['u']      = T_b
+  plot_kwargs['scale']  = 'lin'
+  plot_kwargs['name']   = 'T_B'
+  plot_kwargs['levels'] = T_b_lvls
+  plot_kwargs['title']  = r'$T |_B^{\mathrm{ISSM}}$'
+  plot_variable(**plot_kwargs)
+  
+  plot_kwargs['u']      = T_s
+  plot_kwargs['scale']  = 'lin'
+  plot_kwargs['name']   = 'T_S'
+  plot_kwargs['levels'] = T_s_lvls
+  plot_kwargs['title']  = r'$T |_S^{\mathrm{ISSM}}$'
+  plot_variable(**plot_kwargs)
 
 
 

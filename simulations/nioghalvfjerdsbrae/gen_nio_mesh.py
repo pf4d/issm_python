@@ -38,7 +38,7 @@ dbm.interpolate_from_di(dmg, 'vy', 'vy', order=1)
 #md     = im.triangle(md, out_dir + mesh_name + '.exp', 50000)
 md    = im.bamg(md,
                 'domain', msh_dir + mesh_name + '.exp',
-                'hmax',   5000)
+                'hmax',   1000)
 
 # change data type to that required by InterpFromGridToMesh() :
 x1    = dbm.x.astype('float64')
@@ -65,7 +65,7 @@ u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
 # refine mesh using surface velocities as metric :
 md    = im.bamg(md,
                 'hmax',      100000,
-                'hmin',      500,
+                'hmin',      1000,
                 'gradation', 100,
                 'field',     u_mag,
                 'err',       8)
