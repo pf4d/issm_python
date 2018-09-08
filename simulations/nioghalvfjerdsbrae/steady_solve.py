@@ -1,4 +1,3 @@
-from fenics_viz      import *
 import issm              as im
 import cslvr             as cs
 import numpy             as np
@@ -9,6 +8,7 @@ import os, sys
 # directories for saving data :
 mdl_odr = 'HO'
 tmc     = True
+name    = 'NEGIS'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
@@ -29,7 +29,7 @@ if not os.path.exists(d):
 
 # load the model mesh created by gen_nio_mesh.py :
 md                    = im.model()
-md.miscellaneous.name = 'Nioghalvfjerdsbrae'
+md.miscellaneous.name = name
 
 var_dict  = {'md.mesh'                       : md.mesh,
              'md.inversion.vx_obs'           : md.inversion.vx_obs,
@@ -80,7 +80,10 @@ a_T_u  =  1.916e3     # [s^-1 Pa^-3] upper bound of flow-rate constant
 Q_T_l  =  6e4         # [J mol^-1] lower bound of creep activation energy
 Q_T_u  =  13.9e4      # [J mol^-1] upper bound of creep activation energy
 R      =  8.3144621   # [J mol^-1] universal gas constant
-num_p  =  2           # [--] number of processors to use
+nodes  =  2           # [--] number of nodes to use
+ntpn   =  36          # [--] number of tasks per node
+ntasks =  nodes*ntpn  # [--] number of processor cores to use
+time   =  24*60       # [m] time to complete
 
 #===============================================================================
 # set up element-wise multiplicative identities :
@@ -155,7 +158,6 @@ md.timestepping.time_step                 = 0.0
 
 #===============================================================================
 # boundary conditions :
-print_text('::: issm -- set boundary conditions :::', 'red')
 
 # set the default boundary conditions for an ice-sheet :
 md = im.SetMarineIceSheetBC(md)  # create placeholder arrays for indicies 
@@ -180,147 +182,16 @@ md.flowequation.fe_HO = 'P1'
 
 #===============================================================================
 # solve :
-print_text('::: issm -- solving :::', 'red')
 
-md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
-md.verbose = im.verbose('convergence', True)
+#md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
+md.cluster = im.ollie('name',            name,
+                      'ntasks',          ntasks,
+                      'nodes',           nodes,
+                      'time',            time,
+                      'login',           'ecumming')
+md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 if tmc: md = im.solve(md, 'SteadyState')
 else:   md = im.solve(md, 'StressBalance')
-
-"""
-md = im.solve(md, 'StressBalance')
-
-md.initialization.vx       = md.results.StressbalanceSolution.Vx
-md.initialization.vy       = md.results.StressbalanceSolution.Vy
-md.initialization.vz       = md.results.StressbalanceSolution.Vz
-md.initialization.vel      = md.results.StressbalanceSolution.Vel
-md.initialization.pressure = md.results.StressbalanceSolution.Pressure
-
-#md.initialization.vx       = md.inversion.vx_obs
-#md.initialization.vy       = md.inversion.vy_obs
-#md.initialization.vz       = 0.0 * md.results.StressbalanceSolution.Vz
-#md.initialization.vel      = md.inversion.vel_obs
-#md.initialization.pressure = md.results.StressbalanceSolution.Pressure
-
-md = im.solve(md, 'Thermal')
-"""
-
-#===============================================================================
-# save .vtu files :
-if tmc:  res = md.results.SteadystateSolution
-else:    res = md.results.StressbalanceSolution
-
-p      = res.Pressure.flatten()
-u_x    = res.Vx.flatten()
-u_y    = res.Vy.flatten()
-u_z    = res.Vz.flatten()
-
-u      = [u_x, u_y, u_z]
-
-im.vtuwrite(u, 'u', md, vtu_dir + 'u.vtu')
-im.vtuwrite(p, 'p', md, vtu_dir + 'p.vtu')
-
-#===============================================================================
-# plot the results :
-print_text('::: issm -- plotting :::', 'red')
-
-p_b   = p[md.mesh.vertexonbase]
-u_x_s = u_x[md.mesh.vertexonsurface]
-u_y_s = u_y[md.mesh.vertexonsurface] 
-u_z_s = u_z[md.mesh.vertexonsurface] 
-u_s   = np.array([u_x_s, u_y_s, u_z_s])
-
-# save the mesh coordinates and data for interpolation with CSLVR :
-np.savetxt(out_dir + 'x.txt',   md.mesh.x2d)
-np.savetxt(out_dir + 'y.txt',   md.mesh.y2d)
-np.savetxt(out_dir + 'u_x.txt', u[0])
-np.savetxt(out_dir + 'u_y.txt', u[1])
-np.savetxt(out_dir + 'u_z.txt', u[2])
-np.savetxt(out_dir + 'p.txt',   p)
-
-u_mag     = np.sqrt(u_x_s**2 + u_y_s**2 + u_z_s**2 + 1e-16)
-U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3,
-                      u_mag.max()])
-
-tp_kwargs     = {'linestyle'      : '-',
-                 'lw'             : 1.0,
-                 'color'          : 'k',
-                 'alpha'          : 0.5}
-
-quiver_kwargs = {'pivot'          : 'middle',
-                 'color'          : 'k',
-                 'scale'          : 100,
-                 'alpha'          : 0.5,
-                 'width'          : 0.001,
-                 'headwidth'      : 3.0, 
-                 'headlength'     : 3.0, 
-                 'headaxislength' : 3.0}
-
-# the plot parameters will mostly stay the same for each plot :
-plot_kwargs = {'direc'              : plt_dir, 
-               'coords'             : (md.mesh.x2d, md.mesh.y2d),
-               'cells'              : md.mesh.elements2d - 1,
-               'figsize'            : (5,7.5),
-               'cmap'               : 'viridis',
-               'scale'              : 'lin',
-               'numLvls'            : 10,
-               'levels'             : None,
-               'levels_2'           : None,
-               'umin'               : None,
-               'umax'               : None,
-               'plot_tp'            : False,
-               'tp_kwargs'          : tp_kwargs,
-               'show'               : False,
-               'hide_x_tick_labels' : True,
-               'hide_y_tick_labels' : True,
-               'xlabel'             : '',
-               'ylabel'             : '',
-               'equal_axes'         : True,
-               'hide_axis'          : True,
-               'colorbar_loc'       : 'right',
-               'contour_type'       : 'filled',
-               'extend'             : 'neither',
-               'ext'                : '.pdf',
-               'normalize_vec'      : True,
-               'plot_quiver'        : False,
-               'quiver_skip'        : 0,
-               'quiver_kwargs'      : quiver_kwargs,
-               'res'                : 150,
-               'cb'                 : True,
-               'cb_format'          : '%g'}
-
-plot_kwargs['u']      = u_s
-plot_kwargs['scale']  = 'lin'
-plot_kwargs['name']   = 'U_S'
-plot_kwargs['levels'] = U_lvls
-plot_kwargs['title']  = r'$\underline{u} |_S^{\mathrm{ISSM}}$'
-plot_variable(**plot_kwargs)
-
-if tmc:
-  T      = res.Temperature.flatten()
-  
-  im.vtuwrite(T, 'T', md, vtu_dir + 'T.vtu')
- 
-  T_b      = T[md.mesh.vertexonbase]
-  T_s      = T[md.mesh.vertexonsurface]
-  T_mid    = np.arange(242, 262, 2)
-  T_b_mid  = np.arange(262, 274, 2) 
-  T_b_lvls = np.hstack([T_b.min(), T_mid, T_b_mid, T_b.max()])
-  T_s_lvls = np.hstack([T_s.min(), T_mid, T_s.max()])
-  
-  plot_kwargs['u']      = T_b
-  plot_kwargs['scale']  = 'lin'
-  plot_kwargs['name']   = 'T_B'
-  plot_kwargs['levels'] = T_b_lvls
-  plot_kwargs['title']  = r'$T |_B^{\mathrm{ISSM}}$'
-  plot_variable(**plot_kwargs)
-  
-  plot_kwargs['u']      = T_s
-  plot_kwargs['scale']  = 'lin'
-  plot_kwargs['name']   = 'T_S'
-  plot_kwargs['levels'] = T_s_lvls
-  plot_kwargs['title']  = r'$T |_S^{\mathrm{ISSM}}$'
-  plot_variable(**plot_kwargs)
 
 
 
