@@ -49,7 +49,7 @@ dbm.data['S'][dbm.data['S'] < 1.0] = 1.0
 m = cs.MeshGenerator(dbm, mesh_name, msh_dir)
 
 #m.create_contour('mask', zero_cntr=0.5, skip_pts=2)
-m.create_contour('H', zero_cntr=10, skip_pts=0)  # 50 meter thick. contour
+m.create_contour('H', zero_cntr=15, skip_pts=0)  # 50 meter thick. contour
 
 # get the basin :
 gb = cs.GetBasin(dbm, basin='2.1')               # NEGIS basin
@@ -136,7 +136,9 @@ mask = im.InterpFromGridToMesh(dbm.x, dbm.y, mask,
                                md.mesh.x, md.mesh.y, 0)[0]
 
 # convert to integer :
-mask     = np.round(mask).astype('int')
+mask[mask > 0] =  1
+mask[mask < 0] = -1
+mask           = mask.astype('int')
 
 # ice is grounded for mask equal one
 md.mask.groundedice_levelset = mask
@@ -279,7 +281,7 @@ plt_kwargs['name']    = 'mask'
 plt_kwargs['title']   =  ''#r'$\mathrm{mask} |^{\mathrm{ISSM}}$'
 plt_kwargs['scale']   = 'bool'
 #plt_kwargs['cmap']    = 'RdGy'
-plt_kwargs['show']    = True
+#plt_kwargs['show']    = True
 #plt_kwargs['plot_tp'] = True
 fv.plot_variable(u=mask, **plt_kwargs)
 
