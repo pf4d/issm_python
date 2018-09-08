@@ -2,66 +2,150 @@ import issm       as im
 import cslvr      as cs
 import numpy      as np
 import fenics_viz as fv
-import os, sys
+import os
 
-out_dir   = './dump/vars/'
+#===============================================================================
+# data preparation :
+var_dir   = './dump/vars/'
+msh_dir   = './dump/meshes/'
 plt_dir   = './dump/images/'
+mesh_name = 'nioghalvfjerdsbrae'
 
 # create the output directory if it does not exist :
-d       = os.path.dirname(out_dir)
+d       = os.path.dirname(var_dir)
 if not os.path.exists(d):
   os.makedirs(d)
 
-# load the model mesh created by gen_nio_mesh.py :
+# create the output directory if it does not exist :
+d       = os.path.dirname(msh_dir)
+if not os.path.exists(d):
+  os.makedirs(d)
+
+#===============================================================================
+# use issm to create mesh for 79 N Glacier :
+cs.print_text('::: issm -- constructing mesh :::', 'red')
+
+# instantiate a generic model instance :
 md                    = im.model()
 md.miscellaneous.name = 'Nioghalvfjerdsbrae'
 
-# load the mesh created by running ``gen_nio_mesh.py`` :
-var_dict  = {'md.mesh' : md.mesh}
-load_dict = im.loadvars(out_dir + 'issm_nio.shelve', var_dict)
-md.mesh   = load_dict['md.mesh']
-
-#===============================================================================
 # collect the raw data :
 searise  = cs.DataFactory.get_searise()
 bedmach  = cs.DataFactory.get_bedmachine(thklim=1.0)
 mouginot = cs.DataFactory.get_mouginot()
 
-# create data objects to use with varglas :
-dsr     = cs.DataInput(searise)
-dbm     = cs.DataInput(bedmach)
-dmg     = cs.DataInput(mouginot)
+# create data objects to use with cslvr :
+dsr      = cs.DataInput(searise)
+dbm      = cs.DataInput(bedmach)
+dmg      = cs.DataInput(mouginot)
 
-# put the velocity on the bedmachine grid :
+#===============================================================================
+# generate the contour :
+# FIXME: the issm interpolation will result in areas with the surface ~1 km 
+#        below sea level on a few nodes next to the ocean.  Thus:
+dbm.data['S'][dbm.data['S'] < 1.0] = 1.0
+
+# generate the contour :
+m = cs.MeshGenerator(dbm, mesh_name, msh_dir)
+
+#m.create_contour('mask', zero_cntr=0.5, skip_pts=2)
+m.create_contour('H', zero_cntr=10, skip_pts=0)  # 50 meter thick. contour
+
+# get the basin :
+gb = cs.GetBasin(dbm, basin='2.1')               # NEGIS basin
+gb.remove_skip_points(400)                       # make it crude
+gb.extend_edge(10000)                            # extend the border
+gb.intersection(m.longest_cont)                  # take the intersection
+#gb.plot_xycoords(other=m.longest_cont)          # plot the result
+m.set_contour(gb.get_xy_contour())               # replace the full contour
+
+# process the file and extrude :
+m.eliminate_intersections(dist=200)              # eliminate interscting lines
+m.check_dist()                                   # remove points too close
+m.write_argus_contour()                          # create a .exp contour file
+m.close_file()                                   # close the files
+
+
+#===============================================================================
+# generate the mesh :
 dbm.interpolate_from_di(dmg, 'vx', 'vx', order=1)
 dbm.interpolate_from_di(dmg, 'vy', 'vy', order=1)
 
-# change the projection of all data to be the same as the mesh :
-#dbm.interpolate_from_di(dsr, 'T', 'T', order=3)
+# define the geometry of the simulation :
+#md     = im.triangle(md, msh_dir + mesh_name + '.exp', 50000)
+md    = im.bamg(md,
+                'domain', msh_dir + mesh_name + '.exp',
+                'hmax',   500)
+
+# change data type to that required by InterpFromGridToMesh() :
+x1    = dbm.x.astype('float64')
+y1    = dbm.y.astype('float64')
+velx  = dbm.data['vx'].astype('float64')
+vely  = dbm.data['vy'].astype('float64')
+
+# get the gradient of the mask :
+mask      = dbm.data['mask'].copy()
+mask[mask < 2.0] = 0.0
+gradm     = np.gradient(mask)
+lat_mask  = gradm[0]**2 + gradm[1]**2
+lat_mask  = lat_mask > 0.0
+
+# calculate the velocity magnitude :
+vel   = np.sqrt(velx**2 + vely**2)
+
+# increase the velocity at the grounding line or ice/ocean interface :
+vel[lat_mask] = 1000000.0
+
+# interpolate the data onto the issm mesh :
+u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
+
+# refine mesh using surface velocities as metric :
+md    = im.bamg(md,
+                'hmax',      500000,
+                'hmin',      100,
+                'gradation', 2,
+                'field',     u_mag,
+                'err',       8)
+
+# save the state of the model :
+im.savevars(var_dir + 'issm_nio.shelve', 'md.mesh', md.mesh)
 
 
 #===============================================================================
 # set grounded/floating ice mask :
 cs.print_text('::: issm -- setting mask :::', 'red')
 
-mask = im.InterpFromGridToMesh(dbm.x, dbm.y, dbm.data['mask'],
-                               md.mesh.x, md.mesh.y, 0)[0]
+# determine floatation from density :
+rhoi = 910.0
+rhow = 1028.0
+S    = dbm.data['S']
+B    = dbm.data['B']
+mask = dbm.data['mask']
+gnd  = rhoi * (S - B) > rhow * B
+
+# get the mask and set interior ice-free regions to grounded :
+interior = np.logical_and(mask == 1, gnd)
+mask[interior]  =  1
 
 # issm specifies floating ice as -1 :
-mask            = np.round(mask).astype('int')
 mask[mask == 0] =  1
 mask[mask == 2] = -1
+
+# interpolate the mask onto the grid :
+mask = im.InterpFromGridToMesh(dbm.x, dbm.y, mask,
+                               md.mesh.x, md.mesh.y, 0)[0]
+
+# convert to integer :
+mask     = np.round(mask).astype('int')
 
 # ice is grounded for mask equal one
 md.mask.groundedice_levelset = mask
 
 # ice is present when negative :
-md.mask.ice_levelset         = -1 * np.ones(md.mesh.numberofvertices)
-flt = md.mask.groundedice_levelset == -1  # get the floating indicies
+md.mask.ice_levelset  = -1 * np.ones(md.mesh.numberofvertices)
 
 #===============================================================================
 # calculate input data :
-
 T    = im.InterpFromGridToMesh(dsr.x, dsr.y, dsr.data['T'].astype('float64'),
                                md.mesh.x, md.mesh.y, 0)[0]
 
@@ -116,7 +200,6 @@ md.inversion.vel_obs          = u_mag
 md.friction.coefficient       = beta_sia
 md.initialization.temperature = T
 
-
 #===============================================================================
 # save the state of the model :
 var_dict  = {'md.mask.groundedice_levelset'  : md.mask.groundedice_levelset,
@@ -129,7 +212,7 @@ var_dict  = {'md.mask.groundedice_levelset'  : md.mask.groundedice_levelset,
              'md.inversion.vy_obs'           : md.inversion.vy_obs,
              'md.inversion.vel_obs'          : md.inversion.vel_obs,
              'md.friction_coefficient'       : md.friction.coefficient}
-im.savevars(out_dir + 'issm_nio.shelve', var_dict)
+im.savevars(var_dir + 'issm_nio.shelve', var_dict)
 
 
 #===============================================================================
@@ -196,8 +279,8 @@ plt_kwargs['name']    = 'mask'
 plt_kwargs['title']   =  ''#r'$\mathrm{mask} |^{\mathrm{ISSM}}$'
 plt_kwargs['scale']   = 'bool'
 #plt_kwargs['cmap']    = 'RdGy'
-plt_kwargs['plot_tp'] = True
 plt_kwargs['show']    = True
+#plt_kwargs['plot_tp'] = True
 fv.plot_variable(u=mask, **plt_kwargs)
 
 T_lvls = np.array([T.min(), 242, 244, 246, 248, 250, 252, 254, 256, 258,
@@ -206,6 +289,7 @@ plt_kwargs['levels']  = T_lvls
 plt_kwargs['scale']   = 'lin'
 plt_kwargs['plot_tp'] = False
 plt_kwargs['name']    = 'T'
+plt_kwargs['show']    = False
 plt_kwargs['title']   =  r'$T |_S^{\mathrm{ISSM}}$'
 fv.plot_variable(u=T, **plt_kwargs)
 
@@ -217,7 +301,6 @@ plt_kwargs['scale']       = 'lin'
 plt_kwargs['cmap']        = 'viridis'
 #plt_kwargs['plot_quiver'] = True
 plt_kwargs['plot_tp']     = False
-plt_kwargs['show']        = False
 fv.plot_variable(u=np.array([u_x.flatten(), u_y.flatten()]), **plt_kwargs)
 
 beta_lvls = np.array([beta_sia.min(), 1e5, 1e6, 5e6, 1e7, 5e7,
@@ -229,6 +312,5 @@ plt_kwargs['scale']       = 'lin'
 plt_kwargs['cmap']        = 'viridis'
 plt_kwargs['plot_quiver'] = False
 fv.plot_variable(u=beta_sia, **plt_kwargs)
-
 
 
