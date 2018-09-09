@@ -4,12 +4,18 @@ import numpy      as np
 import fenics_viz as fv
 import os
 
+mdl_odr   = 'HO'
+name      = 'negis'
+mesh_name = 'nioghalvfjerdsbrae'
+
+if mdl_odr == 'HO': mdl_pfx = 'BP'
+else:               mdl_pfx = mdl_odr
+
 #===============================================================================
 # data preparation :
-var_dir   = './dump/vars/'
-msh_dir   = './dump/meshes/'
-plt_dir   = './dump/images/'
-mesh_name = 'nioghalvfjerdsbrae'
+var_dir   = './dump/vars/' + mdl_pfx + '/'
+msh_dir   = './dump/meshes/' + mdl_pfx + '/'
+plt_dir   = './dump/images/' + mdl_pfx + '/'
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(var_dir)
@@ -49,7 +55,7 @@ dbm.data['S'][dbm.data['S'] < 1.0] = 1.0
 m = cs.MeshGenerator(dbm, mesh_name, msh_dir)
 
 #m.create_contour('mask', zero_cntr=0.5, skip_pts=2)
-m.create_contour('H', zero_cntr=15, skip_pts=0)  # 50 meter thick. contour
+m.create_contour('H', zero_cntr=15, skip_pts=10) # 50 meter thick. contour
 
 # get the basin :
 gb = cs.GetBasin(dbm, basin='2.1')               # NEGIS basin
@@ -102,7 +108,7 @@ u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
 # refine mesh using surface velocities as metric :
 md    = im.bamg(md,
                 'hmax',      500000,
-                'hmin',      100,
+                'hmin',      500,
                 'gradation', 2,
                 'field',     u_mag,
                 'err',       8)
@@ -281,8 +287,8 @@ plt_kwargs['name']    = 'mask'
 plt_kwargs['title']   =  ''#r'$\mathrm{mask} |^{\mathrm{ISSM}}$'
 plt_kwargs['scale']   = 'bool'
 #plt_kwargs['cmap']    = 'RdGy'
-#plt_kwargs['show']    = True
-#plt_kwargs['plot_tp'] = True
+plt_kwargs['show']    = True
+plt_kwargs['plot_tp'] = True
 fv.plot_variable(u=mask, **plt_kwargs)
 
 T_lvls = np.array([T.min(), 242, 244, 246, 248, 250, 252, 254, 256, 258,
