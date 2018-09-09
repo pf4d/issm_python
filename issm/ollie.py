@@ -25,6 +25,7 @@ class ollie(object):
     self.name            = ''
     self.login           = ''
     self.hostname        = ''
+    self.partition       = ''
     self.ntasks          = 1
     self.nodes           = 1
     self.time            = 5   # [minutes] time to complete
@@ -57,6 +58,7 @@ class ollie(object):
     s ="class '%s' object '%s' = \n" % (type(self),'self')
     s+="    name:            %s\n" % self.name
     s+="    login:           %s\n" % self.login
+    s+="    partition:       %s\n" % self.partition
     s+="    ntasks:          %i\n" % self.ntasks
     s+="    nodes:           %i\n" % self.nodes
     s+="    time (m):        %i\n" % self.time
@@ -92,13 +94,9 @@ class ollie(object):
 
     #write queuing script 
     if not m.ispc():
-      if   self.time <= 30:                            qos       = 'short'
-      elif self.time >  30    and self.time <= 48*60:  qos       = 'large'
-      elif self.time >  48*60:                         qos       = 'xlarge'
-      if   self.ntasks <= 12:                          partition = 'mini'
-      elif self.ntasks >  12 and self.ntasks <= 36:    partition = 'smp'
-      elif self.ntasks >  36:                          partition = 'mpp'
-      partition = 'mpp'
+      if   self.time <= 30:                            qos = 'short'
+      elif self.time >  30    and self.time <= 48*60:  qos = 'large'
+      elif self.time >  48*60:                         qos = 'xlarge'
       fid = open(modelname + '.queue', 'w')
       fid.write('#!/bin/bash\n')
       fid.write('#SBATCH --ntasks=%i\n'          % self.ntasks)
@@ -107,7 +105,7 @@ class ollie(object):
       fid.write('#SBATCH -t %i\n'                % self.time)
       fid.write('#SBATCH -o %s.outlog\n'         % modelname)
       fid.write('#SBATCH -e %s.errlog\n'         % modelname)
-      fid.write('#SBATCH -p %s\n'                % partition)
+      fid.write('#SBATCH -p %s\n'                % self.partition)
       fid.write('#SBATCH --qos=%s\n'             % qos)
       fid.write('#SBATCH --get-user-env\n\n')
       fid.write('export OMP_NUM_THREADS=1;\n\n')
