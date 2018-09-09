@@ -68,9 +68,10 @@ Q_T_l  =  6e4         # [J mol^-1] lower bound of creep activation energy
 Q_T_u  =  13.9e4      # [J mol^-1] upper bound of creep activation energy
 R      =  8.3144621   # [J mol^-1] universal gas constant
 nodes  =  1           # [--] number of nodes to use
-ntpn   =  36          # [--] number of tasks per node
+ntpn   =  36         # [--] number of tasks per node
 ntasks =  nodes*ntpn  # [--] number of processor cores to use
 time   =  24*60       # [m] time to complete
+part   = 'mpp120'     # [--] partition of ``ollie`` to use
 
 #===============================================================================
 # set up element-wise multiplicative identities :
@@ -172,6 +173,7 @@ md.flowequation.fe_HO = 'P1'
 
 #md.cluster = im.generic('name', im.gethostname(), 'np', 3)
 md.cluster = im.ollie('name',            name,
+                      'partition',       part,
                       'ntasks',          ntasks,
                       'nodes',           nodes,
                       'time',            time,
