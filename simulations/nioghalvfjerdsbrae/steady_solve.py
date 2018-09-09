@@ -7,8 +7,8 @@ import os, sys
 
 # directories for saving data :
 mdl_odr = 'HO'
-tmc     = True
-name    = 'NEGIS'
+tmc     = False
+name    = 'negis'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
