@@ -7,25 +7,12 @@ import os, sys
 
 # directories for saving data :
 mdl_odr = 'HO'
-tmc     = False
+tmc     = True
 name    = 'negis'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
-var_dir = './dump/vars/'
-plt_dir = './dump/images/' + mdl_pfx + '/'
-out_dir = './dump/results/' + mdl_pfx + '/'
-vtu_dir = plt_dir + 'vtu/'
-
-# create the output directory if it does not exist :
-d       = os.path.dirname(out_dir)
-if not os.path.exists(d):
-  os.makedirs(d)
-
-# create the output directory if it does not exist :
-d       = os.path.dirname(vtu_dir)
-if not os.path.exists(d):
-  os.makedirs(d)
+var_dir = './dump/vars/' + mdl_pfx + '/'
 
 # load the model mesh created by gen_nio_mesh.py :
 md                    = im.model()
@@ -80,7 +67,7 @@ a_T_u  =  1.916e3     # [s^-1 Pa^-3] upper bound of flow-rate constant
 Q_T_l  =  6e4         # [J mol^-1] lower bound of creep activation energy
 Q_T_u  =  13.9e4      # [J mol^-1] upper bound of creep activation energy
 R      =  8.3144621   # [J mol^-1] universal gas constant
-nodes  =  2           # [--] number of nodes to use
+nodes  =  1           # [--] number of nodes to use
 ntpn   =  36          # [--] number of tasks per node
 ntasks =  nodes*ntpn  # [--] number of processor cores to use
 time   =  24*60       # [m] time to complete
@@ -183,12 +170,12 @@ md.flowequation.fe_HO = 'P1'
 #===============================================================================
 # solve :
 
-md.cluster = im.generic('name', im.gethostname(), 'np', 3)
-#md.cluster = im.ollie('name',            name,
-#                      'ntasks',          ntasks,
-#                      'nodes',           nodes,
-#                      'time',            time,
-#                      'login',           'ecumming')
+#md.cluster = im.generic('name', im.gethostname(), 'np', 3)
+md.cluster = im.ollie('name',            name,
+                      'ntasks',          ntasks,
+                      'nodes',           nodes,
+                      'time',            time,
+                      'login',           'ecumming')
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 if tmc: md = im.solve(md, 'SteadyState')
 else:   md = im.solve(md, 'StressBalance')
