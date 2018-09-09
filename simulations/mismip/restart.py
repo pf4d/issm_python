@@ -9,11 +9,10 @@ name     = 'lateral_slip_restart'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
-plt_dir = './images/' + mdl_pfx + '/' + name + '/'
-out_dir = './results/' + mdl_pfx + '/'
+var_dir = './dump/results/' + mdl_pfx + '/'
 
 # load the model mesh created by gen_nio_mesh.py :
-md   = im.loadmodel(out_dir + 'mismip_restart.md')
+md   = im.loadmodel(var_dir + 'mismip_restart.md')
 
 #===============================================================================
 # define new simulation parameters :
@@ -67,12 +66,6 @@ md.cluster = im.ollie('name',            name,
                       'login',           'ecumming')
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Transient')
-
-#===============================================================================
-# save the state of the model :
-# FIXME: the savevars method will work for small problems, but fails without 
-#        error for large ones.
-im.savevars(out_dir + name + '.md', 'md', md)
 
 
 

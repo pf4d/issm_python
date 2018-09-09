@@ -10,11 +10,11 @@ dt      = 10
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
-plt_dir = './images/' + mdl_pfx + '/' + name + '/'
-out_dir = './results/' + mdl_pfx + '/'
+plt_dir = './dump/images/' + mdl_pfx + '/' + name + '/'
+var_dir = './dump/vars/' + mdl_pfx + '/'
 
 # load the model mesh created by gen_nio_mesh.py :
-md   = im.loadmodel(out_dir + 'mismip_init.md')
+md   = im.loadmodel(var_dir + 'mismip_init.md')
 
 # update the model with current output :
 md   = im.loadresultsfromdisk(md, './lateral_slip/lateral_slip.outbin')

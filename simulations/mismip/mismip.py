@@ -9,8 +9,7 @@ name     = 'lateral_slip'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
-plt_dir = './images/' + mdl_pfx + '/' + name + '/'
-var_dir = './vars/' + mdl_pfx + '/'
+var_dir = './dump/vars/' + mdl_pfx + '/'
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(var_dir)

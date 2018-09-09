@@ -183,12 +183,12 @@ md.flowequation.fe_HO = 'P1'
 #===============================================================================
 # solve :
 
-#md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
-md.cluster = im.ollie('name',            name,
-                      'ntasks',          ntasks,
-                      'nodes',           nodes,
-                      'time',            time,
-                      'login',           'ecumming')
+md.cluster = im.generic('name', im.gethostname(), 'np', 3)
+#md.cluster = im.ollie('name',            name,
+#                      'ntasks',          ntasks,
+#                      'nodes',           nodes,
+#                      'time',            time,
+#                      'login',           'ecumming')
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 if tmc: md = im.solve(md, 'SteadyState')
 else:   md = im.solve(md, 'StressBalance')
