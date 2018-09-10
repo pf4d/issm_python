@@ -1,7 +1,7 @@
-import issm              as im
-import cslvr             as cs
-import numpy             as np
-from   fenics_viz import plot_variable
+import issm       as im
+import cslvr      as cs
+import numpy      as np
+import fenics_viz as fv
 import os
 
 # directories for saving data :
@@ -119,7 +119,7 @@ plot_kwargs['scale']  = 'lin'
 plot_kwargs['name']   = 'U_S'
 plot_kwargs['levels'] = U_lvls
 plot_kwargs['title']  = r'$\underline{u} |_S^{\mathrm{ISSM}}$'
-plot_variable(**plot_kwargs)
+fv.plot_variable(**plot_kwargs)
 
 if tmc:
   T      = res.Temperature.flatten()
@@ -138,19 +138,19 @@ if tmc:
   plot_kwargs['name']   = 'T_B'
   plot_kwargs['levels'] = T_b_lvls
   plot_kwargs['title']  = r'$T |_B^{\mathrm{ISSM}}$'
-  plot_variable(**plot_kwargs)
+  fv.plot_variable(**plot_kwargs)
   
   plot_kwargs['u']      = T_s
   plot_kwargs['scale']  = 'lin'
   plot_kwargs['name']   = 'T_S'
   plot_kwargs['levels'] = T_s_lvls
   plot_kwargs['title']  = r'$T |_S^{\mathrm{ISSM}}$'
-  plot_variable(**plot_kwargs)
+  fv.plot_variable(**plot_kwargs)
 
 bedmach  = cs.DataFactory.get_bedmachine(thklim=1.0)
 dbm      = cs.DataInput(bedmach)
 
-ice_params = {'llcrnrlat'    :  78.5,
+nio_params = {'llcrnrlat'    :  78.5,
               'llcrnrlon'    : -27.0,
               'urcrnrlat'    :  79.6,
               'urcrnrlon'    : -17.0,

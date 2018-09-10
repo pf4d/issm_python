@@ -15,7 +15,6 @@ else:               mdl_pfx = mdl_odr
 # data preparation :
 var_dir   = './dump/vars/' + mdl_pfx + '/'
 msh_dir   = './dump/meshes/' + mdl_pfx + '/'
-plt_dir   = './dump/images/'
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(var_dir)
@@ -33,7 +32,7 @@ cs.print_text('::: issm -- constructing mesh :::', 'red')
 
 # instantiate a generic model instance :
 md                    = im.model()
-md.miscellaneous.name = 'Nioghalvfjerdsbrae'
+md.miscellaneous.name = name
 
 # collect the raw data :
 searise  = cs.DataFactory.get_searise()
@@ -116,12 +115,12 @@ u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
 # refine mesh using surface velocities as metric :
 md    = im.bamg(md,
                 'hmax',         100000,
-                'hmin',         500,
+                'hmin',         100,
                 'gradation',    2,
                 'KeepVertices', 0,
                 'tol',          500,
                 'field',        u_mag,
-                'err',          100)
+                'err',          3)
 
 # save the state of the model :
 im.savevars(var_dir + 'issm_nio.shelve', 'md.mesh', md.mesh)
@@ -216,7 +215,8 @@ md.initialization.temperature = T
 # save the state of the model :
 cs.print_text('::: issm -- saving the initialization :::', 'red')
 
-var_dict  = {'md.mask.groundedice_levelset'  : md.mask.groundedice_levelset,
+var_dict  = {'md.mesh'                       : md.mesh,
+             'md.mask.groundedice_levelset'  : md.mask.groundedice_levelset,
              'md.mask.ice_levelset'          : md.mask.ice_levelset,
              'md.initialization.temperature' : md.initialization.temperature,
              'md.geometry.surface'           : md.geometry.surface,
@@ -228,103 +228,5 @@ var_dict  = {'md.mask.groundedice_levelset'  : md.mask.groundedice_levelset,
              'md.friction_coefficient'       : md.friction.coefficient}
 im.savevars(var_dir + 'issm_nio.shelve', var_dict)
 
-
-#===============================================================================
-# plot the data :
-tp_kwargs     = {'linestyle'      : '-',
-                 'lw'             : 0.1,
-                 'color'          : 'k',
-                 'alpha'          : 0.8}
-
-quiver_kwargs = {'pivot'          : 'middle',
-                 'color'          : '0.0',
-                 'scale'          : 100,
-                 'alpha'          : 1.0,
-                 'width'          : 0.001,
-                 'headwidth'      : 3.0, 
-                 'headlength'     : 3.0, 
-                 'headaxislength' : 3.0}
-
-plt_kwargs  =  {'direc'              : plt_dir, 
-                'coords'             : (md.mesh.x, md.mesh.y),
-                'cells'              : md.mesh.elements - 1,
-                'figsize'            : (5.6,8),
-                'cmap'               : 'viridis',
-                'scale'              : 'lin',
-                'numLvls'            : 10,
-                'levels'             : None,#U_lvls,
-                'levels_2'           : None,
-                'umin'               : None,
-                'umax'               : None,
-                'plot_tp'            : False,
-                'tp_kwargs'          : tp_kwargs,
-                'show'               : False,
-                'hide_x_tick_labels' : True,
-                'hide_y_tick_labels' : True,
-                'xlabel'             : "",#r'$x$',
-                'ylabel'             : "",#r'$y$',
-                'equal_axes'         : True,
-                'title'              : r'$S |^{\mathrm{ISSM}}$',
-                'hide_axis'          : True,
-                'colorbar_loc'       : 'right',
-                'contour_type'       : 'filled',
-                'extend'             : 'neither',
-                'ext'                : '.pdf',
-                'normalize_vec'      : True,
-                'plot_quiver'        : False,
-                'quiver_kwargs'      : quiver_kwargs,
-                'res'                : 150,
-                'cb'                 : True,
-                'cb_format'          : '%g'}
-
-plt_kwargs['name']   = 'S'
-plt_kwargs['title']  =  r'$S |^{\mathrm{ISSM}}$'
-fv.plot_variable(u=S, **plt_kwargs)
-
-plt_kwargs['name']   = 'B'
-plt_kwargs['title']  =  r'$B |^{\mathrm{ISSM}}$'
-fv.plot_variable(u=B, **plt_kwargs)
-
-plt_kwargs['name']   = 'H'
-plt_kwargs['title']  =  r'$H |^{\mathrm{ISSM}}$'
-fv.plot_variable(u=H, **plt_kwargs)
-
-plt_kwargs['name']    = 'mask'
-plt_kwargs['title']   =  ''#r'$\mathrm{mask} |^{\mathrm{ISSM}}$'
-plt_kwargs['scale']   = 'bool'
-#plt_kwargs['cmap']    = 'RdGy'
-plt_kwargs['show']    = True
-plt_kwargs['plot_tp'] = True
-fv.plot_variable(u=mask, **plt_kwargs)
-
-T_lvls = np.array([T.min(), 242, 244, 246, 248, 250, 252, 254, 256, 258,
-                   T.max()])
-plt_kwargs['levels']  = T_lvls
-plt_kwargs['scale']   = 'lin'
-plt_kwargs['plot_tp'] = False
-plt_kwargs['name']    = 'T'
-plt_kwargs['show']    = False
-plt_kwargs['title']   =  r'$T |_S^{\mathrm{ISSM}}$'
-fv.plot_variable(u=T, **plt_kwargs)
-
-U_lvls = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, u_mag.max()])
-plt_kwargs['name']        = 'U_ob'
-plt_kwargs['title']       = r'$\underline{u}_{\mathrm{ob}} |_S^{\mathrm{ISSM}}$'
-plt_kwargs['levels']      = U_lvls
-plt_kwargs['scale']       = 'lin'
-plt_kwargs['cmap']        = 'viridis'
-#plt_kwargs['plot_quiver'] = True
-plt_kwargs['plot_tp']     = False
-fv.plot_variable(u=np.array([u_x.flatten(), u_y.flatten()]), **plt_kwargs)
-
-beta_lvls = np.array([beta_sia.min(), 1e5, 1e6, 5e6, 1e7, 5e7,
-                      beta_sia.max()])
-plt_kwargs['name']        = 'beta_sia'
-plt_kwargs['title']       = r'$\beta_{\mathrm{SIA}} |^{\mathrm{ISSM}}$'
-plt_kwargs['levels']      = beta_lvls
-plt_kwargs['scale']       = 'lin'
-plt_kwargs['cmap']        = 'viridis'
-plt_kwargs['plot_quiver'] = False
-fv.plot_variable(u=beta_sia, **plt_kwargs)
 
 
