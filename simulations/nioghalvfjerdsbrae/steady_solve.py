@@ -139,7 +139,7 @@ md.initialization.waterfraction           = 0.0 * v_ones
 md.initialization.watercolumn             = 0.0 * v_ones
 md.thermal.stabilization                  = 1 # 1 == art'f'ial diff', 2 == SUPG
 md.thermal.isenthalpy                     = 1
-md.steadystate.maxiter                    = 2
+md.steadystate.maxiter                    = 1
 
 # FIXME: ``SteadyState`` throws an error if this is not zero :
 md.timestepping.time_step                 = 0.0

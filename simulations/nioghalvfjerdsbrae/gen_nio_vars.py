@@ -15,7 +15,7 @@ else:               mdl_pfx = mdl_odr
 # data preparation :
 var_dir   = './dump/vars/' + mdl_pfx + '/'
 msh_dir   = './dump/meshes/' + mdl_pfx + '/'
-plt_dir   = './dump/images/' + mdl_pfx + '/'
+plt_dir   = './dump/images/'
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(var_dir)
@@ -74,6 +74,8 @@ m.close_file()                                   # close the files
 
 #===============================================================================
 # generate the mesh :
+cs.print_text('::: issm -- generating mesh :::', 'red')
+
 dbm.interpolate_from_di(dmg, 'vx', 'vx', order=1)
 dbm.interpolate_from_di(dmg, 'vy', 'vy', order=1)
 
@@ -105,13 +107,21 @@ vel[lat_mask] = 1000000.0
 # interpolate the data onto the issm mesh :
 u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
 
+# interpolate the thickness data onto the issm mesh :
+#H     = im.InterpFromGridToMesh(x1, y1, dbm.data['H'],
+#                                md.mesh.x, md.mesh.y, 0)[0]
+#               'field',        np.vstack([u_mag, H]).T,
+#               'err',          np.array([[8,8]]))
+
 # refine mesh using surface velocities as metric :
 md    = im.bamg(md,
-                'hmax',      500000,
-                'hmin',      500,
-                'gradation', 2,
-                'field',     u_mag,
-                'err',       8)
+                'hmax',         100000,
+                'hmin',         500,
+                'gradation',    2,
+                'KeepVertices', 0,
+                'tol',          500,
+                'field',        u_mag,
+                'err',          100)
 
 # save the state of the model :
 im.savevars(var_dir + 'issm_nio.shelve', 'md.mesh', md.mesh)
@@ -119,7 +129,7 @@ im.savevars(var_dir + 'issm_nio.shelve', 'md.mesh', md.mesh)
 
 #===============================================================================
 # set grounded/floating ice mask :
-cs.print_text('::: issm -- setting mask :::', 'red')
+cs.print_text('::: issm -- generating input data :::', 'red')
 
 # determine floatation from density :
 rhoi = 910.0
@@ -152,15 +162,9 @@ md.mask.groundedice_levelset = mask
 # ice is present when negative :
 md.mask.ice_levelset  = -1 * np.ones(md.mesh.numberofvertices)
 
-#===============================================================================
-# calculate input data :
+# interpolate the data onto the refined mesh :
 T    = im.InterpFromGridToMesh(dsr.x, dsr.y, dsr.data['T'].astype('float64'),
                                md.mesh.x, md.mesh.y, 0)[0]
-
-# geometry :
-cs.print_text('::: issm -- constructing geometry :::', 'red')
-
-# interpolate the data onto the refined mesh created by ``gen_nio_mesh.py`` :
 S    = im.InterpFromGridToMesh(dbm.x, dbm.y, dbm.data['S'],
                                md.mesh.x, md.mesh.y, 0)[0]
 B    = im.InterpFromGridToMesh(dbm.x, dbm.y, dbm.data['B'],
@@ -210,6 +214,8 @@ md.initialization.temperature = T
 
 #===============================================================================
 # save the state of the model :
+cs.print_text('::: issm -- saving the initialization :::', 'red')
+
 var_dict  = {'md.mask.groundedice_levelset'  : md.mask.groundedice_levelset,
              'md.mask.ice_levelset'          : md.mask.ice_levelset,
              'md.initialization.temperature' : md.initialization.temperature,
