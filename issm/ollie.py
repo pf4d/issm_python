@@ -181,7 +181,7 @@ class ollie(object):
 
     #copy files from cluster to current directory
     directory='%s/%s/' % (self.executionpath,dirname)
-    #issmscpin(self.hostname,self.login,self.port,directory,filelist)
+    issmscpin(self.hostname,self.login,self.port,directory,filelist)
 
 
 

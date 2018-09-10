@@ -137,7 +137,7 @@ md.basalforcings.geothermalflux           = q_geo * v_ones
 #md.initialization.temperature = Tm * v_ones
 md.initialization.waterfraction           = 0.0 * v_ones
 md.initialization.watercolumn             = 0.0 * v_ones
-md.thermal.stabilization                  = 1 # 1 == art'f'ial diff', 2 == SUPG
+md.thermal.stabilization                  = 2 # 1 == art'f'ial diff', 2 == SUPG
 md.thermal.isenthalpy                     = 1
 md.steadystate.maxiter                    = 1
 
@@ -155,17 +155,30 @@ md.stressbalance.spcvy     = np.nan * v_ones
 md.stressbalance.spcvz     = np.nan * v_ones
 
 # extrude the mesh so that there are 5 cells in height :
-md.extrude(20, 1.0)
+md.extrude(10, 1.0)
+
+# get the floating base :
+flt = np.logical_and(md.mask.groundedice_levelset == -1, md.mesh.vertexonbase)
+
+# calculate the hydrostatic-pressure-melting point :
+H   = md.geometry.surface - md.geometry.base
+Tpm = Tm - md.materials.beta * rhoi * g * H
 
 # FIXME: this has to be done post-extrude, unlike the momentum ``spc`` stuff :
-md.thermal.spctemperature  = md.initialization.temperature.copy()
+md.thermal.spctemperature      = md.initialization.temperature.copy()
 
 # set the basal boundary condition to Neumann :
 md.thermal.spctemperature[md.mesh.vertexonbase] = np.nan
+md.thermal.spctemperature[flt]                  = Tpm[flt]
 
 # set the flow equation of type `mdl_odr` defined above :
 md = im.setflowequation(md, mdl_odr, 'all')
 md.flowequation.fe_HO = 'P1'
+
+
+#===============================================================================
+# save the state of the model :
+im.savevars(var_dir + 'negis_init.md', 'md', md)
 
 
 #===============================================================================

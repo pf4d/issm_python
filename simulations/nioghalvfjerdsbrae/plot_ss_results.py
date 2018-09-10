@@ -7,18 +7,14 @@ import os
 # directories for saving data :
 mdl_odr = 'HO'
 tmc     = True
+name    = 'negis'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
-var_dir = './dump/vars/'
+var_dir = './dump/vars/' + mdl_pfx + '/'
 plt_dir = './dump/images/' + mdl_pfx + '/'
 out_dir = './dump/results/' + mdl_pfx + '/'
 vtu_dir = plt_dir + 'vtu/'
-
-# create the output directory if it does not exist :
-d       = os.path.dirname(plt_dir)
-if not os.path.exists(d):
-  os.makedirs(d)
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(vtu_dir)
@@ -27,17 +23,13 @@ if not os.path.exists(d):
 
 # load the model mesh created by gen_nio_mesh.py :
 md                    = im.model()
-md.miscellaneous.name = 'Nioghalvfjerdsbrae'
-           
-out_dict   = {'md.results' : md.results,
-              'md.mesh'    : md.mesh}
-load_dict  = im.loadvars(out_dir + 'issm_nio_steadySolve.shelve', out_dict)
-md.results = load_dict['md.results']
-md.mesh    = load_dict['md.mesh']
+md.miscellaneous.name = name
 
-#md.initialization.vz       = 0.0 * md.results.StressbalanceSolution.Vz
-#md.initialization.vel      = md.inversion.vel_obs
-#md.initialization.pressure = md.results.StressbalanceSolution.Pressure
+# load the model mesh created by gen_nio_mesh.py :
+md   = im.loadmodel(var_dir + 'negis_init.md')
+
+# load the steady-state results :
+md   = im.loadresultsfromdisk(md, './negis/negis.outbin')
 
 #===============================================================================
 # save .vtu files :
@@ -172,43 +164,56 @@ ice_params = {'llcrnrlat'    :  78.5,
               'plot_scale'   : True,
               'axes_color'   : 'k'}
 
-T_b_lvls = np.hstack([T_b.min(), 258, 260, 262, 264, 268, 270, 272, 273, T_b.max()])
+plt_params = {'direc'            : plt_dir,
+              'coords'           : (md.mesh.x2d, md.mesh.y2d),
+              'cells'            : md.mesh.elements2d - 1,
+              'u2'               : None,
+              'u2_levels'        : None,
+              'u2_color'         : 'k',
+              'u2_linewidth'     : 1.0,
+              'cmap'             : 'viridis',
+              'scale'            : 'lin',
+              'umin'             : None,
+              'umax'             : None,
+              'numLvls'          : 12,
+              'drawGridLabels'   : True,
+              'levels_2'         : None,
+              'tp'               : True,
+              'tpAlpha'          : 0.5,
+              'contour_type'     : 'filled',
+              'params'           : ice_params,
+              'extend'           : 'neither',
+              'show'             : False,
+              'ext'              : '.pdf',
+              'res'              : 150,
+              'cb'               : True,
+              'cb_format'        : '%g',
+              'zoom_box'         : False,
+              'zoom_box_kwargs'  : None,
+              'plot_pts'         : None,
+              'plot_texts'       : None,
+              'plot_continent'   : False,
+              'cont_plot_params' : None,
+              'drawcoastlines'   : True,
+              'box_params'       : None}
 
-cs.plotIce(dbm, 
-           u                = T_b, 
-           name             = 'T_B_nio',
-           direc            = plt_dir,
-           coords           = (md.mesh.x2d, md.mesh.y2d),
-           cells            = md.mesh.elements2d - 1,
-           u2               = None,
-           u2_levels        = None,
-           u2_color         = 'k',
-           u2_linewidth     = 1.0,
-           title            = r'$T |_S^{\mathrm{ISSM}}$',
-           cmap             = 'viridis',
-           scale            = 'lin',
-           umin             = None,
-           umax             = None,
-           numLvls          = 12,
-           drawGridLabels   = True,
-           levels           = T_b_lvls,
-           levels_2         = None,
-           tp               = True,
-           tpAlpha          = 0.5,
-           contour_type     = 'filled',
-           params           = ice_params,
-           extend           = 'neither',
-           show             = False,
-           ext              = '.pdf',
-           res              = 150,
-           cb               = True,
-           cb_format        = '%g',
-           zoom_box         = False,
-           zoom_box_kwargs  = None,
-           plot_pts         = None,
-           plot_texts       = None,
-           plot_continent   = False,
-           cont_plot_params = None,
-           drawcoastlines   = True,
-           box_params       = None)
+T_b_lvls = np.hstack([T_b.min(), 258, 260, 262, 264, 268, 270, 272, 273, T_b.max()])
+U_lvls   = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, 2e3, 3e3,
+                      u_mag.max()])
+
+cs.plotIce(dbm,
+           u      = T_b, 
+           name   = 'T_B_nio',
+           levels = T_b_lvls,
+           title  = r'$T |_B^{\mathrm{ISSM}}$',
+           **plt_params)
+
+cs.plotIce(dbm,
+           u      = u_s, 
+           name   = 'U_S_nio',
+           levels = U_lvls,
+           title  = r'$\underline{u} |_S^{\mathrm{ISSM}}$',
+           **plt_params)
+
+
 

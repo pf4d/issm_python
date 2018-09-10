@@ -58,7 +58,7 @@ nodes  =  1           # [--] number of nodes to use
 ntpn   =  36          # [--] number of tasks per node
 ntasks =  nodes*ntpn  # [--] number of processor cores to use
 time   =  24*60       # [m] time to complete
-part   = 'mpp120'     # [--] partition of ``ollie`` to use
+part   = 'smp'        # [--] partition of ``ollie`` to use
 
 # create an empty rectangular mesh :
 md     = im.squaremesh(md, Lx, Ly, nx=nx, ny=ny)
@@ -237,13 +237,13 @@ im.savevars(var_dir + 'mismip_init.md', 'md', md)
 #md.initialization.vel = md.results.StressbalanceSolution.Vel
 
 # solve the transient :
-#md.cluster = im.ollie('name', im.gethostname(), 'np', num_p)
-md.cluster = im.ollie('name',            name,
-                      'partition',       part,
-                      'ntasks',          ntasks,
-                      'nodes',           nodes,
-                      'time',            time,
-                      'login',           'ecumming')
+md.cluster = im.generic('name', im.gethostname(), 'np', 2)
+#md.cluster = im.ollie('name',            name,
+#                      'partition',       part,
+#                      'ntasks',          ntasks,
+#                      'nodes',           nodes,
+#                      'time',            time,
+#                      'login',           'ecumming')
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Transient')
 
