@@ -26,6 +26,11 @@ d       = os.path.dirname(msh_dir)
 if not os.path.exists(d):
   os.makedirs(d)
 
+# only a few constants needed :
+rhoi = 910.0
+rhow = 1028.0
+g    = 9.81
+
 #===============================================================================
 # use issm to create mesh for 79 N Glacier :
 cs.print_text('::: issm -- constructing mesh :::', 'red')
@@ -75,8 +80,9 @@ m.close_file()                                   # close the files
 # generate the mesh :
 cs.print_text('::: issm -- generating mesh :::', 'red')
 
-dbm.interpolate_from_di(dmg, 'vx', 'vx', order=1)
-dbm.interpolate_from_di(dmg, 'vy', 'vy', order=1)
+dbm.interpolate_from_di(dmg, 'vx',   'vx',     order=1)
+dbm.interpolate_from_di(dmg, 'vy',   'vy',     order=1)
+dbm.interpolate_from_di(dmg, 'mask', 'U_mask', order=1)
 
 # define the geometry of the simulation :
 #md     = im.triangle(md, msh_dir + mesh_name + '.exp', 50000)
@@ -131,8 +137,6 @@ im.savevars(var_dir + 'issm_nio.shelve', 'md.mesh', md.mesh)
 cs.print_text('::: issm -- generating input data :::', 'red')
 
 # determine floatation from density :
-rhoi = 910.0
-rhow = 1028.0
 S    = dbm.data['S']
 B    = dbm.data['B']
 mask = dbm.data['mask']
@@ -190,13 +194,20 @@ u_y     = im.InterpFromGridToMesh(x1, y1, vely, md.mesh.x, md.mesh.y, 0)[0]
 u_mag   = im.InterpFromGridToMesh(x1, y1, vel,  md.mesh.x, md.mesh.y, 0)[0]
 
 # calculate initial friction based on the SIA :
-grad_S    = np.gradient(S,dbm.dx)
+U_mask             = dbm.data['U_mask']
+U_mask[U_mask > 0] = 1
+
+# calculate surface gradient magnitude :
+grad_S    = np.gradient(dbm.data['S'], dbm.dx)
 gS_mag    = np.sqrt(grad_S[0]**2 + grad_S[1]**2 + 1e-16)
-rhoi      = 910.0
-g         = 9.81
-u_0       = 1e-2
+
+# calculate surface velocity magnitude and impose minimum velocity :
 u_mag_c   = np.sqrt(dbm.data['vx']**2 + dbm.data['vy']**2 + 1e-16)
+u_0       = 1e-2
 u_mag_c[u_mag_c < u_0] = u_0
+u_mag_c[U_mask == 0]   = 1e4
+
+# calculate initial friction based on the SIA :
 beta_sia  = rhoi * g * dbm.data['H'] * gS_mag / u_mag_c
 beta_sia  = im.InterpFromGridToMesh(dbm.x, dbm.y, beta_sia,
                                     md.mesh.x, md.mesh.y, 0)[0]

@@ -131,7 +131,7 @@ plt_kwargs['cmap']        = 'viridis'
 plt_kwargs['plot_tp']     = False
 fv.plot_variable(u=np.array([u_x.flatten(), u_y.flatten()]), **plt_kwargs)
 
-beta_lvls = np.array([beta_sia.min(), 1e5, 1e6, 5e6, 1e7, 5e7,
+beta_lvls = np.array([beta_sia.min(), 2e1, 1e2, 5e2, 1e3, 5e3, 1e4, 2e4,
                       beta_sia.max()])
 plt_kwargs['name']        = 'beta_sia'
 plt_kwargs['title']       = r'$\beta_{\mathrm{SIA}} |^{\mathrm{ISSM}}$'
@@ -233,7 +233,7 @@ cs.plotIce(bedmach,
            title  = r'$\underline{u}_{\mathrm{ob}} |_S^{\mathrm{ISSM}}$',
            **plt_params)
 
-beta_lvls = np.array([beta_sia.min(), 2e4, 5e4, 1e5, 2e5, 1e6, 5e6,
+beta_lvls = np.array([beta_sia.min(), 2e1, 1e2, 5e2, 1e3, 5e3, 1e4,
                       beta_sia.max()])
 cs.plotIce(bedmach,
            u      = beta_sia, 
