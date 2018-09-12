@@ -41,7 +41,7 @@ md.miscellaneous.name = name
 
 # collect the raw data :
 searise  = cs.DataFactory.get_searise()
-bedmach  = cs.DataFactory.get_bedmachine(thklim=1.0)
+bedmach  = cs.DataFactory.get_bedmachine(thklim=10.0)
 mouginot = cs.DataFactory.get_mouginot()
 
 # create data objects to use with cslvr :
@@ -60,6 +60,7 @@ m = cs.MeshGenerator(dbm, mesh_name, msh_dir)
 
 #m.create_contour('mask', zero_cntr=0.5, skip_pts=2)
 m.create_contour('H', zero_cntr=15, skip_pts=10) # 50 meter thick. contour
+m.eliminate_intersections(dist=10)               # eliminate interscting lines
 
 # get the basin :
 gb = cs.GetBasin(dbm, basin='2.1')               # NEGIS basin
@@ -121,15 +122,12 @@ u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
 # refine mesh using surface velocities as metric :
 md    = im.bamg(md,
                 'hmax',         100000,
-                'hmin',         100,
+                'hmin',         1000,
                 'gradation',    2,
                 'KeepVertices', 0,
                 'tol',          500,
                 'field',        u_mag,
-                'err',          3)
-
-# save the state of the model :
-im.savevars(var_dir + 'issm_nio.shelve', 'md.mesh', md.mesh)
+                'err',          10)
 
 
 #===============================================================================

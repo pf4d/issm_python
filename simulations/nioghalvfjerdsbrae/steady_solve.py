@@ -7,7 +7,7 @@ import os, sys
 
 # directories for saving data :
 mdl_odr = 'HO'
-tmc     = True
+tmc     = False
 name    = 'negis'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
@@ -46,32 +46,32 @@ md.friction.coefficient       = load_dict['md.friction_coefficient']
 
 #===============================================================================
 # define constant values :
-rhow   =  1028.0      # [kg m^-3] density of seawater
-rhoi   =  910.0       # [kg m^-3] density of glacier ice
-g      =  9.81        # [m s^2] gravitational acceleration
-spy    =  31556926.0  # [s a^-1] seconds per year
-Hini   =  100.0       # [m] initial ice thickness
-Tm     =  273.15      # [K] melting temperature of ice
-n      =  3.0         # [--] Glen's exponent
-A      =  1e-16       # [Pa^{-n} s^{-1}] flow 
-p      =  1.0         # [--] Paterson friction exponent one
-q      =  0.0         # [--] Paterson friction exponent two
-adot   =  0.3         # [m a^{-a}] surface-mass balance
-tf     =  2.0         # [a] final time
-dt     =  1.0         # [a] time step
-dt_sav =  10.0        # [a] time interval to save data
-cfl    =  0.5         # [--] CFL coefficient
-q_geo  =  0.0#0.042   # [W m^-2] geothermal heat flux
-a_T_l  =  3.985e-13   # [s^-1 Pa^-3] lower bound of flow-rate constant
-a_T_u  =  1.916e3     # [s^-1 Pa^-3] upper bound of flow-rate constant
-Q_T_l  =  6e4         # [J mol^-1] lower bound of creep activation energy
-Q_T_u  =  13.9e4      # [J mol^-1] upper bound of creep activation energy
-R      =  8.3144621   # [J mol^-1] universal gas constant
-nodes  =  1           # [--] number of nodes to use
-ntpn   =  36         # [--] number of tasks per node
-ntasks =  nodes*ntpn  # [--] number of processor cores to use
-time   =  24*60       # [m] time to complete
-part   = 'mpp120'     # [--] partition of ``ollie`` to use
+rhow   =  1028.0        # [kg m^-3] density of seawater
+rhoi   =  910.0         # [kg m^-3] density of glacier ice
+g      =  9.81          # [m s^2] gravitational acceleration
+spy    =  31556926.0    # [s a^-1] seconds per year
+Hini   =  100.0         # [m] initial ice thickness
+Tm     =  273.15        # [K] melting temperature of ice
+n      =  3.0           # [--] Glen's exponent
+A      =  1e-16         # [Pa^{-n} s^{-1}] flow 
+p      =  1.0           # [--] Paterson friction exponent one
+q      =  0.0           # [--] Paterson friction exponent two
+adot   =  0.3           # [m a^{-a}] surface-mass balance
+tf     =  2.0           # [a] final time
+dt     =  1.0           # [a] time step
+dt_sav =  10.0          # [a] time interval to save data
+cfl    =  0.5           # [--] CFL coefficient
+q_geo  =  0.0#0.042     # [W m^-2] geothermal heat flux
+a_T_l  =  3.985e-13     # [s^-1 Pa^-3] lower bound of flow-rate constant
+a_T_u  =  1.916e3       # [s^-1 Pa^-3] upper bound of flow-rate constant
+Q_T_l  =  6e4           # [J mol^-1] lower bound of creep activation energy
+Q_T_u  =  13.9e4        # [J mol^-1] upper bound of creep activation energy
+R      =  8.3144621     # [J mol^-1] universal gas constant
+nodes  =  1             # [--] number of nodes to use
+ntpn   =  36            # [--] number of tasks per node
+ntasks =  nodes*ntpn    # [--] number of processor cores to use
+time   =  24*60         # [m] time to complete
+part   = 'smp'          # [--] partition of ``ollie`` to use
 
 #===============================================================================
 # set up element-wise multiplicative identities :
@@ -102,7 +102,8 @@ A         = a_T * np.exp( - Q_T / (R * T) )
 Bf        = A**(-1/n)
 
 #===============================================================================
-# ISMIP_HOM experiment :
+# define constants :
+flt                          = md.mask.groundedice_levelset == -1
 md.materials.rho_ice         = rhoi
 md.materials.rho_water       = rhow
 md.constants.g               = g
@@ -110,10 +111,12 @@ md.constants.yts             = spy
 
 md.friction.p                = p * e_ones
 md.friction.q                = q * e_ones
+md.friction.coefficient      = 5e5 * v_ones
+md.friction.coefficient[flt] = 0.0  # zero friction over shelves
 
 md.materials.rheology_n      =  n * e_ones
-md.materials.rheology_B      = Bf
-md.materials.rheology_law    = "Arrhenius"
+md.materials.rheology_B      =  (2e-17 / spy)**(-1/n) * v_ones
+#md.materials.rheology_law    = "Arrhenius"
 
 # initialization FIXME: must be done or ``SteadyState`` solve will throw a fit :
 md.initialization.vx          = 0.0 * v_ones
@@ -126,7 +129,7 @@ md.initialization.pressure    = 0.0 * v_ones
 #md.initialization.vy         = md.inversion.vy_obs
 #md.initialization.vz         = 0.0 * v_ones
 #md.initialization.vel        = md.inversion.vel_obs
-#md.initialization.pressure   = 0.0 * v_ones
+md.initialization.pressure   = rhoi * g * md.geometry.thickness
 
 # boundary conditions :
 md.basalforcings.groundedice_melting_rate = 0.0 * v_ones
@@ -150,9 +153,10 @@ md.timestepping.time_step                 = 0.0
 # set the default boundary conditions for an ice-sheet :
 md = im.SetMarineIceSheetBC(md)  # create placeholder arrays for indicies 
 
-md.stressbalance.spcvx     = np.nan * v_ones
-md.stressbalance.spcvy     = np.nan * v_ones
-md.stressbalance.spcvz     = np.nan * v_ones
+## ensure zero-Neumann conditions are imposed on lateral faces :
+#md.stressbalance.spcvx = np.nan * v_ones
+#md.stressbalance.spcvy = np.nan * v_ones
+#md.stressbalance.spcvz = np.nan * v_ones
 
 # extrude the mesh so that there are 5 cells in height :
 md.extrude(10, 1.0)

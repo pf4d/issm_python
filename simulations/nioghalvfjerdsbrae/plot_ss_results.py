@@ -6,7 +6,7 @@ import os
 
 # directories for saving data :
 mdl_odr = 'HO'
-tmc     = True
+tmc     = False
 name    = 'negis'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
@@ -63,10 +63,6 @@ np.savetxt(out_dir + 'u_y.txt', u[1])
 np.savetxt(out_dir + 'u_z.txt', u[2])
 np.savetxt(out_dir + 'p.txt',   p)
 
-u_mag     = np.sqrt(u_x_s**2 + u_y_s**2 + u_z_s**2 + 1e-16)
-U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3,
-                      u_mag.max()])
-
 tp_kwargs     = {'linestyle'      : '-',
                  'lw'             : 1.0,
                  'color'          : 'k',
@@ -113,6 +109,10 @@ plot_kwargs = {'direc'              : plt_dir,
                'res'                : 150,
                'cb'                 : True,
                'cb_format'          : '%g'}
+
+u_mag     = np.sqrt(u_x_s**2 + u_y_s**2 + u_z_s**2 + 1e-16)
+U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3,
+                      u_mag.max()])
 
 plot_kwargs['u']      = u_s
 plot_kwargs['scale']  = 'lin'
@@ -197,23 +197,24 @@ plt_params = {'direc'            : plt_dir,
               'drawcoastlines'   : True,
               'box_params'       : None}
 
-T_b_lvls = np.hstack([T_b.min(), 258, 260, 262, 264, 268, 270, 272, 273, T_b.max()])
 U_lvls   = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, 2e3, 3e3,
-                      u_mag.max()])
-
-cs.plotIce(dbm,
-           u      = T_b, 
-           name   = 'T_B_nio',
-           levels = T_b_lvls,
-           title  = r'$T |_B^{\mathrm{ISSM}}$',
-           **plt_params)
-
+                     u_mag.max()])
 cs.plotIce(dbm,
            u      = u_s, 
            name   = 'U_S_nio',
            levels = U_lvls,
            title  = r'$\underline{u} |_S^{\mathrm{ISSM}}$',
            **plt_params)
+
+if tmc:
+  T_b_lvls = np.hstack([T_b.min(), 258, 260, 262, 264, 268, 270, 272, 273, 
+                        T_b.max()])
+  cs.plotIce(dbm,
+             u      = T_b, 
+             name   = 'T_B_nio',
+             levels = T_b_lvls,
+             title  = r'$T |_B^{\mathrm{ISSM}}$',
+             **plt_params)
 
 
 
