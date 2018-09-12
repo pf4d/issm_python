@@ -46,7 +46,7 @@ Hini   =  100.0       # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
 A      =  1e-16       # [Pa^{-n} s^{-1}] flow 
-beta   =  3e3         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
+beta   =  3.5e3       # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  3.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
@@ -237,13 +237,13 @@ im.savevars(var_dir + 'mismip_init.md', 'md', md)
 #md.initialization.vel = md.results.StressbalanceSolution.Vel
 
 # solve the transient :
-md.cluster = im.generic('name', im.gethostname(), 'np', 2)
-#md.cluster = im.ollie('name',            name,
-#                      'partition',       part,
-#                      'ntasks',          ntasks,
-#                      'nodes',           nodes,
-#                      'time',            time,
-#                      'login',           'ecumming')
+#md.cluster = im.generic('name', im.gethostname(), 'np', 2)
+md.cluster = im.ollie('name',            name,
+                      'partition',       part,
+                      'ntasks',          ntasks,
+                      'nodes',           nodes,
+                      'time',            time,
+                      'login',           'ecumming')
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Transient')
 
