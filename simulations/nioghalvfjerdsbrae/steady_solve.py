@@ -6,9 +6,10 @@ import matplotlib.tri    as tri
 import os, sys
 
 # directories for saving data :
-mdl_odr = 'HO'
-tmc     = True
-name    = 'negis'
+mdl_odr  = 'HO'
+tmc      = True
+computer = 'not_local'
+name     = 'negis'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
@@ -165,7 +166,7 @@ md.stressbalance.spcvx[lat]   = md.inversion.vx_obs[lat]
 md.stressbalance.spcvy[lat]   = md.inversion.vy_obs[lat]
 
 # extrude the mesh so that there are 5 cells in height :
-md.extrude(10, 1.0)
+md.extrude(20, 1.0)
 
 # get the floating base :
 flt = np.logical_and(md.mask.groundedice_levelset == -1, md.mesh.vertexonbase)
@@ -194,13 +195,15 @@ im.savevars(var_dir + 'negis_init.md', 'md', md)
 #===============================================================================
 # solve :
 
-md.cluster = im.generic('name', im.gethostname(), 'np', 2)
-#md.cluster = im.ollie('name',            name,
-#                      'partition',       part,
-#                      'ntasks',          ntasks,
-#                      'nodes',           nodes,
-#                      'time',            time,
-#                      'login',           'ecumming')
+if computer is not "local":
+  md.cluster = im.ollie('name',            name,
+                        'partition',       part,
+                        'ntasks',          ntasks,
+                        'nodes',           nodes,
+                        'time',            time,
+                        'login',           'ecumming')
+else:
+  md.cluster = im.generic('name', im.gethostname(), 'np', 2)
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 if tmc: md = im.solve(md, 'SteadyState')
 else:   md = im.solve(md, 'StressBalance')
