@@ -58,7 +58,7 @@ nodes  =  1           # [--] number of nodes to use
 ntpn   =  36          # [--] number of tasks per node
 ntasks =  nodes*ntpn  # [--] number of processor cores to use
 time   =  24*60       # [m] time to complete
-part   = 'smp'        # [--] partition of ``ollie`` to use
+part   = 'mpp120'     # [--] partition of ``ollie`` to use
 
 # create an empty rectangular mesh :
 md     = im.squaremesh(md, Lx, Ly, nx=nx, ny=ny)
