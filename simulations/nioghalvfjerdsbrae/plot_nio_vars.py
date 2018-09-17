@@ -112,8 +112,7 @@ plt_kwargs['scale']   = 'bool'
 plt_kwargs['plot_tp'] = True
 fv.plot_variable(u=mask, **plt_kwargs)
 
-T_lvls = np.array([T.min(), 242, 244, 246, 248, 250, 252, 254, 256, 258,
-                   T.max()])
+T_lvls = np.array([T.min(), 242, 244, 246, 248, 250, 252, 254, 256, T.max()])
 plt_kwargs['levels']  = T_lvls
 plt_kwargs['scale']   = 'lin'
 plt_kwargs['plot_tp'] = False
@@ -216,7 +215,7 @@ cs.plotIce(bedmach,
            **plt_params)
 
 
-T_lvls = np.array([T.min(), 254, 256, 258, 258.5, 259, 259.5, 260, T.max()])
+T_lvls = np.array([T.min(), 251, 252, 253, 254, 255, T.max()])
 cs.plotIce(bedmach,
            u      = T, 
            name   = 'T_nio',

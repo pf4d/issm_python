@@ -7,7 +7,7 @@ import os, sys
 
 # directories for saving data :
 mdl_odr = 'HO'
-tmc     = False
+tmc     = True
 name    = 'negis'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
@@ -53,7 +53,7 @@ spy    =  31556926.0    # [s a^-1] seconds per year
 Hini   =  100.0         # [m] initial ice thickness
 Tm     =  273.15        # [K] melting temperature of ice
 n      =  3.0           # [--] Glen's exponent
-A      =  1e-16         # [Pa^{-n} s^{-1}] flow 
+A      =  2e-17         # [Pa^{-n} s^{-1}] flow 
 p      =  1.0           # [--] Paterson friction exponent one
 q      =  0.0           # [--] Paterson friction exponent two
 adot   =  0.3           # [m a^{-a}] surface-mass balance
@@ -103,7 +103,6 @@ Bf        = A**(-1/n)
 
 #===============================================================================
 # define constants :
-flt                          = md.mask.groundedice_levelset == -1
 md.materials.rho_ice         = rhoi
 md.materials.rho_water       = rhow
 md.constants.g               = g
@@ -115,8 +114,9 @@ md.friction.coefficient      = 5e5 * v_ones
 md.friction.coefficient[flt] = 0.0  # zero friction over shelves
 
 md.materials.rheology_n      =  n * e_ones
-md.materials.rheology_B      =  (2e-17 / spy)**(-1/n) * v_ones
-#md.materials.rheology_law    = "Arrhenius"
+#md.materials.rheology_B      =  (2e-17 / spy)**(-1/n) * v_ones
+md.materials.rheology_B      =  Bf
+md.materials.rheology_law    = "Arrhenius"
 
 # initialization FIXME: must be done or ``SteadyState`` solve will throw a fit :
 md.initialization.vx          = 0.0 * v_ones
@@ -129,7 +129,7 @@ md.initialization.pressure    = 0.0 * v_ones
 #md.initialization.vy         = md.inversion.vy_obs
 #md.initialization.vz         = 0.0 * v_ones
 #md.initialization.vel        = md.inversion.vel_obs
-md.initialization.pressure   = rhoi * g * md.geometry.thickness
+#md.initialization.pressure   = rhoi * g * md.geometry.thickness
 
 # boundary conditions :
 md.basalforcings.groundedice_melting_rate = 0.0 * v_ones
@@ -142,7 +142,7 @@ md.initialization.waterfraction           = 0.0 * v_ones
 md.initialization.watercolumn             = 0.0 * v_ones
 md.thermal.stabilization                  = 2 # 1 == art'f'ial diff', 2 == SUPG
 md.thermal.isenthalpy                     = 1
-md.steadystate.maxiter                    = 1
+md.steadystate.maxiter                    = 25
 
 # FIXME: ``SteadyState`` throws an error if this is not zero :
 md.timestepping.time_step                 = 0.0
@@ -151,12 +151,18 @@ md.timestepping.time_step                 = 0.0
 # boundary conditions :
 
 # set the default boundary conditions for an ice-sheet :
-md = im.SetMarineIceSheetBC(md)  # create placeholder arrays for indicies 
+md = im.SetMarineIceSheetBC(md)
 
-## ensure zero-Neumann conditions are imposed on lateral faces :
-#md.stressbalance.spcvx = np.nan * v_ones
-#md.stressbalance.spcvy = np.nan * v_ones
-#md.stressbalance.spcvz = np.nan * v_ones
+# ensure Neumann conditions are imposed on lateral faces :
+md.stressbalance.spcvx        = np.nan * v_ones
+md.stressbalance.spcvy        = np.nan * v_ones
+md.stressbalance.spcvz        = np.nan * v_ones
+md.stressbalance.referential  = np.nan * A_ones
+md.stressbalance.loadingforce =    0.0 * b_ones
+
+lat                           = md.mesh.vertexonboundary
+md.stressbalance.spcvx[lat]   = md.inversion.vx_obs[lat]
+md.stressbalance.spcvy[lat]   = md.inversion.vy_obs[lat]
 
 # extrude the mesh so that there are 5 cells in height :
 md.extrude(10, 1.0)
@@ -173,7 +179,7 @@ md.thermal.spctemperature      = md.initialization.temperature.copy()
 
 # set the basal boundary condition to Neumann :
 md.thermal.spctemperature[md.mesh.vertexonbase] = np.nan
-md.thermal.spctemperature[flt]                  = Tpm[flt]
+#md.thermal.spctemperature[flt]                  = Tpm[flt]
 
 # set the flow equation of type `mdl_odr` defined above :
 md = im.setflowequation(md, mdl_odr, 'all')

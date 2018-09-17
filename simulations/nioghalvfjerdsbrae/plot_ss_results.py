@@ -6,7 +6,7 @@ import os
 
 # directories for saving data :
 mdl_odr = 'HO'
-tmc     = False
+tmc     = True
 name    = 'negis'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
@@ -111,7 +111,9 @@ plot_kwargs = {'direc'              : plt_dir,
                'cb_format'          : '%g'}
 
 u_mag     = np.sqrt(u_x_s**2 + u_y_s**2 + u_z_s**2 + 1e-16)
-U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3,
+#U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3,
+#                      u_mag.max()])
+U_lvls    = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2,
                       u_mag.max()])
 
 plot_kwargs['u']      = u_s
@@ -128,10 +130,11 @@ if tmc:
  
   T_b      = T[md.mesh.vertexonbase]
   T_s      = T[md.mesh.vertexonsurface]
-  T_mid    = np.arange(242, 262, 2)
-  T_b_mid  = np.arange(262, 274, 2) 
-  T_b_lvls = np.hstack([T_b.min(), T_mid, T_b_mid, T_b.max()])
-  T_s_lvls = np.hstack([T_s.min(), T_mid, T_s.max()])
+  T_mid    = np.arange(242, 252, 2)
+  T_b_mid  = np.arange(252, 260, 1) 
+  T_s_mid  = np.arange(242, 258, 2)
+  T_b_lvls = np.hstack([T_b.min(), T_mid, T_b_mid, 273, T_b.max()])
+  T_s_lvls = np.hstack([T_s.min(), T_s_mid, T_s.max()])
   
   plot_kwargs['u']      = T_b
   plot_kwargs['scale']  = 'lin'
@@ -197,7 +200,9 @@ plt_params = {'direc'            : plt_dir,
               'drawcoastlines'   : True,
               'box_params'       : None}
 
-U_lvls   = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, 2e3, 3e3,
+#U_lvls   = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2, 5e2, 1e3, 2e3, 3e3,
+#                     u_mag.max()])
+U_lvls   = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2,
                      u_mag.max()])
 cs.plotIce(dbm,
            u      = u_s, 
@@ -207,8 +212,8 @@ cs.plotIce(dbm,
            **plt_params)
 
 if tmc:
-  T_b_lvls = np.hstack([T_b.min(), 258, 260, 262, 264, 268, 270, 272, 273, 
-                        T_b.max()])
+  T_mid    = np.arange(252, 260, 1)
+  T_b_lvls = np.hstack([T_b.min(), T_mid, 273, T_b.max()])
   cs.plotIce(dbm,
              u      = T_b, 
              name   = 'T_B_nio',

@@ -1,7 +1,6 @@
 import issm       as im
 import cslvr      as cs
 import numpy      as np
-import fenics_viz as fv
 import os
 
 mdl_odr   = 'HO'
@@ -41,13 +40,16 @@ md.miscellaneous.name = name
 
 # collect the raw data :
 searise  = cs.DataFactory.get_searise()
-bedmach  = cs.DataFactory.get_bedmachine(thklim=10.0)
+bedmach  = cs.DataFactory.get_bedmachine(thklim=1.0)
 mouginot = cs.DataFactory.get_mouginot()
 
 # create data objects to use with cslvr :
 dsr      = cs.DataInput(searise)
 dbm      = cs.DataInput(bedmach)
 dmg      = cs.DataInput(mouginot)
+
+# change the searise projection to that of the other data :
+dsr.change_projection(dbm)
 
 #===============================================================================
 # generate the contour :
@@ -59,7 +61,7 @@ dbm.data['S'][dbm.data['S'] < 1.0] = 1.0
 m = cs.MeshGenerator(dbm, mesh_name, msh_dir)
 
 #m.create_contour('mask', zero_cntr=0.5, skip_pts=2)
-m.create_contour('H', zero_cntr=15, skip_pts=10) # 50 meter thick. contour
+m.create_contour('H', zero_cntr=15, skip_pts=1)  # 50 meter thick. contour
 m.eliminate_intersections(dist=10)               # eliminate interscting lines
 
 # get the basin :
@@ -121,14 +123,16 @@ u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
 
 # refine mesh using surface velocities as metric :
 md    = im.bamg(md,
-                'hmax',         100000,
-                'hmin',         1000,
-                'gradation',    2,
+                'hmax',         10000,
+                'hmin',         100,
+                'gradation',    1,
                 'KeepVertices', 0,
-                'tol',          500,
+                'tol',          100,
                 'field',        u_mag,
-                'err',          10)
+                'err',          6)
 
+# rank-zero tensor vertex ones vector :
+v_ones = np.ones(md.mesh.numberofvertices)
 
 #===============================================================================
 # set grounded/floating ice mask :
@@ -163,9 +167,13 @@ md.mask.groundedice_levelset = mask
 # ice is present when negative :
 md.mask.ice_levelset  = -1 * np.ones(md.mesh.numberofvertices)
 
+# get an expression which we can evaluate per coordinate of the mesh :
+T_e  = dsr.get_expression('T')
+T    = 0.0 * v_ones
+for i, (x_i, y_i) in enumerate(zip(md.mesh.x, md.mesh.y)):
+  T[i] = T_e(x_i, y_i)
+
 # interpolate the data onto the refined mesh :
-T    = im.InterpFromGridToMesh(dsr.x, dsr.y, dsr.data['T'].astype('float64'),
-                               md.mesh.x, md.mesh.y, 0)[0]
 S    = im.InterpFromGridToMesh(dbm.x, dbm.y, dbm.data['S'],
                                md.mesh.x, md.mesh.y, 0)[0]
 B    = im.InterpFromGridToMesh(dbm.x, dbm.y, dbm.data['B'],
