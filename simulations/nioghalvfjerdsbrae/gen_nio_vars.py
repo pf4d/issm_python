@@ -61,7 +61,7 @@ dbm.data['S'][dbm.data['S'] < 1.0] = 1.0
 m = cs.MeshGenerator(dbm, mesh_name, msh_dir)
 
 #m.create_contour('mask', zero_cntr=0.5, skip_pts=2)
-m.create_contour('H', zero_cntr=15, skip_pts=1)  # 50 meter thick. contour
+m.create_contour('H', zero_cntr=15, skip_pts=8)  # 15 meter thick. contour
 m.eliminate_intersections(dist=10)               # eliminate interscting lines
 
 # get the basin :
