@@ -166,7 +166,7 @@ md.stressbalance.spcvx[lat]   = md.inversion.vx_obs[lat]
 md.stressbalance.spcvy[lat]   = md.inversion.vy_obs[lat]
 
 # extrude the mesh so that there are 5 cells in height :
-md.extrude(20, 1.0)
+md.extrude(10, 1.0)
 
 # get the floating base :
 flt = np.logical_and(md.mask.groundedice_levelset == -1, md.mesh.vertexonbase)
@@ -180,7 +180,7 @@ md.thermal.spctemperature      = md.initialization.temperature.copy()
 
 # set the basal boundary condition to Neumann :
 md.thermal.spctemperature[md.mesh.vertexonbase] = np.nan
-#md.thermal.spctemperature[flt]                  = Tpm[flt]
+md.thermal.spctemperature[flt]                  = Tpm[flt]
 
 # set the flow equation of type `mdl_odr` defined above :
 md = im.setflowequation(md, mdl_odr, 'all')

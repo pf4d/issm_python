@@ -40,7 +40,7 @@ md.miscellaneous.name = name
 
 # collect the raw data :
 searise  = cs.DataFactory.get_searise()
-bedmach  = cs.DataFactory.get_bedmachine(thklim=1.0)
+bedmach  = cs.DataFactory.get_bedmachine(thklim=10.0)
 mouginot = cs.DataFactory.get_mouginot()
 
 # create data objects to use with cslvr :
