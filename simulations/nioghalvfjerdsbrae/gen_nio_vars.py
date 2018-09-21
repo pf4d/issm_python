@@ -123,13 +123,13 @@ u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
 
 # refine mesh using surface velocities as metric :
 md    = im.bamg(md,
-                'hmax',         10000,
-                'hmin',         100,
+                'hmax',         100000,
+                'hmin',         1000,#100
                 'gradation',    1,
                 'KeepVertices', 0,
                 'tol',          100,
                 'field',        u_mag,
-                'err',          6)
+                'err',          10)#6
 
 # rank-zero tensor vertex ones vector :
 v_ones = np.ones(md.mesh.numberofvertices)

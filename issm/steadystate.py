@@ -33,7 +33,7 @@ class steadystate(object):
 
 	#}}}
 	def setdefaultparameters(self): # {{{
-		
+
 		#maximum of steady state iterations
 		self.maxiter=100
 

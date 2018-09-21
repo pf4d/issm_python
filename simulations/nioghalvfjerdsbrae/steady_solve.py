@@ -8,7 +8,7 @@ import os, sys
 # directories for saving data :
 mdl_odr  = 'HO'
 tmc      = True
-computer = 'not_local'
+computer = 'local'
 name     = 'negis'
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
@@ -54,7 +54,7 @@ spy    =  31556926.0    # [s a^-1] seconds per year
 Hini   =  100.0         # [m] initial ice thickness
 Tm     =  273.15        # [K] melting temperature of ice
 n      =  3.0           # [--] Glen's exponent
-A      =  2e-17         # [Pa^{-n} s^{-1}] flow 
+A      =  2e-17         # [Pa^{-n} s^{-1}] flow
 p      =  1.0           # [--] Paterson friction exponent one
 q      =  0.0           # [--] Paterson friction exponent two
 adot   =  0.3           # [m a^{-a}] surface-mass balance
@@ -143,7 +143,10 @@ md.initialization.waterfraction           = 0.0 * v_ones
 md.initialization.watercolumn             = 0.0 * v_ones
 md.thermal.stabilization                  = 2 # 1 == art'f'ial diff', 2 == SUPG
 md.thermal.isenthalpy                     = 1
-md.steadystate.maxiter                    = 25
+md.steadystate.maxiter                    = 50
+md.stressbalance.reltol                   = 1e-11
+md.thermal.reltol                         = 1e-15
+md.steadystate.reltol                     = 1e-15
 
 # FIXME: ``SteadyState`` throws an error if this is not zero :
 md.timestepping.time_step                 = 0.0
