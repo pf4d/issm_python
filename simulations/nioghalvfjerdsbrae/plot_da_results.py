@@ -12,21 +12,28 @@ name    = mdl_odr + '_' + cst_met + '_cost_' + opt_met
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
-var_dir = './dump/vars/'
+var_dir = './dump/vars/' + mdl_pfx + '/'
 plt_dir = './dump/images/' + mdl_pfx + '/' + opt_met + '/'
 out_dir = './dump/results/' + mdl_pfx + '/' + opt_met + '/'
 
-# load the model :
-md = im.loadmodel(out_dir + name + '.md')
+# load the model mesh created by gen_nio_mesh.py :
+md                    = im.model()
+md.miscellaneous.name = name
+
+# load the model mesh created by gen_nio_mesh.py :
+md   = im.loadmodel(var_dir + 'negis_init.md')
+
+# load the steady-state results :
+md   = im.loadresultsfromdisk(md, './' + name + '/' + name + '.outbin')
 
 #===============================================================================
 # plot the results :
 print_text('::: issm -- plotting :::', 'red')
 
 p    = md.results.StressbalanceSolution.Pressure[md.mesh.vertexonbase]
-u_x  = md.results.StressbalanceSolution.Vx[md.mesh.vertexonsurface] 
-u_y  = md.results.StressbalanceSolution.Vy[md.mesh.vertexonsurface] 
-u_z  = md.results.StressbalanceSolution.Vz[md.mesh.vertexonsurface] 
+u_x  = md.results.StressbalanceSolution.Vx[md.mesh.vertexonsurface]
+u_y  = md.results.StressbalanceSolution.Vy[md.mesh.vertexonsurface]
+u_z  = md.results.StressbalanceSolution.Vz[md.mesh.vertexonsurface]
 u    = np.array([u_x.flatten(), u_y.flatten(), u_z.flatten()])
 
 u_mag  = np.sqrt(u[0]**2 + u[1]**2 + u[2]**2 + 1e-16)
@@ -42,13 +49,13 @@ quiver_kwargs = {'pivot'          : 'middle',
                  'scale'          : 100,
                  'alpha'          : 0.5,
                  'width'          : 0.001,
-                 'headwidth'      : 3.0, 
-                 'headlength'     : 3.0, 
+                 'headwidth'      : 3.0,
+                 'headlength'     : 3.0,
                  'headaxislength' : 3.0}
 
 plot_variable(u                   = u,
               name                = 'U_opt_%s' % name,
-              direc               = plt_dir, 
+              direc               = plt_dir,
               coords              = (md.mesh.x2d, md.mesh.y2d),
               cells               = md.mesh.elements2d - 1,
               figsize             = (5,7),

@@ -40,7 +40,7 @@ vsrf   = md.mesh.vertexonsurface
 coords = (md.mesh.x2d, md.mesh.y2d)
 cells  = md.mesh.elements2d - 1
 
-# set the mesh plot parameters :  
+# set the mesh plot parameters :
 tp_kwargs     = {'linestyle'      : '-',
                  'lw'             : 0.5,
                  'color'          : 'k',
@@ -52,8 +52,8 @@ quiver_kwargs = {'pivot'          : 'middle',
                  'scale'          : 100,
                  'alpha'          : 1.0,
                  'width'          : 0.001,
-                 'headwidth'      : 3.0, 
-                 'headlength'     : 3.0, 
+                 'headwidth'      : 3.0,
+                 'headlength'     : 3.0,
                  'headaxislength' : 3.0}
 
 numlvls = 8        # number of contour levels to plot
@@ -76,11 +76,11 @@ for i in range(n):
   ls     = soln_i.MaskGroundediceLevelset[vbed].flatten()
 
   # form the velocity vector :
-  u      = np.array([u_x, u_y, u_z]) 
+  u      = np.array([u_x, u_y, u_z])
 
   # calculate the grounded/floating mask :
   mask   = (ls > 0).astype('int')
- 
+
   # plot each of the variables of interest :
   plot_variable(u                   = u,
                 name                = 'U_%i' % i,
@@ -115,10 +115,10 @@ for i in range(n):
                 res                 = 150,
                 cb                  = True,
                 cb_format           = '%.2f')
-  
+
   plot_variable(u                   = mask,
                 name                = 'mask_%i' % i,
-                direc               = plt_dir, 
+                direc               = plt_dir,
                 coords              = coords,
                 cells               = cells,
                 figsize             = figsize,
@@ -149,10 +149,10 @@ for i in range(n):
                 res                 = 150,
                 cb                  = True,
                 cb_format           = '%g')
-  
+
   plot_variable(u                   = S,
                 name                = 'S_%i' % i,
-                direc               = plt_dir, 
+                direc               = plt_dir,
                 coords              = coords,
                 cells               = cells,
                 figsize             = figsize,
@@ -183,10 +183,10 @@ for i in range(n):
                 res                 = 150,
                 cb                  = True,
                 cb_format           = '%.1f')
-  
+
   plot_variable(u                   = B,
                 name                = 'B_%i' % i,
-                direc               = plt_dir, 
+                direc               = plt_dir,
                 coords              = coords,
                 cells               = cells,
                 figsize             = figsize,
@@ -217,10 +217,10 @@ for i in range(n):
                 res                 = 150,
                 cb                  = True,
                 cb_format           = '%.1f')
-  
+
   plot_variable(u                   = H,
                 name                = 'H_%i' % i,
-                direc               = plt_dir, 
+                direc               = plt_dir,
                 coords              = coords,
                 cells               = cells,
                 figsize             = figsize,

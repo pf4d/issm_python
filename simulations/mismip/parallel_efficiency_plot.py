@@ -34,7 +34,7 @@ ax_r = fig.add_subplot(122)
 ax_l.plot( x_5000, y_5000[0] / y_5000, ls='-',  c='k')
 ax_l.plot( x_2500, y_2500[0] / y_2500, ls='--', c='k')
 ax_l.plot( x_1000, y_1000[0] / y_1000, ls=':',  c='k')
-                                
+
 ax_r.plot( x_5000, y_5000[0] / (y_5000*x_5000), ls='-',  c='k', label=r'$\Delta x = 5000$')
 ax_r.plot( x_2500, y_2500[0] / (y_2500*x_2500), ls='--', c='k', label=r'$\Delta x = 2500$')
 ax_r.plot( x_1000, y_1000[0] / (y_1000*x_1000), ls=':',  c='k', label=r'$\Delta x = 1000$')

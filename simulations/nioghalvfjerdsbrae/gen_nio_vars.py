@@ -18,12 +18,12 @@ msh_dir   = './dump/meshes/' + mdl_pfx + '/'
 # create the output directory if it does not exist :
 d       = os.path.dirname(var_dir)
 if not os.path.exists(d):
-  os.makedirs(d)
+	os.makedirs(d)
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(msh_dir)
 if not os.path.exists(d):
-  os.makedirs(d)
+	os.makedirs(d)
 
 # only a few constants needed :
 rhoi = 910.0
@@ -53,7 +53,7 @@ dsr.change_projection(dbm)
 
 #===============================================================================
 # generate the contour :
-# FIXME: the issm interpolation will result in areas with the surface ~1 km 
+# FIXME: the issm interpolation will result in areas with the surface ~1 km
 #        below sea level on a few nodes next to the ocean.  Thus:
 dbm.data['S'][dbm.data['S'] < 1.0] = 1.0
 
@@ -123,8 +123,8 @@ u_mag = im.InterpFromGridToMesh(x1, y1, vel, md.mesh.x, md.mesh.y, 0)[0]
 
 # refine mesh using surface velocities as metric :
 md    = im.bamg(md,
-                'hmax',         100000,
-                'hmin',         1000,#100
+                'hmax',         10000,
+                'hmin',         500,
                 'gradation',    1,
                 'KeepVertices', 0,
                 'tol',          100,
@@ -171,7 +171,7 @@ md.mask.ice_levelset  = -1 * np.ones(md.mesh.numberofvertices)
 T_e  = dsr.get_expression('T')
 T    = 0.0 * v_ones
 for i, (x_i, y_i) in enumerate(zip(md.mesh.x, md.mesh.y)):
-  T[i] = T_e(x_i, y_i)
+	T[i] = T_e(x_i, y_i)
 
 # interpolate the data onto the refined mesh :
 S    = im.InterpFromGridToMesh(dbm.x, dbm.y, dbm.data['S'],
@@ -179,7 +179,7 @@ S    = im.InterpFromGridToMesh(dbm.x, dbm.y, dbm.data['S'],
 B    = im.InterpFromGridToMesh(dbm.x, dbm.y, dbm.data['B'],
                                md.mesh.x, md.mesh.y, 0)[0]
 
-# FIXME: the issm interpolation will result in areas with the surface ~1 km 
+# FIXME: the issm interpolation will result in areas with the surface ~1 km
 #        below sea level on a few nodes next to the ocean.  Thus:
 S[S < 1.0] = 1.0
 S    = S.astype('float64')    # upper surface

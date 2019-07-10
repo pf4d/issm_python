@@ -12,7 +12,7 @@ name    = mdl_odr + '_' + cst_met + '_cost_' + opt_met
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
-var_dir = './dump/vars/'
+var_dir = './dump/vars/' + mdl_pfx + '/'
 plt_dir = './dump/images/' + mdl_pfx + '/' + opt_met + '/'
 out_dir = './dump/results/' + mdl_pfx + '/' + opt_met + '/'
 
@@ -60,7 +60,7 @@ spy    =  31556926.0  # [s a^-1] seconds per year
 Hini   =  100.0       # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
-A      =  1e-16       # [Pa^{-n} s^{-1}] flow 
+A      =  1e-16       # [Pa^{-n} s^{-1}] flow
 beta   =  1e4         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  1.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
@@ -75,7 +75,7 @@ a_T_u  =  1.916e3     # [s^-1 Pa^-3] upper bound of flow-rate constant
 Q_T_l  =  6e4         # [J mol^-1] lower bound of creep activation energy
 Q_T_u  =  13.9e4      # [J mol^-1] upper bound of creep activation energy
 R      =  8.3144621   # [J mol^-1] universal gas constant
-num_p  =  2           # [--] number of processors
+num_p  =  3           # [--] number of processors
 
 #===============================================================================
 # set up element-wise multiplicative identities :
@@ -113,6 +113,7 @@ md.constants.g               = g
 md.constants.yts             = spy
 md.friction.p                = p * e_ones
 md.friction.q                = q * e_ones
+md.friction.coefficient      = 1e3 * v_ones
 md.materials.rheology_B      = Bf
 md.materials.rheology_n      =  n * e_ones
 md.materials.rheology_law    = "Arrhenius"
@@ -130,14 +131,26 @@ md.masstransport.spcthickness             = np.nan * v_ones
 print_text('::: issm -- set boundary conditions :::', 'red')
 
 # set the default boundary conditions for an ice-sheet :
-md = im.SetMarineIceSheetBC(md)  # create placeholder arrays for indicies 
+md = im.SetMarineIceSheetBC(md)  # create placeholder arrays for indicies
+
+# ensure Neumann conditions are imposed on lateral faces :
+md.stressbalance.spcvx        = np.nan * v_ones
+md.stressbalance.spcvy        = np.nan * v_ones
+md.stressbalance.spcvz        = np.nan * v_ones
+md.stressbalance.referential  = np.nan * A_ones
+md.stressbalance.loadingforce =    0.0 * b_ones
+
+lat                           = md.mesh.vertexonboundary
+md.stressbalance.spcvx[lat]   = md.inversion.vx_obs[lat]
+md.stressbalance.spcvy[lat]   = md.inversion.vy_obs[lat]
 
 # extrude the mesh so that there are 5 cells in height :
-md.extrude(6, 1.0)
+md.extrude(10, 1.0)
 
 # set the flow equation of type `mdl_odr` defined above :
 md = im.setflowequation(md, mdl_odr, 'all')
 md.flowequation.fe_HO = 'P1'
+md.toolkits.DefaultAnalysis = im.iluasmoptions()
 
 
 #===============================================================================
@@ -150,7 +163,7 @@ md         = im.solve(md, 'Stressbalance')
 
 
 #===============================================================================
-# FIXME: since the model was extruded, we have to re-define the element-wise 
+# FIXME: since the model was extruded, we have to re-define the element-wise
 #        multiplicative identities.  This is not ideal :
 
 # rank-zero tensor vertex ones vector :
@@ -215,7 +228,7 @@ elif cst_met == 'morlighem':
 
 elif cst_met == 'log':
   md.inversion.cost_functions                   = [103]
-  md.inversion.cost_functions_coefficients      = v_ones
+  md.inversion.cost_functions_coefficients      = 1e0 * v_ones
   md.inversion.cost_functions_coefficients[flt] = 0.0
 
 elif cst_met == 'l2':
@@ -227,8 +240,8 @@ elif cst_met == 'l2':
 if opt_met == 'm1qn3':
   md.inversion.maxsteps           = 3000  # max gradient evaluations
   md.inversion.maxiter            = 3000  # max objective evaluations
-  md.inversion.dxmin              = 1e-16 # convergence criterion 1
-  md.inversion.gttol              = 1e-16 # convergence criterion 2 :
+  md.inversion.dxmin              = 1e-6  # convergence criterion 1
+  md.inversion.gttol              = 1e-6  # convergence criterion 2 :
                                           # ||g(X)|| / ||g(X0)||   where
                                           # g(X0): gradient at initial guess X0
 
@@ -237,7 +250,7 @@ elif opt_met == 'brent':
   md.inversion.step_threshold          = 0.7 * np.ones(md.inversion.nsteps)
   md.inversion.maxiter_per_step        = 20  * np.ones(md.inversion.nsteps)
   md.inversion.gradient_scaling        = 50  * np.ones(md.inversion.nsteps)
-  md.inversion.cost_function_threshold = np.nan 
+  md.inversion.cost_function_threshold = np.nan
 
 ## FIXME: it is not obvious that the velocity observations have to be extruded :
 #md.inversion.vx_obs   = im.project3d(md,'vector',
@@ -254,10 +267,8 @@ elif opt_met == 'brent':
 #===============================================================================
 # assimilate the velocity data :
 md.cluster = im.generic('name', im.gethostname(), 'np', num_p)
-md.verbose = im.verbose('solution', True, 'control', True)
+md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Stressbalance')
-
-im.savevars(out_dir + name + '.md', 'md', md)
 
 
 

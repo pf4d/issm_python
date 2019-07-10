@@ -1,20 +1,25 @@
 import issm   as im
 import numpy  as np
-import os
+import os, sys
 
 # directories for saving data :
-mdl_odr  = 'HO'
-lat_slip = True
-name     = 'lateral_slip'
+mdl_odr    = 'HO'
+dx         = 2000
+lat_slip   = True
+structured = False
+if structured:  structure = 'structured'
+else:           structure = 'unstructured'
+computer   = 'ollie!'#'local'
+name       = '%s_mismip_beta_%s' % (structure, sys.argv[1])
 
 if mdl_odr == 'HO': mdl_pfx = 'BP'
 else:               mdl_pfx = mdl_odr
-var_dir = './dump/vars/' + mdl_pfx + '/'
+var_dir = './dump/vars/%s/' % mdl_pfx
 
 # create the output directory if it does not exist :
 d       = os.path.dirname(var_dir)
 if not os.path.exists(d):
-  os.makedirs(d)
+	os.makedirs(d)
 
 # MISMIP+ experiment :
 md = im.model()
@@ -25,7 +30,7 @@ md.miscellaneous.name = name
 # define the geometry of the simulation :
 Lx     =  640000.0    # [m] domain length (along ice flow)
 Ly     =  80000.0     # [m] domain width (across ice flow)
-dx     =  10000.0     # [m] element diameter 
+dx     =  float(dx)   # [m] element diameter
 nx     =  int(Lx/dx)  # [--] number of x-coordinate divisions
 ny     =  int(Ly/dx)  # [--] number of y-coordinate divisions
 B0     = -150.0       # [m] bedrock topography at x = 0
@@ -45,24 +50,43 @@ spy    =  31556926.0  # [s a^-1] seconds per year
 Hini   =  100.0       # [m] initial ice thickness
 Tm     =  273.15      # [K] melting temperature of ice
 n      =  3.0         # [--] Glen's exponent
-A      =  1e-16       # [Pa^{-n} s^{-1}] flow 
-beta   =  5e3         # [Pa m^{-1/n} a^{-1/n}] friction coefficient
+A      =  1e-16       # [Pa^{-n} s^{-1}] flow
+beta   =  8.9e3       # [Pa m^{-1/n} a^{-1/n}] friction coefficient
 p      =  3.0         # [--] Paterson friction exponent one
 q      =  0.0         # [--] Paterson friction exponent two
 adot   =  0.3         # [m a^{-a}] surface-mass balance
 tf     =  20000.0     # [a] final time
-dt     =  1.0         # [a] time step
+dt     =  0.5         # [a] time step
 dt_sav =  10.0        # [a] time interval to save data
 cfl    =  0.5         # [--] CFL coefficient
-nodes  =  1           # [--] number of nodes to use
-ntpn   =  18          # [--] number of tasks per node
+nodes  =  4           # [--] number of nodes to use
+ntpn   =  36          # [--] number of tasks per node
 ntasks =  nodes*ntpn  # [--] number of processor cores to use
-time   =  24*60       # [m] time to complete
-part   = 'smp'        # [--] partition of ``ollie`` to use
+time   =  48*60       # [min] time to complete
+part   = 'mpp'        # [--] partition of ``ollie`` to use
+#dt     =  1.0         # [a] time step
+#dt_sav =  10.0        # [a] time interval to save data
+#cfl    =  0.5         # [--] CFL coefficient
+#nodes  =  1           # [--] number of nodes to use
+#ntpn   =  4           # [--] number of tasks per node
+#ntasks =  nodes*ntpn  # [--] number of processor cores to use
+#time   =  12*60       # [min] time to complete
+#part   = 'smp'        # [--] partition of ``ollie`` to use
+#dt     =  1.0         # [a] time step
+#dt_sav =  10.0        # [a] time interval to save data
+#cfl    =  0.5         # [--] CFL coefficient
+#nodes  =  1           # [--] number of nodes to use
+#ntpn   =  36          # [--] number of tasks per node
+#ntasks =  nodes*ntpn  # [--] number of processor cores to use
+#time   =  12*60       # [min] time to complete
+#part   = 'smp'        # [--] partition of ``ollie`` to use
+
+beta   =  float(sys.argv[1])  # override friction with command arg
 
 # create an empty rectangular mesh :
-md     = im.squaremesh(md, Lx, Ly, nx=nx, ny=ny)
-md     = im.setmask(md, 'all', '')
+if structured:  md = im.squaremesh(md, Lx, Ly, nx=nx, ny=ny)
+else:           md = im.triangle(md, 'exp/mismip.exp', dx)
+md = im.setmask(md, 'all', '')
 
 # set up element-wise multiplicative identities :
 
@@ -159,7 +183,7 @@ md.stressbalance.spcvz[pos_w] = slip
 
 # north wall :
 pos_n  = np.where(md.mesh.y > np.max(md.mesh.y) - 0.1)[0]
-md.stressbalance.spcvx[pos_n] = slip 
+md.stressbalance.spcvx[pos_n] = slip
 md.stressbalance.spcvy[pos_n] = 0.0
 md.stressbalance.spcvz[pos_n] = slip
 
@@ -203,6 +227,7 @@ md.timestepping.cfl_coefficient   = cfl
 md.timestepping.time_step         = dt
 md.timestepping.final_time        = tf
 md.settings.output_frequency      = int(dt_sav/dt)
+md.settings.waitonlock            = 0
 
 md.transient.requested_outputs    = ['default',
                                      'GroundedArea',
@@ -216,11 +241,14 @@ md.extrude(8, 3.0)
 # specifiy the flow equation and FE basis :
 md = im.setflowequation(md, mdl_odr, 'all')
 md.flowequation.fe_HO = 'P1'
+md.toolkits.DefaultAnalysis = im.iluasmoptions()
 
 
 #===============================================================================
 # save the state of the model :
-im.savevars(var_dir + 'mismip_init.md', 'md', md)
+init_name = 'init_%s_mismip_dx_%i' % (structure, int(dx))
+if not os.path.isfile(var_dir + init_name):
+  im.savevars(var_dir + init_name, 'md', md)
 
 
 #===============================================================================
@@ -237,13 +265,15 @@ im.savevars(var_dir + 'mismip_init.md', 'md', md)
 #md.initialization.vel = md.results.StressbalanceSolution.Vel
 
 # solve the transient :
-#md.cluster = im.generic('name', im.gethostname(), 'np', 2)
-md.cluster = im.ollie('name',            name,
-                      'partition',       part,
-                      'ntasks',          ntasks,
-                      'nodes',           nodes,
-                      'time',            time,
-                      'login',           'ecumming')
+if computer is not "local":
+	md.cluster = im.ollie('name',            name,
+	                      'partition',       part,
+	                      'ntasks',          ntasks,
+	                      'nodes',           nodes,
+	                      'time',            time,
+	                      'login',           'ecumming')
+else:
+	md.cluster = im.generic('name', im.gethostname(), 'np', ntasks)
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
 md         = im.solve(md, 'Transient')
 

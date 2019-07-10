@@ -51,8 +51,8 @@ u      = [u_x, u_y, u_z]
 
 p_b   = p[md.mesh.vertexonbase]
 u_x_s = u_x[md.mesh.vertexonsurface]
-u_y_s = u_y[md.mesh.vertexonsurface] 
-u_z_s = u_z[md.mesh.vertexonsurface] 
+u_y_s = u_y[md.mesh.vertexonsurface]
+u_z_s = u_z[md.mesh.vertexonsurface]
 u_s   = np.array([u_x_s, u_y_s, u_z_s])
 
 # save the mesh coordinates and data for interpolation with CSLVR :
@@ -73,12 +73,12 @@ quiver_kwargs = {'pivot'          : 'middle',
                  'scale'          : 100,
                  'alpha'          : 0.5,
                  'width'          : 0.001,
-                 'headwidth'      : 3.0, 
-                 'headlength'     : 3.0, 
+                 'headwidth'      : 3.0,
+                 'headlength'     : 3.0,
                  'headaxislength' : 3.0}
 
 # the plot parameters will mostly stay the same for each plot :
-plot_kwargs = {'direc'              : plt_dir, 
+plot_kwargs = {'direc'              : plt_dir,
                'coords'             : (md.mesh.x2d, md.mesh.y2d),
                'cells'              : md.mesh.elements2d - 1,
                'figsize'            : (5,7.5),
@@ -125,24 +125,24 @@ fv.plot_variable(**plot_kwargs)
 
 if tmc:
   T      = res.Temperature.flatten()
-  
+
   #im.vtuwrite(T, 'T', md, vtu_dir + 'T.vtu')
- 
+
   T_b      = T[md.mesh.vertexonbase]
   T_s      = T[md.mesh.vertexonsurface]
   T_mid    = np.arange(242, 252, 2)
-  T_b_mid  = np.arange(252, 260, 1) 
+  T_b_mid  = np.arange(252, 260, 1)
   T_s_mid  = np.arange(242, 258, 2)
   T_b_lvls = np.hstack([T_b.min(), T_mid, T_b_mid, 273, T_b.max()])
   T_s_lvls = np.hstack([T_s.min(), T_s_mid, T_s.max()])
-  
+
   plot_kwargs['u']      = T_b
   plot_kwargs['scale']  = 'lin'
   plot_kwargs['name']   = 'T_B'
   plot_kwargs['levels'] = T_b_lvls
   plot_kwargs['title']  = r'$T |_B^{\mathrm{ISSM}}$'
   fv.plot_variable(**plot_kwargs)
-  
+
   plot_kwargs['u']      = T_s
   plot_kwargs['scale']  = 'lin'
   plot_kwargs['name']   = 'T_S'
@@ -205,7 +205,7 @@ plt_params = {'direc'            : plt_dir,
 U_lvls   = np.array([u_mag.min(), 1e0, 5e0, 1e1, 5e1, 1e2,
                      u_mag.max()])
 cs.plotIce(dbm,
-           u      = u_s, 
+           u      = u_s,
            name   = 'U_S_nio',
            levels = U_lvls,
            title  = r'$\underline{u} |_S^{\mathrm{ISSM}}$',
@@ -215,7 +215,7 @@ if tmc:
   T_mid    = np.arange(252, 260, 1)
   T_b_lvls = np.hstack([T_b.min(), T_mid, 273, T_b.max()])
   cs.plotIce(dbm,
-             u      = T_b, 
+             u      = T_b,
              name   = 'T_B_nio',
              levels = T_b_lvls,
              title  = r'$T |_B^{\mathrm{ISSM}}$',

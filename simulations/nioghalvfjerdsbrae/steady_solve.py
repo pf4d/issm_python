@@ -111,8 +111,8 @@ md.constants.yts             = spy
 
 md.friction.p                = p * e_ones
 md.friction.q                = q * e_ones
-md.friction.coefficient      = 5e5 * v_ones
-md.friction.coefficient[flt] = 0.0  # zero friction over shelves
+#md.friction.coefficient      = 5e5 * v_ones
+#md.friction.coefficient[flt] = 0.0  # zero friction over shelves
 
 md.materials.rheology_n      =  n * e_ones
 #md.materials.rheology_B      =  (2e-17 / spy)**(-1/n) * v_ones
@@ -146,7 +146,8 @@ md.thermal.isenthalpy                     = 1
 md.steadystate.maxiter                    = 50
 md.stressbalance.reltol                   = 1e-11
 md.thermal.reltol                         = 1e-15
-md.steadystate.reltol                     = 1e-15
+md.steadystate.reltol                     = 1e-11
+md.thermal.isdynamicbasalspc              = 1
 
 # FIXME: ``SteadyState`` throws an error if this is not zero :
 md.timestepping.time_step                 = 0.0
@@ -171,6 +172,9 @@ md.stressbalance.spcvy[lat]   = md.inversion.vy_obs[lat]
 # extrude the mesh so that there are 5 cells in height :
 md.extrude(10, 1.0)
 
+# rank-zero tensor vertex ones vector (changed since we extruded) :
+v_ones = np.ones(md.mesh.numberofvertices)
+
 # get the floating base :
 flt = np.logical_and(md.mask.groundedice_levelset == -1, md.mesh.vertexonbase)
 
@@ -185,9 +189,15 @@ md.thermal.spctemperature      = md.initialization.temperature.copy()
 md.thermal.spctemperature[md.mesh.vertexonbase] = np.nan
 md.thermal.spctemperature[flt]                  = Tpm[flt]
 
+# save the SIA friciton for later :
+#beta_sia                = md.friction.coefficient
+#beta_const              = 5e5 * v_ones
+#md.friction.coefficient = beta_const
+
 # set the flow equation of type `mdl_odr` defined above :
 md = im.setflowequation(md, mdl_odr, 'all')
 md.flowequation.fe_HO = 'P1'
+md.toolkits.DefaultAnalysis = im.iluasmoptions()
 
 
 #===============================================================================
@@ -199,17 +209,34 @@ im.savevars(var_dir + 'negis_init.md', 'md', md)
 # solve :
 
 if computer is not "local":
-  md.cluster = im.ollie('name',            name,
-                        'partition',       part,
-                        'ntasks',          ntasks,
-                        'nodes',           nodes,
-                        'time',            time,
-                        'login',           'ecumming')
+	md.cluster = im.ollie('name',            name,
+	                      'partition',       part,
+	                      'ntasks',          ntasks,
+	                      'nodes',           nodes,
+	                      'time',            time,
+	                      'login',           'ecumming')
 else:
-  md.cluster = im.generic('name', im.gethostname(), 'np', 2)
+	md.cluster = im.generic('name', im.gethostname(), 'np', 3)
 md.verbose = im.verbose('solution', True, 'control', True, 'convergence', True)
-if tmc: md = im.solve(md, 'SteadyState')
-else:   md = im.solve(md, 'StressBalance')
+if not tmc: md = im.solve(md, 'StressBalance')
+else:       md = im.solve(md, 'SteadyState')
+#	for theta in np.linspace(0,1,100):
+#		# update the friction and solve :
+#		beta_n                          = theta*beta_sia + (1 - theta)*beta_const
+#		md.friction.coefficient         = beta_n
+#		md                              = im.solve(md, 'SteadyState')
+#
+#		# initialize for next solve :
+#		res                             = md.results.SteadystateSolution
+#		md.initialization.vx            = res.Vx
+#		md.initialization.vy            = res.Vy
+#		md.initialization.vz            = res.Vz
+#		md.initialization.vel           = res.Vel
+#		md.initialization.pressure      = res.Pressure
+#		md.initialization.temperature   = res.Temperature
+#		md.initialization.waterfraction = res.Waterfraction
+#		md.initialization.watercolumn   = res.Watercolumn
+
 
 
 

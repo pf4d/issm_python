@@ -95,7 +95,8 @@ class ollie(object):
     #write queuing script 
     if not m.ispc():
       if   self.time <= 30:                            qos = 'short'
-      elif self.time >  30    and self.time <= 48*60:  qos = 'large'
+      elif self.time >  30    and self.time <= 12*60:  qos = 'normal'
+      elif self.time >  12*60 and self.time <= 48*60:  qos = 'large'
       elif self.time >  48*60:                         qos = 'xlarge'
       fid = open(modelname + '.queue', 'w')
       fid.write('#!/bin/bash\n')
